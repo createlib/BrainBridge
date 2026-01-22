@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お問い合わせ | BRAIN BRIDGE</title>
+    <!-- Google Fonts: Noto Sans JP -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+
+    <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl">お問い合わせ</h1>
+            <p class="mt-4 text-sm text-gray-600">
+                ご質問やご相談は、以下のフォームよりお気軽にお問い合わせください。<br>
+                内容を確認次第、担当者よりご連絡いたします。
+            </p>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="bg-white shadow sm:rounded-lg border border-gray-200 p-6 sm:p-8">
+            <form action="mailto:6rain6ridge@gmail.com" method="post" enctype="text/plain">
+                
+                <div class="space-y-6">
+                    <!-- Name Field -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">
+                            氏名 <span class="text-red-500">*</span>
+                        </label>
+                        <div class="mt-1">
+                            <input type="text" name="氏名" id="name" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                placeholder="山田 太郎">
+                        </div>
+                    </div>
+
+                    <!-- Email Field -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">
+                            メールアドレス <span class="text-red-500">*</span>
+                        </label>
+                        <div class="mt-1">
+                            <input type="email" name="メールアドレス" id="email" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                placeholder="example@email.com">
+                        </div>
+                    </div>
+
+                    <!-- Subject Field -->
+                    <div>
+                        <label for="subject" class="block text-sm font-medium text-gray-700">
+                            件名 <span class="text-red-500">*</span>
+                        </label>
+                        <div class="mt-1">
+                            <input type="text" name="件名" id="subject" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                placeholder="サービスに関するお問い合わせ">
+                        </div>
+                    </div>
+
+                    <!-- Message Body Field -->
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700">
+                            お問い合わせ内容 <span class="text-red-500">*</span>
+                        </label>
+                        <div class="mt-1">
+                            <textarea id="message" name="本文" rows="6" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                placeholder="お問い合わせ内容をご記入ください。"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div>
+                        <button type="submit"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                            送信する（メールソフト起動）
+                        </button>
+                        <p class="mt-2 text-xs text-center text-gray-500">
+                            ※送信ボタンを押すとご利用のメールソフトが起動します。<br>
+                            メールソフトが起動しない場合は、<a href="mailto:6rain6ridge@gmail.com" class="text-blue-600 hover:underline">6rain6ridge@gmail.com</a> まで直接ご連絡ください。
+                        </p>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-sm text-gray-500">
+            &copy; BRAIN BRIDGE. All rights reserved.
+        </div>
+    </div>
+
+</body>
+</html>
