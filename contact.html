@@ -30,9 +30,31 @@
             </p>
         </div>
 
-        <!-- Contact Form -->
+        <!-- Contact Form Container -->
         <div class="bg-white shadow sm:rounded-lg border border-gray-200 p-6 sm:p-8">
-            <form action="mailto:6rain6ridge@gmail.com" method="post" enctype="text/plain">
+            
+            <!-- 送信完了メッセージ（初期状態は非表示） -->
+            <div id="success-message" class="hidden text-center py-10">
+                <svg class="mx-auto h-12 w-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <h3 class="mt-2 text-xl font-medium text-gray-900">送信完了</h3>
+                <p class="mt-1 text-gray-500">お問い合わせありがとうございます。<br>内容を確認の上、ご連絡させていただきます。</p>
+                <button onclick="location.reload()" class="mt-6 text-sm text-blue-600 hover:text-blue-500 underline">
+                    フォームに戻る
+                </button>
+            </div>
+
+            <!-- 
+              Googleフォーム連携用設定
+              action: Googleフォームの送信先URL（viewform ではなく formResponse になっています）
+              target: 画面遷移しないように隠しiframeを指定
+            -->
+            <form id="contact-form" 
+                  action="https://docs.google.com/forms/d/e/1FAIpQLSe-um1-IG2s0ZChRZl4MAWjhbTWSjzGPINVL9VQjReflwK4Zw/formResponse" 
+                  method="POST" 
+                  target="hidden_iframe" 
+                  onsubmit="submitted=true;">
                 
                 <div class="space-y-6">
                     <!-- Name Field -->
@@ -41,7 +63,8 @@
                             氏名 <span class="text-red-500">*</span>
                         </label>
                         <div class="mt-1">
-                            <input type="text" name="氏名" id="name" required
+                            <!-- 氏名のID: entry.1284985487 -->
+                            <input type="text" name="entry.1284985487" id="name" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 placeholder="山田 太郎">
                         </div>
@@ -53,7 +76,8 @@
                             メールアドレス <span class="text-red-500">*</span>
                         </label>
                         <div class="mt-1">
-                            <input type="email" name="メールアドレス" id="email" required
+                            <!-- メールアドレスのID: entry.1213234869 -->
+                            <input type="email" name="entry.1213234869" id="email" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 placeholder="example@email.com">
                         </div>
@@ -65,7 +89,8 @@
                             件名 <span class="text-red-500">*</span>
                         </label>
                         <div class="mt-1">
-                            <input type="text" name="件名" id="subject" required
+                            <!-- 件名のID: entry.549170446 -->
+                            <input type="text" name="entry.549170446" id="subject" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 placeholder="サービスに関するお問い合わせ">
                         </div>
@@ -77,7 +102,8 @@
                             お問い合わせ内容 <span class="text-red-500">*</span>
                         </label>
                         <div class="mt-1">
-                            <textarea id="message" name="本文" rows="6" required
+                            <!-- 本文のID: entry.1104805669 -->
+                            <textarea id="message" name="entry.1104805669" rows="6" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 placeholder="お問い合わせ内容をご記入ください。"></textarea>
                         </div>
@@ -87,15 +113,10 @@
                     <div>
                         <button type="submit"
                             class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
-                            送信する（メールソフト起動）
+                            送信する
                         </button>
-                        <p class="mt-2 text-xs text-center text-gray-500">
-                            ※送信ボタンを押すとご利用のメールソフトが起動します。<br>
-                            メールソフトが起動しない場合は、<a href="mailto:6rain6ridge@gmail.com" class="text-blue-600 hover:underline">6rain6ridge@gmail.com</a> まで直接ご連絡ください。
-                        </p>
                     </div>
                 </div>
-
             </form>
         </div>
 
@@ -104,6 +125,27 @@
             &copy; BRAIN BRIDGE. All rights reserved.
         </div>
     </div>
+
+    <!-- 画面遷移を防ぐための隠しiframe -->
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted) { showSuccess(); }"></iframe>
+
+    <script>
+        // 送信フラグ
+        let submitted = false;
+
+        // 送信完了時にフォームを隠して完了メッセージを表示する関数
+        function showSuccess() {
+            const form = document.getElementById('contact-form');
+            const successMsg = document.getElementById('success-message');
+            
+            // アニメーション的に切り替え
+            form.style.display = 'none';
+            successMsg.classList.remove('hidden');
+            
+            // ページ上部へスクロール
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
 
 </body>
 </html>
