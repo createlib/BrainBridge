@@ -4,13 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>プロフィール | BRAIN BRIDGE</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
@@ -39,32 +34,35 @@
         }
         @keyframes placeholderShimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
         
-        /* Bottom Nav Safe Area */
         .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
     </style>
 </head>
 <body class="text-slate-800 antialiased pb-safe-bottom lg:pb-0">
 
-    <!-- Header Navigation (PC: Full, Mobile: Simple) -->
+    <!-- Navbar -->
     <nav class="glass-header border-b border-slate-200 fixed w-full z-50 top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <!-- Mobile Back Button -->
                 <a href="javascript:history.back()" class="lg:hidden text-slate-500 hover:text-slate-900 transition-colors">
                     <i class="fa-solid fa-arrow-left text-xl"></i>
                 </a>
-                <!-- Logo -->
                 <a href="user.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                     <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fa-solid fa-layer-group"></i></span>
                     BRAIN BRIDGE
                 </a>
             </div>
 
-            <!-- PC Menu Items -->
+            <!-- Actions -->
             <div class="flex items-center gap-4">
-                <!-- Search Icon (Hidden on Mobile, shown in Bottom Nav) -->
+                <!-- Search (PC) -->
                 <a href="search.html" class="hidden lg:flex p-2 text-slate-400 hover:text-brand-600 transition-colors" title="ユーザー検索">
                     <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                </a>
+                
+                <!-- Notification Bell (Added) -->
+                <a href="notifications.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors relative">
+                    <i class="fa-regular fa-bell text-xl"></i>
+                    <span id="nav-badge" class="hidden absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                 </a>
                 
                 <button onclick="location.reload()" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="更新">
@@ -81,7 +79,7 @@
         </div>
     </nav>
 
-    <!-- Bottom Navigation (Mobile Only) -->
+    <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-50 safe-area-pb">
         <div class="flex justify-around items-center h-16">
             <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
@@ -96,7 +94,6 @@
                 <i class="fa-solid fa-handshake-simple text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">マッチ</span>
             </button>
-            <!-- Active State for MyPage -->
             <a href="user.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
                 <i class="fa-solid fa-user text-xl mb-1"></i>
                 <span class="text-[10px] font-bold">マイページ</span>
@@ -104,7 +101,7 @@
         </div>
     </nav>
 
-    <!-- Error Message Container (Hidden by default) -->
+    <!-- Error Message -->
     <div id="error-container" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-white/80 backdrop-blur-sm">
         <div class="bg-white p-8 rounded-2xl shadow-xl border border-red-100 text-center max-w-sm mx-4">
             <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
@@ -149,12 +146,8 @@
 
                             <div class="flex items-center gap-6 py-4 border-t border-slate-100">
                                 <div class="text-center cursor-pointer hover:opacity-75 transition-opacity">
-                                    <span class="block font-bold text-slate-900 text-lg" id="count-following">-</span>
-                                    <span class="text-xs text-slate-500 font-medium">フォロー中</span>
-                                </div>
-                                <div class="text-center cursor-pointer hover:opacity-75 transition-opacity">
-                                    <span class="block font-bold text-slate-900 text-lg" id="count-followers">-</span>
-                                    <span class="text-xs text-slate-500 font-medium">フォロワー</span>
+                                    <span class="block font-bold text-slate-900 text-lg" id="count-mutual">-</span>
+                                    <span class="text-xs text-slate-500 font-medium">相互フォロー</span>
                                 </div>
                             </div>
 
@@ -177,7 +170,6 @@
                 </div>
             </aside>
 
-            <!-- Right Column: Details Content -->
             <div class="flex-1 min-w-0">
                 <div class="space-y-6">
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
@@ -223,14 +215,15 @@
         </div>
     </div>
 
-    <div id="notification" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 hidden transition-all duration-300 translate-y-20">
+    <!-- Notification Toast -->
+    <div id="notification" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 hidden transition-all duration-300 translate-y-20">
         <div class="bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 backdrop-blur-md bg-opacity-90"><i class="fa-solid fa-check-circle text-brand-400 text-lg"></i><span id="notif-message" class="text-sm font-bold"></span></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp, collection, getCountFromServer, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp, collection, getCountFromServer, addDoc, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
@@ -287,6 +280,9 @@
             if (user && !user.isAnonymous) {
                 currentUser = user;
                 
+                // 通知バッジチェック
+                checkUnreadNotifications(user.uid);
+                
                 if (!targetUid || targetUid === user.uid) {
                     isSelf = true;
                     targetUid = user.uid;
@@ -302,6 +298,17 @@
                 window.location.href = 'login.html';
             }
         });
+
+        async function checkUnreadNotifications(uid) {
+            try {
+                const notifRef = collection(db, 'artifacts', appId, 'users', uid, 'notifications');
+                const q = query(notifRef, where('isRead', '==', false));
+                const snap = await getCountFromServer(q);
+                if (snap.data().count > 0) {
+                    document.getElementById('nav-badge').classList.remove('hidden');
+                }
+            } catch (e) { console.error(e); }
+        }
 
         function enableSelfMode() {
             const headerActions = document.getElementById('header-actions');
@@ -324,8 +331,7 @@
             updateDashboardUI(mockTarget);
             toggleRestrictedContent(isMutual);
             if(isMutual) document.getElementById('mutual-badge').classList.remove('hidden');
-            document.getElementById('count-following').textContent = '120';
-            document.getElementById('count-followers').textContent = '45';
+            document.getElementById('count-mutual').textContent = '12';
         }
 
         async function loadFullProfile(uid) {
@@ -335,7 +341,6 @@
                 if (docSnap.exists()) {
                     updateDashboardUI(docSnap.data());
                 } else {
-                    console.log("Profile not found in private data.");
                     updateDashboardUI({ userId: uid, name: '（未設定）' });
                 }
             } catch (e) {
@@ -348,11 +353,9 @@
             try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
                 const docSnap = await getDoc(docRef);
-                
                 if (docSnap.exists()) {
                     updateDashboardUI(docSnap.data());
                 } else {
-                    console.error("User not found in public data:", uid);
                     document.getElementById('error-container').classList.remove('hidden');
                 }
             } catch (e) {
@@ -362,18 +365,15 @@
 
         async function updateFollowCounts(uid) {
             try {
+                // 相互フォロー数をカウント (isMutual=true のドキュメント数)
                 const followingColl = collection(db, 'artifacts', appId, 'users', uid, 'following');
-                const followersColl = collection(db, 'artifacts', appId, 'users', uid, 'followers');
-                
-                const followingSnap = await getCountFromServer(followingColl);
-                const followersSnap = await getCountFromServer(followersColl);
-                
-                document.getElementById('count-following').textContent = followingSnap.data().count;
-                document.getElementById('count-followers').textContent = followersSnap.data().count;
+                const q = query(followingColl, where('isMutual', '==', true));
+                const snap = await getCountFromServer(q);
+                document.getElementById('count-mutual').textContent = snap.data().count;
             } catch (e) {
+                // 既存データなどでindexがない場合エラーになる可能性あり
                 // console.error("Count error:", e);
-                document.getElementById('count-following').textContent = '-';
-                document.getElementById('count-followers').textContent = '-';
+                document.getElementById('count-mutual').textContent = '-';
             }
         }
 
@@ -383,6 +383,8 @@
                 const isFollowingSnap = await getDoc(followingRef);
                 isFollowing = isFollowingSnap.exists();
 
+                // DB上のフラグを確認 (isMutualフィールドがあるか)
+                // ただし整合性のため、相手側のフォロワーリストも念のため確認してUI決定
                 const followerRef = doc(db, 'artifacts', appId, 'users', myUid, 'followers', targetUid);
                 const isFollowedBackSnap = await getDoc(followerRef);
                 const isFollowedBack = isFollowedBackSnap.exists();
@@ -421,12 +423,12 @@
             
             if (isFollowing) {
                 btnHtml = `
-                    <button onclick="toggleFollow()" class="w-full inline-flex justify-center items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-900 bg-white hover:bg-slate-50 transition-all">
+                    <button onclick="toggleFollow()" class="w-full lg:w-auto inline-flex justify-center items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-900 bg-white hover:bg-slate-50 transition-all">
                         フォロー中
                     </button>`;
             } else {
                 btnHtml = `
-                    <button onclick="toggleFollow()" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-md text-sm font-bold rounded-xl text-white bg-slate-900 hover:bg-slate-800 transition-all">
+                    <button onclick="toggleFollow()" class="w-full lg:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-md text-sm font-bold rounded-xl text-white bg-slate-900 hover:bg-slate-800 transition-all">
                         フォロー
                     </button>`;
             }
@@ -440,21 +442,48 @@
             }
             
             const myUid = currentUser.uid;
+            // 自分のFollowing
             const myFollowingRef = doc(db, 'artifacts', appId, 'users', myUid, 'following', targetUid);
+            // 相手のFollowers
             const targetFollowerRef = doc(db, 'artifacts', appId, 'users', targetUid, 'followers', myUid);
             const notificationColl = collection(db, 'artifacts', appId, 'users', targetUid, 'notifications');
 
+            // 相互判定用の参照
+            const targetFollowingMeRef = doc(db, 'artifacts', appId, 'users', targetUid, 'following', myUid);
+
             try {
                 if (isFollowing) {
+                    // 解除
                     await deleteDoc(myFollowingRef);
                     await deleteDoc(targetFollowerRef);
+                    
+                    // 相手が自分をフォローしていた場合、相手の isMutual フラグを下げる
+                    const checkSnap = await getDoc(targetFollowingMeRef);
+                    if (checkSnap.exists()) {
+                        await updateDoc(targetFollowingMeRef, { isMutual: false });
+                    }
+
                     isFollowing = false;
                     showNotification('フォローを解除しました');
                 } else {
+                    // フォロー
                     const timestamp = serverTimestamp();
-                    await setDoc(myFollowingRef, { createdAt: timestamp });
+                    
+                    // 相手が自分をフォローしているか確認
+                    const checkSnap = await getDoc(targetFollowingMeRef);
+                    const isMutualAction = checkSnap.exists();
+
+                    // 自分のFollowingに書き込み (isMutualフラグ付き)
+                    await setDoc(myFollowingRef, { createdAt: timestamp, isMutual: isMutualAction });
+                    // 相手のFollowersに書き込み
                     await setDoc(targetFollowerRef, { createdAt: timestamp });
                     
+                    // もし相互なら、相手側のFollowingデータのフラグも更新
+                    if (isMutualAction) {
+                         await updateDoc(targetFollowingMeRef, { isMutual: true });
+                    }
+
+                    // 通知
                     try {
                         await addDoc(notificationColl, {
                             type: 'follow',
@@ -462,16 +491,14 @@
                             createdAt: timestamp,
                             isRead: false
                         });
-                    } catch (notifyError) {
-                        console.warn("通知送信失敗（権限不足の可能性）:", notifyError);
-                    }
+                    } catch (e) { console.warn("Notify failed", e); }
 
                     isFollowing = true;
                     showNotification('フォローしました');
                 }
                 
                 await checkFollowStatus(myUid, targetUid);
-                updateFollowCounts(targetUid);
+                updateFollowCounts(targetUid); // 相手のカウント（表示上変わらないかもだが）
 
             } catch (e) {
                 console.error(e);
@@ -481,35 +508,29 @@
 
         function toggleRestrictedContent(show) {
             const masks = ['message-mask', 'career-mask'];
-            
             document.querySelectorAll('.mutual-only').forEach(el => {
                 if(show) el.classList.remove('hidden');
                 else el.classList.add('hidden');
             });
-
             if (show) {
                 document.getElementById('message-container').classList.remove('hidden');
                 document.getElementById('message-lock-icon').classList.add('hidden');
-                
                 document.getElementById('career-container').classList.remove('hidden');
                 document.getElementById('career-lock-icon').classList.add('hidden');
-                
                 masks.forEach(id => document.getElementById(id)?.classList.add('hidden'));
             } else {
                 document.getElementById('message-container').classList.add('hidden');
                 document.getElementById('message-lock-icon').classList.remove('hidden');
-                
                 document.getElementById('career-container').classList.add('hidden');
                 document.getElementById('career-lock-icon').classList.remove('hidden');
-                
                 masks.forEach(id => document.getElementById(id)?.classList.remove('hidden'));
             }
         }
 
         function updateDashboardUI(data) {
-            document.querySelectorAll('.shimmer').forEach(el => {
-                el.classList.remove('shimmer', 'w-32', 'h-8');
-            });
+            document.getElementById('nav-name').textContent = data.name || 'User';
+            if (data.userId) document.getElementById('nav-id').textContent = '@' + data.userId;
+            document.querySelectorAll('.shimmer').forEach(el => el.classList.remove('shimmer', 'w-32', 'h-8'));
 
             document.getElementById('profile-name').textContent = data.name || data.userId || '（名称未設定）';
             document.getElementById('profile-id').textContent = '@' + (data.userId || '-');
@@ -529,13 +550,8 @@
             }
 
             const messageEl = document.getElementById('profile-message');
-            if (data.message) {
-                messageEl.innerHTML = formatText(data.message);
-                messageEl.classList.remove('text-slate-400');
-            } else {
-                messageEl.textContent = 'まだメッセージがありません。';
-                messageEl.classList.add('text-slate-400');
-            }
+            messageEl.innerHTML = data.message ? formatText(data.message) : 'まだメッセージがありません。';
+            if (!data.message) messageEl.classList.add('text-slate-400');
 
             const snsContainer = document.getElementById('profile-sns-links');
             snsContainer.innerHTML = '';
@@ -561,13 +577,8 @@
             updateList('list-looking-for', data.lookingFor);
 
             const goalsEl = document.getElementById('profile-goals');
-            if (data.goals) {
-                goalsEl.innerHTML = formatText(data.goals);
-                goalsEl.classList.remove('text-slate-400');
-            } else {
-                goalsEl.textContent = '未設定';
-                goalsEl.classList.add('text-slate-400');
-            }
+            goalsEl.innerHTML = data.goals ? formatText(data.goals) : '未設定';
+            if (!data.goals) goalsEl.classList.add('text-slate-400');
 
             const tagsContainer = document.getElementById('tags-container');
             tagsContainer.innerHTML = '';
@@ -610,8 +621,7 @@
                                     <span class="text-xs text-slate-400 font-medium">${c.start || '?'} 〜 ${c.end || '現在'}</span>
                                 </div>
                                 <div class="text-sm text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl">${formattedDesc}</div>
-                            </div>
-                        `;
+                            </div>`;
                     });
                 } else {
                     careerContainer.innerHTML = '<div class="text-slate-400 text-sm italic">経歴情報はありません</div>';
@@ -638,10 +648,8 @@
         window.showNotification = (msg) => {
             const notif = document.getElementById('notification');
             const msgEl = document.getElementById('notif-message');
-            
             notif.classList.remove('hidden', 'translate-y-20');
             msgEl.textContent = msg;
-            
             setTimeout(() => {
                 notif.classList.add('translate-y-20');
                 setTimeout(() => notif.classList.add('hidden'), 300);
@@ -652,11 +660,8 @@
             return {
                 userId: 'admin', name: 'テスト管理者', jobTitle: 'システム開発', gender: '男性',
                 profileScore: 90, hobbies: ['開発', 'デザイン'], skills: ['Firebase', 'HTML/CSS'], email: 'admin@test.com',
-                prefecture: '東京都', message: '管理者アカウントです。\nこの画面はSNS風のUIデザインテスト用です。[Google](https://google.com) へのリンクテスト。\nhttps://example.com も自動リンクになります。', 
-                bio: 'ここは誰でも見れる自己紹介エリアです。', 
-                goals: '使いやすいサービスを作ること',
-                canOffer: ['技術相談', 'コードレビュー'], lookingFor: ['UI/UXデザイナー'], 
-                career: [{ company: 'Sample Tech', role: 'Dev', start: '2020', description: '詳細な経歴テキスト。\n[ポートフォリオ](https://portfolio.com) などを記載できます。' }]
+                prefecture: '東京都', message: '管理者アカウントです。\n相互フォロー状態の確認用テキストです。', bio: 'ここは誰でも見れる自己紹介エリアです。', goals: '使いやすいサービスを作ること',
+                canOffer: ['技術相談', 'コードレビュー'], lookingFor: ['UI/UXデザイナー'], career: []
             };
         }
     </script>
