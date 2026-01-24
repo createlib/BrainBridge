@@ -97,6 +97,11 @@
 
             <!-- Actions -->
             <div class="flex items-center gap-3">
+                <!-- 検索ページへのリンクを追加 -->
+                <a href="search.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="ユーザー検索">
+                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                </a>
+                
                 <button onclick="location.reload()" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="更新">
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
@@ -149,7 +154,7 @@
                                 </div>
                             </div>
 
-                            <!-- Bio (Public) -->
+                            <!-- Bio -->
                             <div class="mb-6">
                                 <p id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p>
                             </div>
@@ -357,7 +362,6 @@
             });
 
             // 2. Linkify
-            // Combined pattern for [text](url) and raw http(s) links
             return safeText.replace(
                 /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)|(https?:\/\/[a-zA-Z0-9.\/?=&%#_:-]+)/g,
                 (match, mdText, mdUrl, rawUrl) => {
@@ -609,6 +613,9 @@
         }
 
         function updateDashboardUI(data) {
+            document.getElementById('nav-name').textContent = data.name || 'User';
+            if (data.userId) document.getElementById('nav-id').textContent = '@' + data.userId;
+
             document.querySelectorAll('.shimmer').forEach(el => {
                 el.classList.remove('shimmer', 'w-32', 'h-8');
             });
