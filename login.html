@@ -11,7 +11,7 @@
 </head>
 <body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
 
-    <!-- トップページに戻るリンク (追加) -->
+    <!-- トップページに戻るリンク -->
     <div class="absolute top-4 left-4 sm:top-8 sm:left-8">
         <a href="index.html" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">
             <i class="fa-solid fa-arrow-left mr-2"></i>
@@ -28,8 +28,8 @@
         <form class="mt-8 space-y-6" onsubmit="handleLogin(event)">
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">ユーザーID</label>
-                    <input name="userid" type="text" required class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="ユーザーIDを入力">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ユーザーID または メールアドレス</label>
+                    <input name="userid" type="text" required class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="ユーザーID / email">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">パスワード</label>
@@ -48,7 +48,6 @@
 
         <div class="mt-6 text-center">
             <p class="text-sm text-gray-600">アカウントをお持ちでない方は <a href="register.html" class="font-bold text-blue-600 hover:text-blue-500 underline decoration-2 underline-offset-2">新規登録はこちら</a></p>
-            <p class="mt-4"><a href="index.html" class="text-xs text-gray-400 hover:text-gray-600">トップページに戻る</a></p>
         </div>
     </div>
 
@@ -62,7 +61,7 @@
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ▼▼▼▼ Firebase Config (更新) ▼▼▼▼
+        // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
             authDomain: "brainbridge-4b8ac.firebaseapp.com",
@@ -76,9 +75,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
-        // グローバル変数として appId を設定 (Firestoreパスで使用)
-        const appId = 'default-app-id'; // 必要に応じて変更してください
+        const appId = 'default-app-id';
 
         // ログイン済みならマイページへ
         onAuthStateChanged(auth, (user) => {
@@ -89,11 +86,11 @@
 
         window.handleLogin = async (e) => {
             e.preventDefault();
-            const userIdInput = e.target.userid.value;
+            const userInput = e.target.userid.value.trim();
             const password = e.target.password.value;
 
             // Admin Backdoor
-            if (userIdInput === 'admin' && password === 'admin') {
+            if (userInput === 'admin' && password === 'admin') {
                 localStorage.setItem('isAdminMock', 'true');
                 window.location.href = 'user.html';
                 return;
@@ -102,31 +99,40 @@
             showNotification('ログイン中...', 'info');
 
             try {
-                let email = userIdInput;
-                // メールアドレス形式でない場合、IDから検索するロジックが必要だが
-                // 今回は簡易的に「@が含まれていなければID検索を試みる」
-                if (!userIdInput.includes('@')) {
+                let email = userInput;
+
+                // 入力値がメールアドレスでない場合（@がない場合）、ユーザーIDとして検索
+                if (!userInput.includes('@')) {
                     // ID検索 (Firestoreの公開データからEmailを取得)
-                    // 注: セキュリティルールで公開データの読み取り許可が必要
                     const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
-                    const q = query(usersRef, where("userId", "==", userIdInput));
+                    const q = query(usersRef, where("userId", "==", userInput));
                     const querySnapshot = await getDocs(q);
                     
                     if (!querySnapshot.empty) {
-                        // Emailが見つかった場合
-                        // 注: 実際のアプリではEmailを公開データに含めるのはリスクがあるため、
-                        // userId@myapp.com のようなダミーアドレス運用か、Cloud Functions経由が安全です。
-                        // ここでは便宜上、公開データに含めたと仮定するか、入力をEmail推奨とします。
-                        alert('ログインには登録メールアドレスを使用することをお勧めします。');
+                        const userData = querySnapshot.docs[0].data();
+                        if (userData.email) {
+                            email = userData.email;
+                            console.log("IDからメールアドレスを取得しました:", email);
+                        } else {
+                            throw new Error("このIDに関連付けられたメールアドレスが見つかりません。");
+                        }
+                    } else {
+                        throw new Error("指定されたユーザーIDは見つかりません。");
                     }
                 }
 
+                // Emailとパスワードでログイン実行
                 await signInWithEmailAndPassword(auth, email, password);
                 showNotification('ログイン成功！', 'success');
                 // リダイレクトは onAuthStateChanged が処理します
             } catch (error) {
                 console.error(error);
-                showNotification('ログイン失敗: ' + error.message, 'error');
+                let msg = 'ログインに失敗しました。';
+                if (error.code === 'auth/wrong-password') msg = 'パスワードが間違っています。';
+                else if (error.code === 'auth/user-not-found') msg = 'ユーザーが見つかりません。';
+                else if (error.message) msg = error.message;
+                
+                showNotification(msg, 'error');
             }
         };
 
