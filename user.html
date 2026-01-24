@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マイページ | BRAIN BRIDGE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Noto Sans JP', sans-serif; background-color: #f3f4f6; }</style>
+</head>
+<body class="min-h-screen bg-gray-100 text-gray-800 font-sans">
+
+    <!-- Navbar -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm fixed w-full z-20 top-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-900 tracking-tight">BRAIN BRIDGE</h1>
+            <button onclick="handleLogout()" class="text-gray-500 hover:text-red-600 transition-colors text-sm font-medium px-3 py-1 rounded hover:bg-red-50">
+                <i class="fa-solid fa-right-from-bracket mr-1"></i> ログアウト
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto pt-24 px-4 sm:px-6 lg:px-8 pb-20">
+        
+        <!-- Cover Image -->
+        <div class="relative h-48 sm:h-64 rounded-t-3xl bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 shadow-md overflow-hidden">
+            <div class="absolute inset-0 bg-black/10"></div>
+            <!-- Decorative Circle -->
+            <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
+            <div class="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+        </div>
+
+        <!-- Profile Header -->
+        <div class="bg-white rounded-b-3xl shadow-lg relative px-6 sm:px-10 pb-8 mb-8">
+            <div class="flex flex-col sm:flex-row items-center sm:items-end -mt-16 sm:-mt-20 mb-6">
+                <!-- Avatar -->
+                <div class="relative z-10">
+                    <div class="h-32 w-32 sm:h-40 sm:w-40 rounded-full border-4 border-white bg-gray-100 flex items-center justify-center overflow-hidden shadow-md">
+                        <i id="dashboard-icon-placeholder" class="fa-solid fa-user text-5xl text-gray-300"></i>
+                        <img id="dashboard-icon-img" src="" class="hidden w-full h-full object-cover" alt="Profile">
+                    </div>
+                    <a href="profile.html" class="absolute bottom-1 right-1 bg-blue-600 text-white rounded-full p-2.5 shadow-lg hover:bg-blue-700 transition-colors sm:hidden">
+                        <i class="fa-solid fa-pen text-sm"></i>
+                    </a>
+                </div>
+                
+                <!-- Basic Info -->
+                <div class="mt-4 sm:mt-0 sm:ml-6 flex-1 text-center sm:text-left">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 id="dashboard-name" class="text-3xl font-bold text-gray-900">（名称未設定）</h2>
+                            <p id="dashboard-job" class="text-gray-600 font-medium mt-1">（職業未設定）</p>
+                        </div>
+                        <div class="hidden sm:block mt-4 sm:mt-0">
+                            <a href="profile.html" class="inline-flex items-center px-5 py-2.5 border border-gray-300 shadow-sm text-sm font-bold rounded-full text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                                <i class="fa-solid fa-pen mr-2"></i> プロフィール編集
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Mini Details -->
+                    <div class="mt-4 flex flex-wrap justify-center sm:justify-start gap-4 text-sm text-gray-500">
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-location-dot mr-1.5 text-gray-400"></i>
+                            <span id="dashboard-location">-</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-cake-candles mr-1.5 text-gray-400"></i>
+                            <span id="dashboard-birth">-</span>
+                        </div>
+                        <!-- SNS Icons -->
+                        <div id="dashboard-sns-links" class="flex items-center gap-3 ml-2 border-l pl-4 border-gray-200">
+                            <!-- JS injected -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completion Bar (Modern) -->
+            <div class="mt-6 pt-6 border-t border-gray-100">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">プロフィール充実度</span>
+                    <span id="score-text" class="text-sm font-bold text-blue-600">0%</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                    <div id="score-bar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-1000 ease-out shadow-sm" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                
+                <!-- Basic Info Card -->
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fa-regular fa-id-card text-blue-500 mr-2"></i> 基本データ
+                    </h3>
+                    <div class="space-y-4 text-sm">
+                        <div class="pb-3 border-b border-gray-100">
+                            <p class="text-xs text-gray-400">ユーザーID (紹介ID)</p>
+                            <p id="dashboard-userid" class="font-bold text-blue-600 text-lg select-all cursor-pointer" title="クリックで選択">-</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">フリガナ</p>
+                            <p id="dashboard-kana" class="font-medium text-gray-700">-</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">性別</p>
+                            <p id="dashboard-gender" class="font-medium text-gray-700">-</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">連絡先</p>
+                            <p id="dashboard-email" class="font-medium text-gray-700 break-all">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills & Hobbies Card -->
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fa-solid fa-tags text-blue-500 mr-2"></i> スキル・趣味
+                    </h3>
+                    <div class="flex flex-wrap gap-2" id="dashboard-tags">
+                        <span class="text-sm text-gray-400 italic">タグ未設定</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- Message / Goals -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
+                    <h3 class="font-bold text-gray-900 text-lg mb-6 flex items-center border-b pb-3">
+                        <i class="fa-solid fa-quote-left text-blue-500 mr-3"></i> 想い・ストーリー
+                    </h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-500 mb-2">メッセージ</h4>
+                            <p id="dashboard-message" class="text-gray-700 leading-relaxed whitespace-pre-wrap">まだメッセージがありません。</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-500 mb-2">今後の目標・やりたいこと</h4>
+                            <p id="dashboard-goals" class="text-gray-700 leading-relaxed whitespace-pre-wrap">まだ目標が設定されていません。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Matching Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Can Offer -->
+                    <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100">
+                        <h3 class="font-bold text-blue-800 mb-4 flex items-center">
+                            <i class="fa-solid fa-hand-holding-heart mr-2"></i> 提供できること
+                        </h3>
+                        <ul id="dashboard-can-offer" class="space-y-2">
+                            <li class="text-sm text-gray-500 italic">未設定</li>
+                        </ul>
+                    </div>
+                    <!-- Looking For -->
+                    <div class="bg-pink-50 rounded-2xl p-6 border border-pink-100">
+                        <h3 class="font-bold text-pink-800 mb-4 flex items-center">
+                            <i class="fa-solid fa-magnifying-glass mr-2"></i> 求めていること
+                        </h3>
+                        <ul id="dashboard-looking-for" class="space-y-2">
+                            <li class="text-sm text-gray-500 italic">未設定</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Career -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
+                    <h3 class="font-bold text-gray-900 text-lg mb-6 flex items-center border-b pb-3">
+                        <i class="fa-solid fa-briefcase text-blue-500 mr-3"></i> 経歴
+                    </h3>
+                    <div id="dashboard-career" class="space-y-6 relative border-l-2 border-gray-100 ml-3 pl-6">
+                        <p class="text-sm text-gray-500 italic">経歴情報はありません。</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ▼▼▼▼ Firebase Config (更新) ▼▼▼▼
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
+            authDomain: "brainbridge-4b8ac.firebaseapp.com",
+            projectId: "brainbridge-4b8ac",
+            storageBucket: "brainbridge-4b8ac.firebasestorage.app",
+            messagingSenderId: "803209683213",
+            appId: "1:803209683213:web:b62d13784fa2bbbb9f5044"
+        };
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'default-app-id';
+
+        // Admin Mock Data
+        const adminData = {
+            userId: 'admin',
+            name: 'テスト管理者',
+            nameKana: 'てすとかんりしゃ',
+            jobTitle: 'プロダクトマネージャー',
+            gender: '男性',
+            profileScore: 85,
+            hobbies: ['ランニング', '映画鑑賞', 'プログラミング', 'サウナ'],
+            skills: ['Web制作', '管理画面操作', 'プロジェクト管理'],
+            email: 'admin@example.com',
+            prefecture: '東京都',
+            city: '渋谷区',
+            message: 'はじめまして。管理者のテストアカウントです。\nこのデザインはSNSプロフィール風のUIテストのために作成されました。\n\n自由な交流を楽しんでください！',
+            goals: '使いやすいプラットフォームを作ること。\n多くのユーザーをつなげること。',
+            canOffer: ['システム開発', 'デザイン相談', 'ランチ'],
+            lookingFor: ['UI/UXデザイナー', 'フィードバック', 'コーヒー仲間'],
+            career: [
+                { company: '株式会社テスト', role: 'エンジニア', start: '2020-04', end: '2023-03', description: 'Webアプリの開発に従事' },
+                { company: 'BRAIN BRIDGE', role: 'PM', start: '2023-04', end: '', description: '新規事業の立ち上げ' }
+            ],
+            snsX: 'admin_test',
+            websiteUrl: 'https://example.com',
+            photoURL: ''
+        };
+
+        // 認証チェック
+        if (localStorage.getItem('isAdminMock') === 'true') {
+            updateDashboardUI(adminData);
+        } else {
+            onAuthStateChanged(auth, async (user) => {
+                if (user && !user.isAnonymous) {
+                    await loadUserProfile(user.uid);
+                } else {
+                    window.location.href = 'login.html';
+                }
+            });
+        }
+
+        async function loadUserProfile(uid) {
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile');
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    updateDashboardUI(docSnap.data());
+                } else {
+                    updateDashboardUI({ userId: uid });
+                }
+            } catch (e) {
+                console.error("Load profile error", e);
+            }
+        }
+
+        function updateDashboardUI(data) {
+            // Header
+            document.getElementById('dashboard-name').textContent = data.name || data.userId || '（名称未設定）';
+            document.getElementById('dashboard-job').textContent = data.jobTitle || '（職業未設定）';
+            
+            // Icon
+            const iconImg = document.getElementById('dashboard-icon-img');
+            const iconPh = document.getElementById('dashboard-icon-placeholder');
+            if (data.photoURL) {
+                iconImg.src = data.photoURL;
+                iconImg.classList.remove('hidden');
+                iconPh.classList.add('hidden');
+            } else {
+                iconImg.classList.add('hidden');
+                iconPh.classList.remove('hidden');
+            }
+            
+            // Basic Info
+            document.getElementById('dashboard-userid').textContent = data.userId || '-';
+            document.getElementById('dashboard-kana').textContent = data.nameKana || '-';
+            document.getElementById('dashboard-gender').textContent = data.gender || '未設定'; 
+            document.getElementById('dashboard-email').textContent = data.contactEmail || data.email || '非公開';
+            document.getElementById('dashboard-location').textContent = (data.prefecture || '') + (data.city ? ' ' + data.city : '') || 'エリア未設定';
+
+            // Birth
+            let birthDisplay = '-';
+            if (data.birthDate) {
+                if (data.birthVisibility === 'full') birthDisplay = data.birthDate; 
+                else if (data.birthVisibility === 'monthDay') birthDisplay = data.birthDate.substring(5);
+                else birthDisplay = '非公開';
+            }
+            document.getElementById('dashboard-birth').textContent = birthDisplay;
+
+            // SNS
+            const snsContainer = document.getElementById('dashboard-sns-links');
+            snsContainer.innerHTML = '';
+            if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="text-gray-400 hover:text-blue-500 transition-colors"><i class="fa-solid fa-globe text-lg"></i></a>`;
+            if (data.snsInstagram) snsContainer.innerHTML += `<a href="${data.snsInstagram.startsWith('http') ? data.snsInstagram : 'https://instagram.com/'+data.snsInstagram}" target="_blank" class="text-gray-400 hover:text-pink-500 transition-colors"><i class="fa-brands fa-instagram text-lg"></i></a>`;
+            if (data.snsX) snsContainer.innerHTML += `<a href="${data.snsX.startsWith('http') ? data.snsX : 'https://twitter.com/'+data.snsX}" target="_blank" class="text-gray-400 hover:text-gray-900 transition-colors"><i class="fa-brands fa-x-twitter text-lg"></i></a>`;
+
+            // Tags
+            const tagsContainer = document.getElementById('dashboard-tags');
+            tagsContainer.innerHTML = '';
+            const allTags = [...(data.hobbies || []), ...(data.skills || [])];
+            if (allTags.length > 0) {
+                allTags.forEach(tag => {
+                    const span = document.createElement('span');
+                    span.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100';
+                    span.textContent = '#' + tag;
+                    tagsContainer.appendChild(span);
+                });
+            } else {
+                tagsContainer.innerHTML = '<span class="text-sm text-gray-400 italic">タグ未設定</span>';
+            }
+
+            // Text Areas
+            document.getElementById('dashboard-message').textContent = data.message || 'まだメッセージがありません。';
+            document.getElementById('dashboard-goals').textContent = data.goals || 'まだ目標が設定されていません。';
+
+            // Lists
+            const updateList = (id, items) => {
+                const el = document.getElementById(id);
+                el.innerHTML = '';
+                if (items && items.length > 0) {
+                    items.forEach(item => {
+                        el.innerHTML += `<li class="flex items-start text-sm text-gray-700"><span class="mr-2 text-gray-400">•</span>${item}</li>`;
+                    });
+                } else {
+                    el.innerHTML = '<li class="text-sm text-gray-400 italic">未設定</li>';
+                }
+            };
+            updateList('dashboard-can-offer', data.canOffer);
+            updateList('dashboard-looking-for', data.lookingFor);
+
+            // Career
+            const careerContainer = document.getElementById('dashboard-career');
+            careerContainer.innerHTML = '';
+            if (data.career && data.career.length > 0) {
+                data.career.forEach(c => {
+                    careerContainer.innerHTML += `
+                        <div class="relative">
+                            <div class="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 border-white bg-blue-400 ring-4 ring-blue-50"></div>
+                            <h4 class="font-bold text-gray-900">${c.company || '会社名不明'}</h4>
+                            <p class="text-sm text-blue-600 font-medium mb-1">${c.role || ''} <span class="text-gray-400 text-xs ml-1">(${c.start || '?'} 〜 ${c.end || '現在'})</span></p>
+                            <p class="text-sm text-gray-600 leading-relaxed">${c.description || ''}</p>
+                        </div>
+                    `;
+                });
+            } else {
+                careerContainer.innerHTML = '<p class="text-sm text-gray-500 italic">経歴情報はありません。</p>';
+            }
+
+            // Score
+            const score = data.profileScore || 0;
+            document.getElementById('score-text').textContent = score + '%';
+            document.getElementById('score-bar').style.width = score + '%';
+        }
+
+        window.handleLogout = () => {
+            if (localStorage.getItem('isAdminMock') === 'true') {
+                localStorage.removeItem('isAdminMock');
+                window.location.href = 'login.html';
+                return;
+            }
+            signOut(auth);
+            window.location.href = 'login.html';
+        };
+    </script>
+</body>
+</html>
