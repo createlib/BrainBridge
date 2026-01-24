@@ -14,10 +14,13 @@
     <!-- Navbar -->
     <nav class="bg-white/90 backdrop-blur-md shadow-sm fixed w-full z-20 top-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-gray-900 tracking-tight">BRAIN BRIDGE</h1>
-            <button onclick="handleLogout()" class="text-gray-500 hover:text-red-600 transition-colors text-sm font-medium px-3 py-1 rounded hover:bg-red-50">
-                <i class="fa-solid fa-right-from-bracket mr-1"></i> ログアウト
-            </button>
+            <a href="user.html" class="text-xl font-bold text-gray-900 tracking-tight hover:text-blue-600 transition-colors">BRAIN BRIDGE</a>
+            <div class="flex items-center space-x-4">
+                <a href="user.html" class="text-sm font-medium text-gray-600 hover:text-gray-900" id="nav-mypage-link">マイページ</a>
+                <button onclick="handleLogout()" class="text-gray-500 hover:text-red-600 transition-colors text-sm font-medium px-3 py-1 rounded hover:bg-red-50">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> ログアウト
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -41,25 +44,29 @@
                         <i id="dashboard-icon-placeholder" class="fa-solid fa-user text-5xl text-gray-300"></i>
                         <img id="dashboard-icon-img" src="" class="hidden w-full h-full object-cover" alt="Profile">
                     </div>
-                    <a href="profile.html" class="absolute bottom-1 right-1 bg-blue-600 text-white rounded-full p-2.5 shadow-lg hover:bg-blue-700 transition-colors sm:hidden">
+                    <!-- Edit Button (Self Only) -->
+                    <a href="profile.html" id="mobile-edit-btn" class="hidden absolute bottom-1 right-1 bg-blue-600 text-white rounded-full p-2.5 shadow-lg hover:bg-blue-700 transition-colors sm:hidden">
                         <i class="fa-solid fa-pen text-sm"></i>
                     </a>
                 </div>
                 
-                <!-- Basic Info -->
+                <!-- Basic Info & Actions -->
                 <div class="mt-4 sm:mt-0 sm:ml-6 flex-1 text-center sm:text-left">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h2 id="dashboard-name" class="text-3xl font-bold text-gray-900">（名称未設定）</h2>
-                            <p id="dashboard-job" class="text-gray-600 font-medium mt-1">（職業未設定）</p>
+                            <h2 id="dashboard-name" class="text-3xl font-bold text-gray-900">（読み込み中...）</h2>
+                            <p id="dashboard-job" class="text-gray-600 font-medium mt-1">...</p>
                         </div>
-                        <div class="hidden sm:block mt-4 sm:mt-0">
-                            <a href="profile.html" class="inline-flex items-center px-5 py-2.5 border border-gray-300 shadow-sm text-sm font-bold rounded-full text-gray-700 bg-white hover:bg-gray-50 transition-colors">
-                                <i class="fa-solid fa-pen mr-2"></i> プロフィール編集
-                            </a>
+                        
+                        <!-- Action Buttons -->
+                        <div class="hidden sm:block mt-4 sm:mt-0" id="header-actions">
+                            <!-- JS will inject buttons here -->
                         </div>
                     </div>
                     
+                    <!-- Mobile Action Button (Placeholder for JS) -->
+                    <div class="sm:hidden mt-4" id="mobile-header-actions"></div>
+
                     <!-- Mini Details -->
                     <div class="mt-4 flex flex-wrap justify-center sm:justify-start gap-4 text-sm text-gray-500">
                         <div class="flex items-center">
@@ -70,7 +77,7 @@
                             <i class="fa-solid fa-cake-candles mr-1.5 text-gray-400"></i>
                             <span id="dashboard-birth">-</span>
                         </div>
-                        <!-- SNS Icons -->
+                        <!-- SNS Icons (Mutual Follow Only) -->
                         <div id="dashboard-sns-links" class="flex items-center gap-3 ml-2 border-l pl-4 border-gray-200">
                             <!-- JS injected -->
                         </div>
@@ -78,14 +85,23 @@
                 </div>
             </div>
 
-            <!-- Completion Bar (Modern) -->
-            <div class="mt-6 pt-6 border-t border-gray-100">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">プロフィール充実度</span>
-                    <span id="score-text" class="text-sm font-bold text-blue-600">0%</span>
+            <!-- Follow Status / Mutual Indicator -->
+            <div class="mt-6 pt-6 border-t border-gray-100 flex justify-between items-center">
+                <div class="flex space-x-6">
+                    <span id="mutual-status-badge" class="hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <i class="fa-solid fa-handshake mr-1"></i> 相互フォロー中
+                    </span>
                 </div>
-                <div class="w-full bg-gray-100 rounded-full h-2">
-                    <div id="score-bar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-1000 ease-out shadow-sm" style="width: 0%"></div>
+                
+                <!-- Completion Bar (Self Only) -->
+                <div id="completion-bar-container" class="hidden w-1/2 max-w-xs">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">プロフィール充実度</span>
+                        <span id="score-text" class="text-xs font-bold text-blue-600">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-1.5">
+                        <div id="score-bar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-1.5 rounded-full transition-all duration-1000 ease-out shadow-sm" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -103,21 +119,26 @@
                     </h3>
                     <div class="space-y-4 text-sm">
                         <div class="pb-3 border-b border-gray-100">
-                            <p class="text-xs text-gray-400">ユーザーID (紹介ID)</p>
-                            <p id="dashboard-userid" class="font-bold text-blue-600 text-lg select-all cursor-pointer" title="クリックで選択">-</p>
+                            <p class="text-xs text-gray-400">ユーザーID</p>
+                            <p id="dashboard-userid" class="font-bold text-blue-600 text-lg select-all">-</p>
                         </div>
-                        <div>
-                            <p class="text-xs text-gray-400">フリガナ</p>
-                            <p id="dashboard-kana" class="font-medium text-gray-700">-</p>
-                        </div>
-                        <div>
+                        <!-- Mutual Follow Items (Including Gender) -->
+                        <div class="mutual-only hidden">
                             <p class="text-xs text-gray-400">性別</p>
                             <p id="dashboard-gender" class="font-medium text-gray-700">-</p>
                         </div>
-                        <div>
-                            <p class="text-xs text-gray-400">連絡先</p>
+                        <div class="mutual-only hidden">
+                            <p class="text-xs text-gray-400 mt-2">フリガナ</p>
+                            <p id="dashboard-kana" class="font-medium text-gray-700">-</p>
+                        </div>
+                        <div class="mutual-only hidden">
+                            <p class="text-xs text-gray-400 mt-2">連絡先</p>
                             <p id="dashboard-email" class="font-medium text-gray-700 break-all">-</p>
                         </div>
+                    </div>
+                    <!-- Mask for non-mutual -->
+                    <div id="basic-info-mask" class="mt-4 p-3 bg-gray-50 rounded text-center text-xs text-gray-500">
+                        <i class="fa-solid fa-lock mr-1"></i> 詳細情報は相互フォローで公開
                     </div>
                 </div>
 
@@ -140,23 +161,31 @@
                 <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
                     <h3 class="font-bold text-gray-900 text-lg mb-6 flex items-center border-b pb-3">
                         <i class="fa-solid fa-quote-left text-blue-500 mr-3"></i> 想い・ストーリー
+                        <span class="ml-auto text-xs font-normal text-gray-400 mutual-badge hidden bg-green-50 text-green-700 px-2 py-1 rounded">相互フォロワー限定</span>
                     </h3>
                     
                     <div class="space-y-6">
-                        <div>
-                            <h4 class="text-sm font-bold text-gray-500 mb-2">メッセージ</h4>
-                            <p id="dashboard-message" class="text-gray-700 leading-relaxed whitespace-pre-wrap">まだメッセージがありません。</p>
+                        <!-- Mutual Content -->
+                        <div class="mutual-only hidden space-y-6">
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-500 mb-2">メッセージ</h4>
+                                <p id="dashboard-message" class="text-gray-700 leading-relaxed whitespace-pre-wrap">まだメッセージがありません。</p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-500 mb-2">今後の目標・やりたいこと</h4>
+                                <p id="dashboard-goals" class="text-gray-700 leading-relaxed whitespace-pre-wrap">まだ目標が設定されていません。</p>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="text-sm font-bold text-gray-500 mb-2">今後の目標・やりたいこと</h4>
-                            <p id="dashboard-goals" class="text-gray-700 leading-relaxed whitespace-pre-wrap">まだ目標が設定されていません。</p>
+                        <!-- Non-Mutual Mask -->
+                        <div id="message-mask" class="py-8 text-center bg-gray-50 rounded-lg">
+                            <i class="fa-solid fa-lock text-3xl text-gray-300 mb-2"></i>
+                            <p class="text-gray-500 text-sm">相互フォローになると<br>詳しい想いやストーリーが表示されます</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Matching Info -->
+                <!-- Matching Info (Public) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Can Offer -->
                     <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100">
                         <h3 class="font-bold text-blue-800 mb-4 flex items-center">
                             <i class="fa-solid fa-hand-holding-heart mr-2"></i> 提供できること
@@ -165,7 +194,6 @@
                             <li class="text-sm text-gray-500 italic">未設定</li>
                         </ul>
                     </div>
-                    <!-- Looking For -->
                     <div class="bg-pink-50 rounded-2xl p-6 border border-pink-100">
                         <h3 class="font-bold text-pink-800 mb-4 flex items-center">
                             <i class="fa-solid fa-magnifying-glass mr-2"></i> 求めていること
@@ -180,9 +208,19 @@
                 <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
                     <h3 class="font-bold text-gray-900 text-lg mb-6 flex items-center border-b pb-3">
                         <i class="fa-solid fa-briefcase text-blue-500 mr-3"></i> 経歴
+                        <span class="ml-auto text-xs font-normal text-gray-400 mutual-badge hidden bg-green-50 text-green-700 px-2 py-1 rounded">相互フォロワー限定</span>
                     </h3>
-                    <div id="dashboard-career" class="space-y-6 relative border-l-2 border-gray-100 ml-3 pl-6">
-                        <p class="text-sm text-gray-500 italic">経歴情報はありません。</p>
+                    
+                    <!-- Mutual Content -->
+                    <div class="mutual-only hidden">
+                        <div id="dashboard-career" class="space-y-6 relative border-l-2 border-gray-100 ml-3 pl-6">
+                            <p class="text-sm text-gray-500 italic">経歴情報はありません。</p>
+                        </div>
+                    </div>
+                    <!-- Non-Mutual Mask -->
+                    <div id="career-mask" class="py-8 text-center bg-gray-50 rounded-lg">
+                        <i class="fa-solid fa-lock text-3xl text-gray-300 mb-2"></i>
+                        <p class="text-gray-500 text-sm">相互フォローになると<br>詳細な経歴が表示されます</p>
                     </div>
                 </div>
 
@@ -190,12 +228,17 @@
         </div>
     </main>
 
+    <!-- Notification -->
+    <div id="notification" class="fixed top-4 right-4 z-50 hidden max-w-sm w-full bg-white shadow-lg rounded-lg p-4 border-l-4">
+        <p id="notif-message" class="text-sm font-medium"></p>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ▼▼▼▼ Firebase Config (更新) ▼▼▼▼
+        // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
             authDomain: "brainbridge-4b8ac.firebaseapp.com",
@@ -209,68 +252,205 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = 'default-app-id';
+        
+        // 環境に応じたappIdの取得 (重要: これがずれるとデータを読み込めません)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        // Admin Mock Data
-        const adminData = {
-            userId: 'admin',
-            name: 'テスト管理者',
-            nameKana: 'てすとかんりしゃ',
-            jobTitle: 'プロダクトマネージャー',
-            gender: '男性',
-            profileScore: 85,
-            hobbies: ['ランニング', '映画鑑賞', 'プログラミング', 'サウナ'],
-            skills: ['Web制作', '管理画面操作', 'プロジェクト管理'],
-            email: 'admin@example.com',
-            prefecture: '東京都',
-            city: '渋谷区',
-            message: 'はじめまして。管理者のテストアカウントです。\nこのデザインはSNSプロフィール風のUIテストのために作成されました。\n\n自由な交流を楽しんでください！',
-            goals: '使いやすいプラットフォームを作ること。\n多くのユーザーをつなげること。',
-            canOffer: ['システム開発', 'デザイン相談', 'ランチ'],
-            lookingFor: ['UI/UXデザイナー', 'フィードバック', 'コーヒー仲間'],
-            career: [
-                { company: '株式会社テスト', role: 'エンジニア', start: '2020-04', end: '2023-03', description: 'Webアプリの開発に従事' },
-                { company: 'BRAIN BRIDGE', role: 'PM', start: '2023-04', end: '', description: '新規事業の立ち上げ' }
-            ],
-            snsX: 'admin_test',
-            websiteUrl: 'https://example.com',
-            photoURL: ''
-        };
+        let currentUser = null;
+        let isSelf = false;
+        let targetUid = null;
+        let isFollowing = false;
+        let isMutual = false;
 
-        // 認証チェック
-        if (localStorage.getItem('isAdminMock') === 'true') {
-            updateDashboardUI(adminData);
-        } else {
-            onAuthStateChanged(auth, async (user) => {
-                if (user && !user.isAnonymous) {
-                    await loadUserProfile(user.uid);
+        // Admin Mock Logic
+        const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
+
+        // URLパラメータから表示対象のUIDを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        targetUid = urlParams.get('uid');
+
+        // Main Logic
+        onAuthStateChanged(auth, async (user) => {
+            if (isAdminMock) {
+                currentUser = { uid: 'test_admin_uid' };
+                if (targetUid && targetUid !== 'test_admin_uid') {
+                    isSelf = false;
+                    setupViewForOtherUser('admin_mock_target');
                 } else {
-                    window.location.href = 'login.html';
+                    isSelf = true;
+                    targetUid = 'test_admin_uid';
+                    updateDashboardUI(getAdminMockData());
+                    enableSelfMode();
                 }
-            });
+                return;
+            }
+
+            if (user && !user.isAnonymous) {
+                currentUser = user;
+                
+                if (!targetUid || targetUid === user.uid) {
+                    // 自分自身のページ
+                    isSelf = true;
+                    targetUid = user.uid;
+                    enableSelfMode();
+                    await loadFullProfile(user.uid);
+                } else {
+                    // 他人のページ
+                    isSelf = false;
+                    await checkFollowStatus(user.uid, targetUid); 
+                    await loadPublicProfile(targetUid);
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function enableSelfMode() {
+            document.getElementById('mobile-edit-btn').classList.remove('hidden');
+            const headerActions = document.getElementById('header-actions');
+            headerActions.innerHTML = `
+                <a href="profile.html" class="inline-flex items-center px-5 py-2.5 border border-gray-300 shadow-sm text-sm font-bold rounded-full text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <i class="fa-solid fa-pen mr-2"></i> プロフィール編集
+                </a>`;
+            document.getElementById('completion-bar-container').classList.remove('hidden');
+            isMutual = true; 
+            toggleRestrictedContent(true);
         }
 
-        async function loadUserProfile(uid) {
+        async function setupViewForOtherUser(mockMode) {
+            const mockTarget = getAdminMockData();
+            mockTarget.name = "サンプル太郎";
+            mockTarget.userId = "target_user";
+            
+            isMutual = confirm("【テスト用】相互フォロー状態として表示しますか？\nOK=相互(全表示), Cancel=片思い/未フォロー(制限表示)");
+            isFollowing = true;
+            renderFollowButton();
+            updateDashboardUI(mockTarget);
+        }
+
+        async function loadFullProfile(uid) {
             try {
+                // Private Profileの読み込み
                 const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    updateDashboardUI(docSnap.data());
+                } else {
+                    console.log("No profile data found for:", uid);
+                    // データがない場合でも、最低限の情報を表示して「読み込み中」を解除
+                    updateDashboardUI({ userId: uid, name: '（未設定）' });
+                }
+            } catch (e) {
+                console.error("Load self profile error", e);
+                // エラー時も「読み込み中」を解除するためにダミー更新
+                updateDashboardUI({ userId: uid, name: '（読み込みエラー）' });
+                showNotification('プロフィールの読み込みに失敗しました', 'error');
+            }
+        }
+
+        async function loadPublicProfile(uid) {
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
                 const docSnap = await getDoc(docRef);
                 
                 if (docSnap.exists()) {
                     updateDashboardUI(docSnap.data());
                 } else {
-                    updateDashboardUI({ userId: uid });
+                    alert('ユーザーが見つかりません');
+                    window.location.href = 'user.html'; 
                 }
             } catch (e) {
-                console.error("Load profile error", e);
+                console.error("Load public profile error", e);
+            }
+        }
+
+        async function checkFollowStatus(myUid, targetUid) {
+            try {
+                const followingRef = doc(db, 'artifacts', appId, 'users', myUid, 'following', targetUid);
+                const followingSnap = await getDoc(followingRef);
+                isFollowing = followingSnap.exists();
+
+                const followerRef = doc(db, 'artifacts', appId, 'users', myUid, 'followers', targetUid);
+                const followerSnap = await getDoc(followerRef);
+                const isFollowedBack = followerSnap.exists();
+
+                isMutual = isFollowing && isFollowedBack;
+                renderFollowButton();
+                
+            } catch (e) {
+                console.error("Follow check error", e);
+            }
+        }
+
+        function renderFollowButton() {
+            const container = document.getElementById('header-actions');
+            const mobileContainer = document.getElementById('mobile-header-actions');
+            let btnHtml = '';
+            if (isFollowing) {
+                btnHtml = `<button onclick="toggleFollow()" class="inline-flex items-center px-6 py-2.5 border border-gray-300 shadow-sm text-sm font-bold rounded-full text-gray-700 bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"><i class="fa-solid fa-check mr-2"></i> フォロー中</button>`;
+            } else {
+                btnHtml = `<button onclick="toggleFollow()" class="inline-flex items-center px-6 py-2.5 border border-transparent shadow-md text-sm font-bold rounded-full text-white bg-blue-600 hover:bg-blue-700 transition-colors"><i class="fa-solid fa-user-plus mr-2"></i> フォローする</button>`;
+            }
+            container.innerHTML = btnHtml;
+            mobileContainer.innerHTML = btnHtml.replace('px-6', 'w-full justify-center');
+        }
+
+        window.toggleFollow = async () => {
+            if (!currentUser || isAdminMock) {
+                if(isAdminMock) { isFollowing = !isFollowing; renderFollowButton(); showNotification('Mock Action', 'success'); }
+                return;
+            }
+            const myUid = currentUser.uid;
+            const myFollowingRef = doc(db, 'artifacts', appId, 'users', myUid, 'following', targetUid);
+            const targetFollowerRef = doc(db, 'artifacts', appId, 'users', targetUid, 'followers', myUid);
+            try {
+                if (isFollowing) {
+                    await deleteDoc(myFollowingRef);
+                    await deleteDoc(targetFollowerRef);
+                    isFollowing = false;
+                    showNotification('フォロー解除しました', 'info');
+                } else {
+                    const timestamp = serverTimestamp();
+                    await setDoc(myFollowingRef, { createdAt: timestamp });
+                    await setDoc(targetFollowerRef, { createdAt: timestamp });
+                    isFollowing = true;
+                    showNotification('フォローしました！', 'success');
+                }
+                await checkFollowStatus(myUid, targetUid);
+                if(!isSelf) loadPublicProfile(targetUid); 
+
+            } catch (e) {
+                console.error(e);
+                showNotification('エラーが発生しました', 'error');
+            }
+        };
+
+        function toggleRestrictedContent(show) {
+            const mutualElements = document.querySelectorAll('.mutual-only');
+            const masks = ['basic-info-mask', 'message-mask', 'career-mask'];
+            const badge = document.querySelector('.mutual-badge');
+            const statusBadge = document.getElementById('mutual-status-badge');
+
+            if (show) {
+                mutualElements.forEach(el => el.classList.remove('hidden'));
+                masks.forEach(id => document.getElementById(id)?.classList.add('hidden'));
+                if (badge) badge.classList.remove('hidden');
+                if (statusBadge) statusBadge.classList.remove('hidden');
+            } else {
+                mutualElements.forEach(el => el.classList.add('hidden'));
+                masks.forEach(id => document.getElementById(id)?.classList.remove('hidden'));
+                if (badge) badge.classList.add('hidden');
+                if (statusBadge) statusBadge.classList.add('hidden');
             }
         }
 
         function updateDashboardUI(data) {
-            // Header
+            // 1. 公開情報
             document.getElementById('dashboard-name').textContent = data.name || data.userId || '（名称未設定）';
             document.getElementById('dashboard-job').textContent = data.jobTitle || '（職業未設定）';
-            
-            // Icon
+            document.getElementById('dashboard-userid').textContent = data.userId || '-';
+            document.getElementById('dashboard-location').textContent = (data.prefecture || '') + (data.city ? ' ' + data.city : '') || 'エリア未設定';
+
             const iconImg = document.getElementById('dashboard-icon-img');
             const iconPh = document.getElementById('dashboard-icon-placeholder');
             if (data.photoURL) {
@@ -281,29 +461,6 @@
                 iconImg.classList.add('hidden');
                 iconPh.classList.remove('hidden');
             }
-            
-            // Basic Info
-            document.getElementById('dashboard-userid').textContent = data.userId || '-';
-            document.getElementById('dashboard-kana').textContent = data.nameKana || '-';
-            document.getElementById('dashboard-gender').textContent = data.gender || '未設定'; 
-            document.getElementById('dashboard-email').textContent = data.contactEmail || data.email || '非公開';
-            document.getElementById('dashboard-location').textContent = (data.prefecture || '') + (data.city ? ' ' + data.city : '') || 'エリア未設定';
-
-            // Birth
-            let birthDisplay = '-';
-            if (data.birthDate) {
-                if (data.birthVisibility === 'full') birthDisplay = data.birthDate; 
-                else if (data.birthVisibility === 'monthDay') birthDisplay = data.birthDate.substring(5);
-                else birthDisplay = '非公開';
-            }
-            document.getElementById('dashboard-birth').textContent = birthDisplay;
-
-            // SNS
-            const snsContainer = document.getElementById('dashboard-sns-links');
-            snsContainer.innerHTML = '';
-            if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="text-gray-400 hover:text-blue-500 transition-colors"><i class="fa-solid fa-globe text-lg"></i></a>`;
-            if (data.snsInstagram) snsContainer.innerHTML += `<a href="${data.snsInstagram.startsWith('http') ? data.snsInstagram : 'https://instagram.com/'+data.snsInstagram}" target="_blank" class="text-gray-400 hover:text-pink-500 transition-colors"><i class="fa-brands fa-instagram text-lg"></i></a>`;
-            if (data.snsX) snsContainer.innerHTML += `<a href="${data.snsX.startsWith('http') ? data.snsX : 'https://twitter.com/'+data.snsX}" target="_blank" class="text-gray-400 hover:text-gray-900 transition-colors"><i class="fa-brands fa-x-twitter text-lg"></i></a>`;
 
             // Tags
             const tagsContainer = document.getElementById('dashboard-tags');
@@ -320,11 +477,7 @@
                 tagsContainer.innerHTML = '<span class="text-sm text-gray-400 italic">タグ未設定</span>';
             }
 
-            // Text Areas
-            document.getElementById('dashboard-message').textContent = data.message || 'まだメッセージがありません。';
-            document.getElementById('dashboard-goals').textContent = data.goals || 'まだ目標が設定されていません。';
-
-            // Lists
+            // Matching
             const updateList = (id, items) => {
                 const el = document.getElementById(id);
                 el.innerHTML = '';
@@ -339,32 +492,91 @@
             updateList('dashboard-can-offer', data.canOffer);
             updateList('dashboard-looking-for', data.lookingFor);
 
-            // Career
-            const careerContainer = document.getElementById('dashboard-career');
-            careerContainer.innerHTML = '';
-            if (data.career && data.career.length > 0) {
-                data.career.forEach(c => {
-                    careerContainer.innerHTML += `
-                        <div class="relative">
-                            <div class="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 border-white bg-blue-400 ring-4 ring-blue-50"></div>
-                            <h4 class="font-bold text-gray-900">${c.company || '会社名不明'}</h4>
-                            <p class="text-sm text-blue-600 font-medium mb-1">${c.role || ''} <span class="text-gray-400 text-xs ml-1">(${c.start || '?'} 〜 ${c.end || '現在'})</span></p>
-                            <p class="text-sm text-gray-600 leading-relaxed">${c.description || ''}</p>
-                        </div>
-                    `;
-                });
+
+            // 2. 制限情報 (Mutual or Self)
+            const showRestricted = isMutual || isSelf;
+            
+            // Basic Info Restricted
+            const setTextOrMask = (id, text, isVisible) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (isVisible) {
+                    el.textContent = text || '-';
+                    el.parentElement.classList.remove('hidden');
+                } else {
+                    el.parentElement.classList.add('hidden');
+                }
+            };
+            setTextOrMask('dashboard-gender', data.gender, showRestricted);
+            setTextOrMask('dashboard-kana', data.nameKana, showRestricted);
+            setTextOrMask('dashboard-email', data.contactEmail || data.email, showRestricted);
+            
+            // Birth Date
+            let birthDisplay = '-';
+            if (showRestricted) {
+                if (data.birthDate) {
+                    if (data.birthVisibility === 'full' || isSelf) birthDisplay = data.birthDate; 
+                    else if (data.birthVisibility === 'monthDay') birthDisplay = data.birthDate.substring(5);
+                    else birthDisplay = '非公開';
+                }
             } else {
-                careerContainer.innerHTML = '<p class="text-sm text-gray-500 italic">経歴情報はありません。</p>';
+                birthDisplay = '';
+            }
+            const birthEl = document.getElementById('dashboard-birth');
+            if (birthEl) {
+                if(showRestricted) {
+                    birthEl.textContent = birthDisplay;
+                    birthEl.parentElement.classList.remove('hidden');
+                } else {
+                    birthEl.parentElement.classList.add('hidden');
+                }
             }
 
-            // Score
-            const score = data.profileScore || 0;
-            document.getElementById('score-text').textContent = score + '%';
-            document.getElementById('score-bar').style.width = score + '%';
+            // UI Masks Control
+            toggleRestrictedContent(showRestricted);
+
+            // Fill Content (even if hidden)
+            if (showRestricted) {
+                // SNS
+                const snsContainer = document.getElementById('dashboard-sns-links');
+                snsContainer.innerHTML = '';
+                if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="text-gray-400 hover:text-blue-500 transition-colors"><i class="fa-solid fa-globe text-lg"></i></a>`;
+                if (data.snsInstagram) snsContainer.innerHTML += `<a href="${data.snsInstagram.startsWith('http') ? data.snsInstagram : 'https://instagram.com/'+data.snsInstagram}" target="_blank" class="text-gray-400 hover:text-pink-500 transition-colors"><i class="fa-brands fa-instagram text-lg"></i></a>`;
+                if (data.snsX) snsContainer.innerHTML += `<a href="${data.snsX.startsWith('http') ? data.snsX : 'https://twitter.com/'+data.snsX}" target="_blank" class="text-gray-400 hover:text-gray-900 transition-colors"><i class="fa-brands fa-x-twitter text-lg"></i></a>`;
+
+                // Message & Goals
+                document.getElementById('dashboard-message').textContent = data.message || 'まだメッセージがありません。';
+                document.getElementById('dashboard-goals').textContent = data.goals || 'まだ目標が設定されていません。';
+
+                // Career
+                const careerContainer = document.getElementById('dashboard-career');
+                careerContainer.innerHTML = '';
+                if (data.career && data.career.length > 0) {
+                    data.career.forEach(c => {
+                        careerContainer.innerHTML += `
+                            <div class="relative">
+                                <div class="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 border-white bg-blue-400 ring-4 ring-blue-50"></div>
+                                <h4 class="font-bold text-gray-900">${c.company || '会社名不明'}</h4>
+                                <p class="text-sm text-blue-600 font-medium mb-1">${c.role || ''} <span class="text-gray-400 text-xs ml-1">(${c.start || '?'} 〜 ${c.end || '現在'})</span></p>
+                                <p class="text-sm text-gray-600 leading-relaxed">${c.description || ''}</p>
+                            </div>
+                        `;
+                    });
+                } else {
+                    careerContainer.innerHTML = '<p class="text-sm text-gray-500 italic">経歴情報はありません。</p>';
+                }
+            }
+
+            // Score (Self)
+            if (isSelf) {
+                const score = data.profileScore || 0;
+                document.getElementById('score-text').textContent = score + '%';
+                document.getElementById('score-bar').style.width = score + '%';
+            }
         }
 
         window.handleLogout = () => {
-            if (localStorage.getItem('isAdminMock') === 'true') {
+            if (isAdminMock) {
                 localStorage.removeItem('isAdminMock');
                 window.location.href = 'login.html';
                 return;
@@ -372,6 +584,27 @@
             signOut(auth);
             window.location.href = 'login.html';
         };
+
+        window.showNotification = (msg, type) => {
+            const notif = document.getElementById('notification');
+            const msgEl = document.getElementById('notif-message');
+            notif.classList.remove('hidden', 'border-blue-500', 'border-red-500', 'border-green-500');
+            if(type === 'error') notif.classList.add('border-red-500', 'text-red-700');
+            else if (type === 'success') notif.classList.add('border-green-500', 'text-green-700');
+            else notif.classList.add('border-blue-500', 'text-blue-700');
+            msgEl.textContent = msg;
+            notif.classList.remove('hidden');
+            setTimeout(() => notif.classList.add('hidden'), 3000);
+        };
+
+        function getAdminMockData() {
+            return {
+                userId: 'admin', name: 'テスト管理者', jobTitle: 'システム', gender: '男性',
+                profileScore: 90, hobbies: ['開発'], skills: ['管理'], email: 'admin@test.com',
+                prefecture: '東京都', message: '管理者です', goals: 'テスト',
+                canOffer: ['テスト'], lookingFor: ['バグ報告'], career: []
+            };
+        }
     </script>
 </body>
 </html>
