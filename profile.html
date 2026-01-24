@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロフィール編集 | BRAIN BRIDGE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #f3f4f6; }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] summary ~ * { animation: slideDown 0.3s ease-in-out; }
+        @keyframes slideDown { 0% { opacity: 0; transform: translateY(-10px); } 100% { opacity: 1; transform: translateY(0); } }
+        .accordion-arrow { transition: transform 0.3s ease; }
+        details[open] .accordion-arrow { transform: rotate(180deg); }
+        .tag-checkbox:checked + div { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 text-gray-800 font-sans pb-24">
+
+    <!-- Header -->
+    <header class="bg-white shadow sticky top-0 z-20">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-900">プロフィール編集</h1>
+            <div class="flex space-x-3">
+                <a href="user.html" class="text-gray-600 hover:text-gray-900 text-sm font-medium py-2">キャンセル</a>
+                <button onclick="saveProfile()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold shadow-sm transition-colors">
+                    保存する
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto mt-6 px-4">
+        <form id="profile-form" class="space-y-8" onsubmit="event.preventDefault();">
+            
+            <!-- 0. 公開設定・職業 -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">基本設定</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">公開状態</label>
+                        <select name="profilePublic" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                            <option value="true">公開する</option>
+                            <option value="false">非公開（下書き）</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">※「非公開」にすると検索結果から一時的に除外されます（データは保持されます）</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">職業・肩書 <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded ml-1">重要</span></label>
+                        <input type="text" name="jobTitle" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" placeholder="例：WEBデザイナー、営業マネージャー">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1. 基本情報 -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">① 基本情報</h2>
+                
+                <!-- アイコン画像アップロード -->
+                <div class="mb-6 flex flex-col items-center sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+                    <div class="relative">
+                        <div class="h-24 w-24 rounded-full border-2 border-gray-200 bg-gray-100 flex items-center justify-center overflow-hidden">
+                            <img id="edit-icon-preview" src="" class="hidden w-full h-full object-cover">
+                            <i id="edit-icon-placeholder" class="fa-solid fa-user text-3xl text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700">プロフィールアイコン</label>
+                        <input type="file" id="icon-upload" accept="image/*" class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <p class="mt-1 text-xs text-gray-500">推奨: 正方形の画像 (JPG, PNG)</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">氏名（表示用） <span class="text-red-500">*</span></label>
+                            <input type="text" name="name" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">ふりがな</label>
+                            <input type="text" name="nameKana" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">性別</label>
+                            <select name="gender" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                                <option value="">未選択</option>
+                                <option value="男性">男性</option>
+                                <option value="女性">女性</option>
+                                <option value="その他">その他</option>
+                                <option value="回答しない">回答しない</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">生年月日</label>
+                            <input type="date" name="birthDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">生年月日の公開範囲</label>
+                            <select name="birthVisibility" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                                <option value="private">非公開</option>
+                                <option value="monthDay">月日のみ公開</option>
+                                <option value="full">全て公開（年齢表示）</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 連絡・外部リンク -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">② 連絡先・SNS</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">メールアドレス（連絡用）</label>
+                        <input type="email" name="contactEmail" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" placeholder="ログイン用とは別に設定可">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">WEBサイト (URL)</label>
+                            <input type="url" name="websiteUrl" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" placeholder="https://...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Instagram (ID/URL)</label>
+                            <input type="text" name="snsInstagram" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">X (旧Twitter) (ID/URL)</label>
+                            <input type="text" name="snsX" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 居住・活動エリア -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">③ エリア</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">都道府県</label>
+                        <select name="prefecture" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                            <option value="">選択してください</option>
+                            <option value="東京都">東京都</option>
+                            <option value="大阪府">大阪府</option>
+                            <option value="神奈川県">神奈川県</option>
+                            <option value="愛知県">愛知県</option>
+                            <option value="福岡県">福岡県</option>
+                            <option value="北海道">北海道</option>
+                            <option value="その他">その他</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">市区町村（任意）</label>
+                        <input type="text" name="city" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. 趣味（タグ） -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">④ 趣味（複数選択可）</h2>
+                <div id="hobbies-container" class="space-y-2"></div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700">その他（自由記述）</label>
+                    <input type="text" name="hobbyOtherText" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                </div>
+            </div>
+
+            <!-- 5. 特技・スキル -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">⑤ 特技・スキル</h2>
+                <div id="skills-container" class="space-y-2"></div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700">補足説明（300文字以内）</label>
+                    <textarea name="skillDescription" rows="3" maxlength="300" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"></textarea>
+                </div>
+            </div>
+
+            <!-- 6. 経歴 -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h2 class="text-lg font-bold text-gray-900">⑥ 経歴</h2>
+                    <button type="button" onclick="addCareerField()" class="text-sm text-blue-600 hover:underline">
+                        + 追加する
+                    </button>
+                </div>
+                <div id="career-list" class="space-y-6"></div>
+            </div>
+
+            <!-- 7 & 8. 想い・やりたいこと -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">⑦ 想い・⑧ やりたいこと</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">想い・メッセージ</label>
+                        <textarea name="message" rows="5" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">今後やりたいこと・目標</label>
+                        <textarea name="goals" rows="5" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. 提供/募集 -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">⑨ マッチング情報</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">提供できること（Can Offer）</label>
+                        <p class="text-xs text-gray-500 mb-2">カンマ(,)区切りで入力</p>
+                        <textarea name="canOffer" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">求めていること（Looking For）</label>
+                        <p class="text-xs text-gray-500 mb-2">カンマ(,)区切りで入力</p>
+                        <textarea name="lookingFor" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </main>
+
+    <!-- Notification -->
+    <div id="notification" class="fixed top-4 right-4 z-50 hidden max-w-sm w-full bg-white shadow-lg rounded-lg p-4 border-l-4">
+        <p id="notif-message" class="text-sm font-medium"></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        // ▼▼▼▼ Firebase Config (更新) ▼▼▼▼
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
+            authDomain: "brainbridge-4b8ac.firebaseapp.com",
+            projectId: "brainbridge-4b8ac",
+            storageBucket: "brainbridge-4b8ac.firebasestorage.app",
+            messagingSenderId: "803209683213",
+            appId: "1:803209683213:web:b62d13784fa2bbbb9f5044"
+        };
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const appId = 'default-app-id';
+
+        let currentUser = null;
+        let currentUserData = null;
+
+        // Data Definitions
+        const hobbyCategories = {
+            "🏃 スポーツ・運動系": ["ランニング", "ウォーキング", "筋トレ", "ヨガ", "ピラティス", "ダンス", "バスケットボール", "サッカー", "フットサル", "野球", "テニス", "バドミントン", "卓球", "ゴルフ", "ボルダリング", "登山", "サーフィン", "スノーボード", "スキー", "サイクリング", "水泳", "格闘技", "武道"],
+            "🎵 音楽・エンタメ": ["カラオケ", "楽器演奏（ギター）", "楽器演奏（ピアノ）", "作曲", "歌", "ライブ鑑賞", "フェス", "DJ", "映画鑑賞", "アニメ鑑賞", "漫画", "ゲーム", "ボードゲーム"],
+            "🎨 文化・アート": ["絵画", "イラスト", "デザイン", "写真撮影", "動画編集", "手芸", "DIY", "小説執筆", "ブログ"],
+            "📚 学び": ["読書", "自己啓発", "歴史", "心理学", "投資", "マーケティング", "プログラミング", "英語学習", "資格取得"],
+            "🍳 食・暮らし": ["料理", "お菓子作り", "カフェ巡り", "食べ歩き", "お酒", "コーヒー", "インテリア", "ミニマリズム"],
+            "✈️ 旅行": ["国内旅行", "海外旅行", "一人旅", "キャンプ", "温泉巡り", "神社仏閣巡り"],
+            "🤝 人": ["交流会", "ボランティア", "地域活動", "コーチング", "子育て"],
+            "🌿 その他": ["瞑想", "占い", "その他"]
+        };
+        const skillCategories = {
+            "💻 IT": ["Web制作", "WordPress", "Firebase", "ノーコード", "アプリ開発", "プログラミング", "データ分析", "AI活用"],
+            "🎤 コミュニケーション": ["プレゼン", "ファシリテーション", "講師", "コーチング", "営業", "交渉", "インタビュー"],
+            "✍️ 発信": ["ライティング", "SNS運用", "ブログ運営", "動画編集", "デザイン"],
+            "💼 ビジネス": ["起業", "経営", "マーケティング", "会計", "人事", "英語"],
+            "🧘 その他": ["料理指導", "整理収納", "健康管理"]
+        };
+
+        // Init
+        const adminData = {
+            userId: 'admin',
+            name: 'テスト管理者',
+            nameKana: 'てすとかんりしゃ',
+            jobTitle: 'プロダクトマネージャー',
+            gender: '男性',
+            profilePublic: "true",
+            hobbies: ['ランニング'],
+            skills: ['Web制作'],
+            email: 'admin@example.com',
+            photoURL: ''
+        };
+
+        if (localStorage.getItem('isAdminMock') === 'true') {
+            currentUser = { uid: 'test_admin_uid' };
+            currentUserData = adminData;
+            renderFormOptions();
+            populateForm(currentUserData);
+        } else {
+            onAuthStateChanged(auth, async (user) => {
+                if (user && !user.isAnonymous) {
+                    currentUser = user;
+                    await loadUserProfile(user.uid);
+                } else {
+                    window.location.href = 'login.html';
+                }
+            });
+            renderFormOptions();
+        }
+
+        async function loadUserProfile(uid) {
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    currentUserData = docSnap.data();
+                } else {
+                    currentUserData = { userId: uid };
+                }
+                populateForm(currentUserData);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderFormOptions() {
+            renderCategorySection('hobbies-container', hobbyCategories, 'hobbies');
+            renderCategorySection('skills-container', skillCategories, 'skills');
+        }
+
+        function renderCategorySection(containerId, categoriesData, inputName) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            for (const [category, items] of Object.entries(categoriesData)) {
+                const details = document.createElement('details');
+                details.className = 'group border border-gray-200 rounded-lg bg-white overflow-hidden';
+                details.innerHTML = `
+                    <summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50 bg-gray-50 transition-colors select-none">
+                        <span class="font-bold text-gray-700 text-sm">${category}</span>
+                        <span class="accordion-arrow text-gray-400"><i class="fa-solid fa-chevron-down"></i></span>
+                    </summary>
+                    <div class="p-4 border-t border-gray-100 flex flex-wrap gap-2"></div>`;
+                const contentDiv = details.querySelector('div');
+                items.forEach(item => {
+                    contentDiv.innerHTML += `
+                        <label class="cursor-pointer">
+                            <input type="checkbox" name="${inputName}" value="${item}" class="tag-checkbox hidden">
+                            <div class="px-3 py-1.5 rounded-full border border-gray-300 text-sm text-gray-600 hover:bg-gray-100 transition-colors select-none">${item}</div>
+                        </label>`;
+                });
+                container.appendChild(details);
+            }
+        }
+
+        function populateForm(data) {
+            const form = document.getElementById('profile-form');
+            if (!data) return;
+            const fields = ['name', 'nameKana', 'gender', 'birthDate', 'birthVisibility', 'contactEmail', 'websiteUrl', 'snsInstagram', 'snsX', 'prefecture', 'city', 'hobbyOtherText', 'skillDescription', 'message', 'goals', 'profilePublic', 'jobTitle', 'canOffer', 'lookingFor'];
+            fields.forEach(f => { if (form[f] && data[f]) form[f].value = data[f]; });
+
+            const img = document.getElementById('edit-icon-preview');
+            const ph = document.getElementById('edit-icon-placeholder');
+            if (data.photoURL) {
+                img.src = data.photoURL;
+                img.classList.remove('hidden');
+                ph.classList.add('hidden');
+            }
+
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+                if (data[cb.name] && data[cb.name].includes(cb.value)) {
+                    cb.checked = true;
+                    cb.closest('details').open = true;
+                }
+            });
+
+            const careerList = document.getElementById('career-list');
+            careerList.innerHTML = '';
+            if (data.career && Array.isArray(data.career)) {
+                data.career.forEach(c => addCareerField(c));
+            } else {
+                addCareerField();
+            }
+        }
+
+        window.addCareerField = (data = {}) => {
+            const container = document.getElementById('career-list');
+            const div = document.createElement('div');
+            div.className = 'bg-gray-50 p-4 rounded border border-gray-200 relative career-item';
+            div.innerHTML = `
+                <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                    <input type="text" placeholder="会社名・組織名" class="career-company w-full border-gray-300 rounded p-2 text-sm" value="${data.company || ''}">
+                    <input type="text" placeholder="役職・役割" class="career-role w-full border-gray-300 rounded p-2 text-sm" value="${data.role || ''}">
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-2">
+                    <input type="month" class="career-start w-full border-gray-300 rounded p-2 text-sm" value="${data.start || ''}">
+                    <input type="month" class="career-end w-full border-gray-300 rounded p-2 text-sm" value="${data.end || ''}">
+                </div>
+                <textarea placeholder="詳細（業務内容など）" class="career-desc w-full border-gray-300 rounded p-2 text-sm" rows="2">${data.description || ''}</textarea>
+            `;
+            container.appendChild(div);
+        };
+
+        // Icon Preview
+        document.getElementById('icon-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('edit-icon-preview');
+                    const ph = document.getElementById('edit-icon-placeholder');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    ph.classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        window.saveProfile = async () => {
+            if (!currentUser) return;
+            showNotification('保存中...', 'info');
+
+            const form = document.getElementById('profile-form');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            // Image Upload
+            const iconFile = document.getElementById('icon-upload').files[0];
+            let photoURL = currentUserData.photoURL || null;
+            if (iconFile && currentUser.uid !== 'test_admin_uid') {
+                try {
+                    const storagePath = `users/${currentUser.uid}/profile_icon.jpg`;
+                    const storageRef = ref(storage, storagePath);
+                    const snapshot = await uploadBytes(storageRef, iconFile);
+                    photoURL = await getDownloadURL(snapshot.ref);
+                } catch (e) {
+                    console.error("Upload failed", e);
+                }
+            } else if (iconFile && currentUser.uid === 'test_admin_uid') {
+                // Mock for admin
+                const reader = new FileReader();
+                reader.readAsDataURL(iconFile); // Doesn't await, simplistic for demo
+            }
+            data.photoURL = photoURL;
+
+            // Arrays
+            const hobbies = [];
+            form.querySelectorAll('input[name="hobbies"]:checked').forEach(cb => hobbies.push(cb.value));
+            data.hobbies = hobbies;
+            const skills = [];
+            form.querySelectorAll('input[name="skills"]:checked').forEach(cb => skills.push(cb.value));
+            data.skills = skills;
+
+            // Career
+            const career = [];
+            document.querySelectorAll('.career-item').forEach(item => {
+                const comp = item.querySelector('.career-company').value;
+                if (comp) {
+                    career.push({
+                        company: comp,
+                        role: item.querySelector('.career-role').value,
+                        start: item.querySelector('.career-start').value,
+                        end: item.querySelector('.career-end').value,
+                        description: item.querySelector('.career-desc').value
+                    });
+                }
+            });
+            data.career = career;
+
+            if(data.canOffer) data.canOffer = data.canOffer.split(',').map(s=>s.trim()).filter(s=>s);
+            if(data.lookingFor) data.lookingFor = data.lookingFor.split(',').map(s=>s.trim()).filter(s=>s);
+
+            // Calc Score
+            let score = 0; let totalWeight = 0;
+            const scoring = [{k:'name',w:10},{k:'jobTitle',w:10},{k:'prefecture',w:10},{k:'gender',w:5},{k:'contactEmail',w:5},{k:'birthDate',w:5},{k:'hobbies',w:10,isArr:true},{k:'skills',w:10,isArr:true},{k:'message',w:15},{k:'goals',w:15},{k:'canOffer',w:5,isArr:true},{k:'lookingFor',w:5,isArr:true},{k:'photoURL',w:10}];
+            scoring.forEach(item => {
+                totalWeight += item.w;
+                let filled = item.isArr ? (data[item.k] && data[item.k].length>0) : !!data[item.k];
+                if(filled) score += item.w;
+            });
+            data.profileScore = Math.min(100, Math.round((score/totalWeight)*100));
+            data.updatedAt = new Date().toISOString();
+
+            const finalData = { ...currentUserData, ...data };
+
+            if (currentUser.uid === 'test_admin_uid') {
+                showNotification('プロフィールを更新しました(テスト)', 'success');
+                setTimeout(() => window.location.href = 'user.html', 1000);
+                return;
+            }
+
+            try {
+                // 1. Private Master Data (Always saved)
+                await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile'), finalData);
+                
+                // 2. Public Search Index
+                const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid);
+                
+                if (data.profilePublic === 'true') {
+                    // Update/Restore public view
+                    const publicData = {
+                        userId: finalData.userId,
+                        name: finalData.name,
+                        jobTitle: finalData.jobTitle,
+                        gender: finalData.gender || null,
+                        prefecture: finalData.prefecture,
+                        hobbies: finalData.hobbies,
+                        skills: finalData.skills,
+                        canOffer: finalData.canOffer,
+                        lookingFor: finalData.lookingFor,
+                        photoURL: finalData.photoURL,
+                        updatedAt: finalData.updatedAt
+                    };
+                    await setDoc(publicDocRef, publicData, { merge: true });
+                } else {
+                    // Remove from public view ONLY (Master stays in private)
+                    // This "hides" the user from search results as requested
+                    try {
+                        await deleteDoc(publicDocRef);
+                        console.log("Hidden from public search");
+                    } catch (ignore) {}
+                }
+
+                showNotification('プロフィールを更新しました', 'success');
+                setTimeout(() => window.location.href = 'user.html', 1000);
+
+            } catch (e) {
+                console.error("Save error", e);
+                showNotification('保存に失敗しました', 'error');
+            }
+        };
+
+        window.showNotification = (msg, type) => {
+            const notif = document.getElementById('notification');
+            const msgEl = document.getElementById('notif-message');
+            notif.classList.remove('hidden', 'border-blue-500', 'border-red-500', 'border-green-500');
+            if(type === 'error') notif.classList.add('border-red-500', 'text-red-700');
+            else if (type === 'success') notif.classList.add('border-green-500', 'text-green-700');
+            else notif.classList.add('border-blue-500', 'text-blue-700');
+            msgEl.textContent = msg;
+            notif.classList.remove('hidden');
+            setTimeout(() => notif.classList.add('hidden'), 3000);
+        };
+    </script>
+</body>
+</html>
