@@ -366,7 +366,8 @@
 
         async function loadUserProfile(uid) {
             try {
-                const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile');
+                // パス修正: /profile/data
+                const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     currentUserData = docSnap.data();
@@ -551,24 +552,18 @@
             }
 
             try {
-                // 1. Private Master Data (Always saved with ALL fields)
-                await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile'), finalData);
+                // 1. Private Master Data (パス修正済み: /profile/data)
+                await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data'), finalData);
                 
                 // 2. Public Search Index
-                // ユーザーの指示により、公開DBにも全ての情報を保存します。
-                // 表示の制御（相互フォロー限定など）はクライアントサイド（user.html）で行います。
                 const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid);
                 
                 if (data.profilePublic === 'true') {
-                    // 全データを公開コレクションにコピー
-                    // ※createdAtなどシステム管理項目の一部は除外しても良いですが、今回は単純化のためマージします
+                    // 全情報を公開DBにもコピー（表示側で制御）
                     const publicData = {
                         ...finalData,
                         updatedAt: new Date().toISOString()
                     };
-                    // 不要なシステム管理フィールドがあれば削除（任意）
-                    delete publicData.referrerId; 
-                    
                     await setDoc(publicDocRef, publicData, { merge: true });
                 } else {
                     try {
