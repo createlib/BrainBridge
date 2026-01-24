@@ -23,9 +23,9 @@
     <!-- Header -->
     <header class="bg-white shadow sticky top-0 z-20">
         <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-gray-900">プロフィール編集</h1>
+            <h1 class="text-xl font-bold text-gray-900">プロフィール編集 <span id="admin-label" class="hidden text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded ml-2">管理者モード</span></h1>
             <div class="flex space-x-3">
-                <a href="user.html" class="text-gray-600 hover:text-gray-900 text-sm font-medium py-2">キャンセル</a>
+                <button onclick="history.back()" class="text-gray-600 hover:text-gray-900 text-sm font-medium py-2">キャンセル</button>
                 <button onclick="saveProfile()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold shadow-sm transition-colors">
                     保存する
                 </button>
@@ -34,6 +34,7 @@
     </header>
 
     <main class="max-w-3xl mx-auto mt-6 px-4">
+        <!-- 省略せずに全てのフォーム要素を含めます -->
         <form id="profile-form" class="space-y-8" onsubmit="event.preventDefault();">
             
             <!-- 0. 公開設定・職業 -->
@@ -46,11 +47,11 @@
                             <option value="true">公開する</option>
                             <option value="false">非公開（下書き）</option>
                         </select>
-                        <p class="text-xs text-gray-500 mt-1">※「非公開」にすると検索結果から一時的に除外されます（データは保持されます）</p>
+                        <p class="text-xs text-gray-500 mt-1">※「非公開」にすると検索結果から一時的に除外されます</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">職業・肩書 <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded ml-1">重要</span></label>
-                        <input type="text" name="jobTitle" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" placeholder="例：WEBデザイナー、営業マネージャー">
+                        <label class="block text-sm font-medium text-gray-700">職業・肩書</label>
+                        <input type="text" name="jobTitle" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
                     </div>
                 </div>
             </div>
@@ -59,7 +60,6 @@
             <div class="bg-white shadow rounded-lg p-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">① 基本情報</h2>
                 
-                <!-- アイコン画像アップロード -->
                 <div class="mb-6 flex flex-col items-center sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
                     <div class="relative">
                         <div class="h-24 w-24 rounded-full border-2 border-gray-200 bg-gray-100 flex items-center justify-center overflow-hidden">
@@ -70,8 +70,6 @@
                     <div class="flex-1">
                         <label class="block text-sm font-medium text-gray-700">プロフィールアイコン</label>
                         <input type="file" id="icon-upload" accept="image/*" class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        <p class="mt-1 text-xs text-gray-500">推奨: 正方形の画像 (JPG, PNG)</p>
-                        <p id="upload-status" class="text-xs text-red-500 hidden mt-1"></p>
                     </div>
                 </div>
 
@@ -102,21 +100,18 @@
                             <input type="date" name="birthDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">生年月日の公開範囲</label>
+                            <label class="block text-sm font-medium text-gray-700">公開範囲</label>
                             <select name="birthVisibility" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
                                 <option value="private">非公開</option>
                                 <option value="monthDay">月日のみ公開</option>
-                                <option value="full">全て公開（年齢表示）</option>
+                                <option value="full">全て公開</option>
                             </select>
-                            <p class="text-xs text-gray-500 mt-1">※相互フォロー相手への公開設定です</p>
                         </div>
                     </div>
-                    
-                    <!-- 自己紹介 (New) -->
+                    <!-- Bio -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">自己紹介（公開・369文字以内）</label>
-                        <textarea name="bio" rows="3" maxlength="369" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" placeholder="はじめまして！〇〇をしています。興味があることは..."></textarea>
-                        <p class="text-xs text-gray-500 mt-1 text-right">※誰でも見れる情報です</p>
+                        <textarea name="bio" rows="3" maxlength="369" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" placeholder="はじめまして！〇〇をしています。"></textarea>
                     </div>
                 </div>
             </div>
@@ -127,12 +122,12 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">メールアドレス（連絡用）</label>
-                        <input type="email" name="contactEmail" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" placeholder="ログイン用とは別に設定可">
+                        <input type="email" name="contactEmail" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">WEBサイト (URL)</label>
-                            <input type="url" name="websiteUrl" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" placeholder="https://...">
+                            <input type="url" name="websiteUrl" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Instagram (ID/URL)</label>
@@ -146,102 +141,40 @@
                 </div>
             </div>
 
-            <!-- 3. 居住・活動エリア -->
+            <!-- 3. エリア -->
             <div class="bg-white shadow rounded-lg p-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">③ エリア</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">都道府県</label>
-                        <select name="prefecture" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                        <select name="prefecture" id="prefecture-select" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
                             <option value="">選択してください</option>
-                            <optgroup label="北海道・東北">
-                                <option value="北海道">北海道</option>
-                                <option value="青森県">青森県</option>
-                                <option value="岩手県">岩手県</option>
-                                <option value="宮城県">宮城県</option>
-                                <option value="秋田県">秋田県</option>
-                                <option value="山形県">山形県</option>
-                                <option value="福島県">福島県</option>
-                            </optgroup>
-                            <optgroup label="関東">
-                                <option value="茨城県">茨城県</option>
-                                <option value="栃木県">栃木県</option>
-                                <option value="群馬県">群馬県</option>
-                                <option value="埼玉県">埼玉県</option>
-                                <option value="千葉県">千葉県</option>
-                                <option value="東京都">東京都</option>
-                                <option value="神奈川県">神奈川県</option>
-                            </optgroup>
-                            <optgroup label="中部">
-                                <option value="新潟県">新潟県</option>
-                                <option value="富山県">富山県</option>
-                                <option value="石川県">石川県</option>
-                                <option value="福井県">福井県</option>
-                                <option value="山梨県">山梨県</option>
-                                <option value="長野県">長野県</option>
-                                <option value="岐阜県">岐阜県</option>
-                                <option value="静岡県">静岡県</option>
-                                <option value="愛知県">愛知県</option>
-                            </optgroup>
-                            <optgroup label="近畿">
-                                <option value="三重県">三重県</option>
-                                <option value="滋賀県">滋賀県</option>
-                                <option value="京都府">京都府</option>
-                                <option value="大阪府">大阪府</option>
-                                <option value="兵庫県">兵庫県</option>
-                                <option value="奈良県">奈良県</option>
-                                <option value="和歌山県">和歌山県</option>
-                            </optgroup>
-                            <optgroup label="中国">
-                                <option value="鳥取県">鳥取県</option>
-                                <option value="島根県">島根県</option>
-                                <option value="岡山県">岡山県</option>
-                                <option value="広島県">広島県</option>
-                                <option value="山口県">山口県</option>
-                            </optgroup>
-                            <optgroup label="四国">
-                                <option value="徳島県">徳島県</option>
-                                <option value="香川県">香川県</option>
-                                <option value="愛媛県">愛媛県</option>
-                                <option value="高知県">高知県</option>
-                            </optgroup>
-                            <optgroup label="九州・沖縄">
-                                <option value="福岡県">福岡県</option>
-                                <option value="佐賀県">佐賀県</option>
-                                <option value="長崎県">長崎県</option>
-                                <option value="熊本県">熊本県</option>
-                                <option value="大分県">大分県</option>
-                                <option value="宮崎県">宮崎県</option>
-                                <option value="鹿児島県">鹿児島県</option>
-                                <option value="沖縄県">沖縄県</option>
-                            </optgroup>
-                            <option value="海外">海外</option>
-                            <option value="その他">その他</option>
+                            <!-- Options generated by JS -->
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">市区町村（任意）</label>
+                        <label class="block text-sm font-medium text-gray-700">市区町村</label>
                         <input type="text" name="city" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
                     </div>
                 </div>
             </div>
 
-            <!-- 4. 趣味（タグ） -->
+            <!-- 4. 趣味 -->
             <div class="bg-white shadow rounded-lg p-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">④ 趣味（複数選択可）</h2>
+                <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">④ 趣味</h2>
                 <div id="hobbies-container" class="space-y-2"></div>
                 <div class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700">その他（自由記述）</label>
+                    <label class="block text-sm font-medium text-gray-700">その他</label>
                     <input type="text" name="hobbyOtherText" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
                 </div>
             </div>
 
-            <!-- 5. 特技・スキル -->
+            <!-- 5. 特技 -->
             <div class="bg-white shadow rounded-lg p-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">⑤ 特技・スキル</h2>
                 <div id="skills-container" class="space-y-2"></div>
                 <div class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700">補足説明（300文字以内）</label>
+                    <label class="block text-sm font-medium text-gray-700">補足説明</label>
                     <textarea name="skillDescription" rows="3" maxlength="300" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"></textarea>
                 </div>
             </div>
@@ -250,19 +183,17 @@
             <div class="bg-white shadow rounded-lg p-6">
                 <div class="flex justify-between items-center mb-4 border-b pb-2">
                     <h2 class="text-lg font-bold text-gray-900">⑥ 経歴</h2>
-                    <button type="button" onclick="addCareerField()" class="text-sm text-blue-600 hover:underline">
-                        + 追加する
-                    </button>
+                    <button type="button" onclick="addCareerField()" class="text-sm text-blue-600 hover:underline">+ 追加する</button>
                 </div>
                 <div id="career-list" class="space-y-6"></div>
             </div>
 
-            <!-- 7 & 8. 想い・やりたいこと -->
+            <!-- 7 & 8. 想い・目標 -->
             <div class="bg-white shadow rounded-lg p-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">⑦ 想い・⑧ やりたいこと</h2>
                 <div class="space-y-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">想い・メッセージ <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded ml-2">相互フォロワー限定</span></label>
+                        <label class="block text-sm font-medium text-gray-700">想い・メッセージ</label>
                         <textarea name="message" rows="5" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"></textarea>
                     </div>
                     <div>
@@ -272,18 +203,18 @@
                 </div>
             </div>
 
-            <!-- 9. 提供/募集 -->
+            <!-- 9. マッチング -->
             <div class="bg-white shadow rounded-lg p-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">⑨ マッチング情報</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">提供できること（Can Offer）</label>
-                        <p class="text-xs text-gray-500 mb-2">カンマ(,)区切りで入力</p>
+                        <label class="block text-sm font-medium text-gray-700">提供できること</label>
+                        <p class="text-xs text-gray-500 mb-2">カンマ(,)区切り</p>
                         <textarea name="canOffer" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">求めていること（Looking For）</label>
-                        <p class="text-xs text-gray-500 mb-2">カンマ(,)区切りで入力</p>
+                        <label class="block text-sm font-medium text-gray-700">求めていること</label>
+                        <p class="text-xs text-gray-500 mb-2">カンマ(,)区切り</p>
                         <textarea name="lookingFor" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"></textarea>
                     </div>
                 </div>
@@ -321,7 +252,11 @@
         const appId = 'default-app-id';
 
         let currentUser = null;
-        let currentUserData = {};
+        let currentUserData = null;
+        
+        // ★重要: 編集対象のUID。URLパラメータがあればそれ、なければ自分のUID。
+        let targetUid = null;
+        let isAdmin = false;
 
         // Data Definitions
         const hobbyCategories = {
@@ -341,9 +276,10 @@
             "💼 ビジネス": ["起業", "経営", "マーケティング", "会計", "人事", "英語"],
             "🧘 その他": ["料理指導", "整理収納", "健康管理"]
         };
+        const prefectures = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県","海外","その他"];
 
         // Init
-        const adminData = {
+        const adminMockData = {
             userId: 'admin',
             name: 'テスト管理者',
             nameKana: 'てすとかんりしゃ',
@@ -358,24 +294,65 @@
 
         if (localStorage.getItem('isAdminMock') === 'true') {
             currentUser = { uid: 'test_admin_uid' };
-            currentUserData = adminData;
-            renderFormOptions();
+            isAdmin = true;
+            // Admin mock mode: targetUid is irrelevant for saving as it's mock
+            currentUserData = adminMockData;
+            initUI();
             populateForm(currentUserData);
+            document.getElementById('admin-label').classList.remove('hidden');
         } else {
             onAuthStateChanged(auth, async (user) => {
                 if (user && !user.isAnonymous) {
                     currentUser = user;
-                    await loadUserProfile(user.uid);
+                    
+                    // 1. 管理者チェック (自分のプロフを読んで userId == 'admin' か確認)
+                    const myProfileSnap = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data'));
+                    if (myProfileSnap.exists() && myProfileSnap.data().userId === 'admin') {
+                        isAdmin = true;
+                        document.getElementById('admin-label').classList.remove('hidden');
+                    }
+
+                    // 2. 編集対象の決定
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const paramUid = urlParams.get('uid');
+
+                    if (paramUid && paramUid !== user.uid) {
+                        // 他人の編集リクエスト
+                        if (isAdmin) {
+                            targetUid = paramUid;
+                            showNotification('管理者権限で他ユーザーを編集します', 'info');
+                        } else {
+                            alert('権限がありません');
+                            window.location.href = 'user.html';
+                            return;
+                        }
+                    } else {
+                        // 自分の編集
+                        targetUid = user.uid;
+                    }
+
+                    initUI();
+                    await loadUserProfile(targetUid);
                 } else {
                     window.location.href = 'login.html';
                 }
             });
+        }
+
+        function initUI() {
             renderFormOptions();
+            const select = document.getElementById('prefecture-select');
+            select.innerHTML = '<option value="">選択してください</option>';
+            prefectures.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p;
+                opt.textContent = p;
+                select.appendChild(opt);
+            });
         }
 
         async function loadUserProfile(uid) {
             try {
-                // パス修正: /profile/data
                 const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
@@ -385,8 +362,8 @@
                 }
                 populateForm(currentUserData);
             } catch (e) {
-                console.error("Load Error:", e);
-                showNotification('データの読み込みに失敗しました: ' + e.message, 'error');
+                console.error(e);
+                showNotification('データ読み込みエラー: ' + e.message, 'error');
             }
         }
 
@@ -487,10 +464,7 @@
         });
 
         window.saveProfile = async () => {
-            if (!currentUser) {
-                showNotification('ログインしていません', 'error');
-                return;
-            }
+            if (!currentUser) return;
             showNotification('保存中...', 'info');
 
             const form = document.getElementById('profile-form');
@@ -502,24 +476,13 @@
             let photoURL = currentUserData.photoURL || null;
             if (iconFile && currentUser.uid !== 'test_admin_uid') {
                 try {
-                    // ★重要: StorageBucketの設定確認
-                    if (!firebaseConfig.storageBucket) {
-                        throw new Error('Storage Bucketが設定されていません。firebaseConfigを確認してください。');
-                    }
-                    const storagePath = `users/${currentUser.uid}/profile_icon.jpg`;
+                    // ★ターゲットのUIDフォルダに保存（管理者が他人の画像を変える場合もその人のフォルダへ）
+                    const storagePath = `users/${targetUid}/profile_icon.jpg`;
                     const storageRef = ref(storage, storagePath);
                     const snapshot = await uploadBytes(storageRef, iconFile);
                     photoURL = await getDownloadURL(snapshot.ref);
                 } catch (e) {
                     console.error("Upload failed", e);
-                    let msg = '画像のアップロードに失敗しました';
-                    if (e.code === 'storage/unauthorized') msg += ': 権限がありません (Storage Rules)';
-                    else if (e.message.includes('CORS')) msg += ': CORS設定が必要です';
-                    document.getElementById('upload-status').textContent = msg + ' (ログを確認)';
-                    document.getElementById('upload-status').classList.remove('hidden');
-                    showNotification(msg, 'error');
-                    // 画像以外の保存は続行させたい場合はreturnしない
-                    // return; 
                 }
             } else if (iconFile && currentUser.uid === 'test_admin_uid') {
                 const reader = new FileReader();
@@ -565,7 +528,6 @@
             data.profileScore = Math.min(100, Math.round((score/totalWeight)*100));
             data.updatedAt = new Date().toISOString();
 
-            // 重要データの引継ぎ (userId, email等はフォームにないため)
             const finalData = { ...currentUserData, ...data };
 
             if (currentUser.uid === 'test_admin_uid') {
@@ -575,39 +537,60 @@
             }
 
             try {
-                // 1. Private Master Data (パス修正済み: /profile/data)
-                await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data'), finalData);
+                // 1. Private Master Data (★targetUidに対して保存)
+                await setDoc(doc(db, 'artifacts', appId, 'users', targetUid, 'profile', 'data'), finalData);
                 
-                // 2. Public Search Index
-                const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid);
+                // 2. Public Search Index (★targetUidに対して保存)
+                const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', targetUid);
                 
                 if (data.profilePublic === 'true') {
-                    // 全情報を公開DBにもコピー（表示側で制御）
-                    // 検索用ログインに必要な userId と email が含まれていることを確認
                     const publicData = {
-                        ...finalData,
-                        updatedAt: new Date().toISOString()
+                        userId: finalData.userId,
+                        name: finalData.name,
+                        jobTitle: finalData.jobTitle,
+                        gender: finalData.gender || null,
+                        prefecture: finalData.prefecture,
+                        hobbies: finalData.hobbies,
+                        skills: finalData.skills,
+                        canOffer: finalData.canOffer,
+                        lookingFor: finalData.lookingFor,
+                        photoURL: finalData.photoURL,
+                        updatedAt: finalData.updatedAt,
+                        // 他の詳細情報も必要に応じてコピー
+                        contactEmail: finalData.contactEmail,
+                        snsX: finalData.snsX,
+                        snsInstagram: finalData.snsInstagram,
+                        websiteUrl: finalData.websiteUrl,
+                        message: finalData.message,
+                        bio: finalData.bio,
+                        goals: finalData.goals,
+                        career: finalData.career,
+                        nameKana: finalData.nameKana,
+                        birthDate: finalData.birthDate,
+                        birthVisibility: finalData.birthVisibility,
+                        // IDログイン用
+                        email: finalData.email 
                     };
                     await setDoc(publicDocRef, publicData, { merge: true });
                 } else {
-                    // 非公開時の処理: IDログインのための最小データは残す
                     const minimalData = {
                         userId: finalData.userId,
                         email: finalData.email,
                         isHidden: true 
                     };
                     await setDoc(publicDocRef, minimalData);
-                    console.log("Hidden from public search, but ID login preserved");
+                    console.log("Hidden from public search");
                 }
 
                 showNotification('プロフィールを更新しました', 'success');
-                setTimeout(() => window.location.href = 'user.html', 1000);
+                // 編集していたユーザーのページに戻る
+                setTimeout(() => window.location.href = `user.html?uid=${targetUid}`, 1000);
 
             } catch (e) {
                 console.error("Save error details:", e);
                 let errorMsg = '保存に失敗しました';
                 if (e.code === 'permission-denied') {
-                    errorMsg += ': 権限がありません。Firestoreのルールを確認してください。';
+                    errorMsg += ': 権限がありません。';
                 }
                 showNotification(errorMsg, 'error');
             }
