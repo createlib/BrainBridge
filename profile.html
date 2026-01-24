@@ -145,12 +145,68 @@
                         <label class="block text-sm font-medium text-gray-700">都道府県</label>
                         <select name="prefecture" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
                             <option value="">選択してください</option>
-                            <option value="東京都">東京都</option>
-                            <option value="大阪府">大阪府</option>
-                            <option value="神奈川県">神奈川県</option>
-                            <option value="愛知県">愛知県</option>
-                            <option value="福岡県">福岡県</option>
-                            <option value="北海道">北海道</option>
+                            <optgroup label="北海道・東北">
+                                <option value="北海道">北海道</option>
+                                <option value="青森県">青森県</option>
+                                <option value="岩手県">岩手県</option>
+                                <option value="宮城県">宮城県</option>
+                                <option value="秋田県">秋田県</option>
+                                <option value="山形県">山形県</option>
+                                <option value="福島県">福島県</option>
+                            </optgroup>
+                            <optgroup label="関東">
+                                <option value="茨城県">茨城県</option>
+                                <option value="栃木県">栃木県</option>
+                                <option value="群馬県">群馬県</option>
+                                <option value="埼玉県">埼玉県</option>
+                                <option value="千葉県">千葉県</option>
+                                <option value="東京都">東京都</option>
+                                <option value="神奈川県">神奈川県</option>
+                            </optgroup>
+                            <optgroup label="中部">
+                                <option value="新潟県">新潟県</option>
+                                <option value="富山県">富山県</option>
+                                <option value="石川県">石川県</option>
+                                <option value="福井県">福井県</option>
+                                <option value="山梨県">山梨県</option>
+                                <option value="長野県">長野県</option>
+                                <option value="岐阜県">岐阜県</option>
+                                <option value="静岡県">静岡県</option>
+                                <option value="愛知県">愛知県</option>
+                            </optgroup>
+                            <optgroup label="近畿">
+                                <option value="三重県">三重県</option>
+                                <option value="滋賀県">滋賀県</option>
+                                <option value="京都府">京都府</option>
+                                <option value="大阪府">大阪府</option>
+                                <option value="兵庫県">兵庫県</option>
+                                <option value="奈良県">奈良県</option>
+                                <option value="和歌山県">和歌山県</option>
+                            </optgroup>
+                            <optgroup label="中国">
+                                <option value="鳥取県">鳥取県</option>
+                                <option value="島根県">島根県</option>
+                                <option value="岡山県">岡山県</option>
+                                <option value="広島県">広島県</option>
+                                <option value="山口県">山口県</option>
+                            </optgroup>
+                            <optgroup label="四国">
+                                <option value="徳島県">徳島県</option>
+                                <option value="香川県">香川県</option>
+                                <option value="愛媛県">愛媛県</option>
+                                <option value="高知県">高知県</option>
+                            </optgroup>
+                            <optgroup label="九州・沖縄">
+                                <option value="福岡県">福岡県</option>
+                                <option value="佐賀県">佐賀県</option>
+                                <option value="長崎県">長崎県</option>
+                                <option value="熊本県">熊本県</option>
+                                <option value="大分県">大分県</option>
+                                <option value="宮崎県">宮崎県</option>
+                                <option value="鹿児島県">鹿児島県</option>
+                                <option value="沖縄県">沖縄県</option>
+                            </optgroup>
+                            <option value="海外">海外</option>
                             <option value="その他">その他</option>
                         </select>
                     </div>
@@ -238,7 +294,7 @@
         import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        // ▼▼▼▼ Firebase Config (更新) ▼▼▼▼
+        // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
             authDomain: "brainbridge-4b8ac.firebaseapp.com",
@@ -260,21 +316,95 @@
 
         // Data Definitions
         const hobbyCategories = {
-            "🏃 スポーツ・運動系": ["ランニング", "ウォーキング", "筋トレ", "ヨガ", "ピラティス", "ダンス", "バスケットボール", "サッカー", "フットサル", "野球", "テニス", "バドミントン", "卓球", "ゴルフ", "ボルダリング", "登山", "サーフィン", "スノーボード", "スキー", "サイクリング", "水泳", "格闘技", "武道"],
-            "🎵 音楽・エンタメ": ["カラオケ", "楽器演奏（ギター）", "楽器演奏（ピアノ）", "作曲", "歌", "ライブ鑑賞", "フェス", "DJ", "映画鑑賞", "アニメ鑑賞", "漫画", "ゲーム", "ボードゲーム"],
-            "🎨 文化・アート": ["絵画", "イラスト", "デザイン", "写真撮影", "動画編集", "手芸", "DIY", "小説執筆", "ブログ"],
-            "📚 学び": ["読書", "自己啓発", "歴史", "心理学", "投資", "マーケティング", "プログラミング", "英語学習", "資格取得"],
-            "🍳 食・暮らし": ["料理", "お菓子作り", "カフェ巡り", "食べ歩き", "お酒", "コーヒー", "インテリア", "ミニマリズム"],
-            "✈️ 旅行": ["国内旅行", "海外旅行", "一人旅", "キャンプ", "温泉巡り", "神社仏閣巡り"],
-            "🤝 人": ["交流会", "ボランティア", "地域活動", "コーチング", "子育て"],
-            "🌿 その他": ["瞑想", "占い", "その他"]
+            "🏃 スポーツ・運動系": [
+                "ランニング", "ウォーキング", "筋トレ", "ヨガ", "ピラティス", 
+                "ダンス（HIPHOP／ジャズ／社交ダンス／フラ）", "バスケットボール", "サッカー", "フットサル", 
+                "野球", "テニス", "バドミントン", "卓球", "ゴルフ", 
+                "ボルダリング／クライミング", "登山／ハイキング", "サーフィン", "スノーボード", "スキー", 
+                "サイクリング", "水泳", "格闘技（柔術／空手／ボクシングなど）", "武道（剣道／合気道など）",
+                "モータースポーツ", "スケートボード"
+            ],
+            "🎵 音楽・エンタメ": [
+                "カラオケ", "楽器演奏（ギター）", "楽器演奏（ピアノ）", "楽器演奏（ドラム）", "楽器演奏（ベース）", "楽器演奏（管弦楽）",
+                "作曲・DTM", "歌・ボーカル", "ライブ鑑賞", "フェス参加", "DJ", "レコード収集", 
+                "映画鑑賞", "映画レビュー", "アニメ鑑賞", "漫画", 
+                "ゲーム（家庭用）", "ゲーム（PC）", "ゲーム（スマホ）", "ボードゲーム", "TRPG", "eスポーツ観戦",
+                "お笑い鑑賞", "舞台・演劇鑑賞", "美術館巡り"
+            ],
+            "🎨 文化・アート・創作": [
+                "絵画", "イラスト", "デザイン", "写真撮影", "動画撮影", "動画編集", "映像制作", 
+                "書道", "陶芸", "工芸", "手芸", "ハンドメイド制作", "DIY", 
+                "小説執筆", "詩", "ブログ執筆", "ライティング", "コピーライティング",
+                "華道・茶道", "着物"
+            ],
+            "📚 学び・知的探究": [
+                "読書", "ビジネス書", "自己啓発", "歴史", "哲学", "心理学", "科学", 
+                "投資・金融", "経済", "マーケティング", "プログラミング", "AI・テクノロジー", 
+                "英語学習", "語学学習（中国語）", "語学学習（その他）", "資格取得", "勉強会参加", "セミナー参加",
+                "クイズ", "パズル"
+            ],
+            "🍳 食・暮らし": [
+                "料理", "お菓子作り", "パン作り", "カフェ巡り", "食べ歩き", 
+                "ワイン", "日本酒", "コーヒー", "紅茶", "発酵食品", 
+                "健康食", "オーガニック", "家庭菜園", "ガーデニング", "インテリア", 
+                "ミニマリズム", "断捨離", "サウナ・スパ", "ペット"
+            ],
+            "✈️ 旅行・アウトドア": [
+                "国内旅行", "海外旅行", "一人旅", "バックパッカー", "キャンプ", "ソロキャンプ", "車中泊", 
+                "温泉巡り", "神社仏閣巡り", "世界遺産", "写真旅", "ローカル探索", "釣り"
+            ],
+            "🤝 人・コミュニティ": [
+                "交流会参加", "異業種交流", "起業家コミュニティ", "ボランティア", "NPO活動", 
+                "地域活動", "コーチング", "メンタリング", "教育活動", "子育てコミュニティ", "イベント企画"
+            ],
+            "🌿 マインド・ウェルネス": [
+                "瞑想", "マインドフルネス", "呼吸法", "スピリチュアル", "占い", 
+                "自己対話", "journaling（日記）", "メンタルケア", "コーチングを受ける側"
+            ],
+            "🔖 その他": [
+                "その他（自由記述）"
+            ]
         };
+
         const skillCategories = {
-            "💻 IT": ["Web制作", "WordPress", "Firebase", "ノーコード", "アプリ開発", "プログラミング", "データ分析", "AI活用"],
-            "🎤 コミュニケーション": ["プレゼン", "ファシリテーション", "講師", "コーチング", "営業", "交渉", "インタビュー"],
-            "✍️ 発信": ["ライティング", "SNS運用", "ブログ運営", "動画編集", "デザイン"],
-            "💼 ビジネス": ["起業", "経営", "マーケティング", "会計", "人事", "英語"],
-            "🧘 その他": ["料理指導", "整理収納", "健康管理"]
+            "💻 IT・エンジニアリング": [
+                "Web制作(HTML/CSS)", "フロントエンド開発(React/Vue)", "バックエンド開発(Node/Python/Go)", 
+                "スマホアプリ開発(iOS/Android/Flutter)", "WordPress構築・運用", 
+                "ノーコード開発(Bubble/Glide/STUDIO)", "ECサイト構築(Shopify/BASE)",
+                "インフラ・クラウド(AWS/GCP/Azure)", "データベース設計", "セキュリティ",
+                "AI・機械学習", "データ分析・解析", "自動化(GAS/RPA)", "ブロックチェーン/Web3"
+            ],
+            "🎨 デザイン・クリエイティブ": [
+                "Webデザイン(UI/UX)", "グラフィックデザイン", "ロゴ・バナー制作", "DTP・印刷物デザイン",
+                "動画編集(Premiere/AfterEffects)", "映像制作・ディレクション", 
+                "写真撮影", "写真レタッチ", "イラスト作成", "3Dモデリング", "ライティング", "コピーライティング"
+            ],
+            "💼 ビジネス・経営": [
+                "経営・事業開発", "起業・スタートアップ支援", "経営企画・戦略", "プロジェクト管理(PM)",
+                "マーケティング(Web/SNS)", "広報・PR", "ブランディング",
+                "営業(法人/個人)", "インサイドセールス", "カスタマーサクセス",
+                "人事・採用", "組織開発", "経理・財務", "法務・知財", "資金調達"
+            ],
+            "🎤 コミュニケーション・教育": [
+                "プレゼンテーション", "ファシリテーション", "コーチング", "メンタリング", 
+                "カウンセリング", "ティーチング・講師", "イベント司会・MC", 
+                "営業トーク・交渉", "インタビュー・取材", "キャリア相談"
+            ],
+            "🌏 語学・グローバル": [
+                "英語(日常会話)", "英語(ビジネス)", "TOEIC/TOEFL指導", "翻訳・通訳(英語)",
+                "中国語", "韓国語", "フランス語", "スペイン語", "ドイツ語", "その他言語",
+                "日本語教師", "海外進出支援"
+            ],
+            "🏥 医療・福祉・専門職": [
+                "医師", "歯科医師", "看護師", "薬剤師", "理学療法士/作業療法士", 
+                "栄養管理・指導", "介護・福祉", "心理カウンセラー",
+                "弁護士", "税理士", "行政書士", "社会保険労務士", "FP(ファイナンシャルプランナー)", "宅建士"
+            ],
+            "🧘 ライフスタイル・その他": [
+                "料理・調理", "整理収納アドバイザー", "パーソナルトレーニング", "ヨガ・ピラティス指導",
+                "美容・メイク", "ファッションスタイリング", "占い・鑑定",
+                "DIY・ハンドメイド", "運転・送迎", "事務代行・秘書"
+            ]
         };
 
         // Init
@@ -420,7 +550,10 @@
         });
 
         window.saveProfile = async () => {
-            if (!currentUser) return;
+            if (!currentUser) {
+                showNotification('ログインしていません', 'error');
+                return;
+            }
             showNotification('保存中...', 'info');
 
             const form = document.getElementById('profile-form');
@@ -438,11 +571,11 @@
                     photoURL = await getDownloadURL(snapshot.ref);
                 } catch (e) {
                     console.error("Upload failed", e);
+                    // ここでreturnして処理を中断せず、画像以外の保存に進む
                 }
             } else if (iconFile && currentUser.uid === 'test_admin_uid') {
-                // Mock for admin
                 const reader = new FileReader();
-                reader.readAsDataURL(iconFile); // Doesn't await, simplistic for demo
+                reader.readAsDataURL(iconFile); 
             }
             data.photoURL = photoURL;
 
@@ -500,7 +633,6 @@
                 const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid);
                 
                 if (data.profilePublic === 'true') {
-                    // Update/Restore public view
                     const publicData = {
                         userId: finalData.userId,
                         name: finalData.name,
@@ -517,7 +649,6 @@
                     await setDoc(publicDocRef, publicData, { merge: true });
                 } else {
                     // Remove from public view ONLY (Master stays in private)
-                    // This "hides" the user from search results as requested
                     try {
                         await deleteDoc(publicDocRef);
                         console.log("Hidden from public search");
@@ -528,8 +659,12 @@
                 setTimeout(() => window.location.href = 'user.html', 1000);
 
             } catch (e) {
-                console.error("Save error", e);
-                showNotification('保存に失敗しました', 'error');
+                console.error("Save error details:", e);
+                let errorMsg = '保存に失敗しました';
+                if (e.code === 'permission-denied') {
+                    errorMsg += ': 権限がありません。Firestoreのルールを確認してください。';
+                }
+                showNotification(errorMsg, 'error');
             }
         };
 
