@@ -117,7 +117,7 @@
                             <p class="text-xs text-gray-400">ユーザーID</p>
                             <p id="dashboard-userid" class="font-bold text-blue-600 text-lg select-all">-</p>
                         </div>
-                        <!-- Mutual Follow Items -->
+                        <!-- Mutual Follow Items (Including Gender) -->
                         <div class="mutual-only hidden">
                             <p class="text-xs text-gray-400">性別</p>
                             <p id="dashboard-gender" class="font-medium text-gray-700">-</p>
@@ -233,6 +233,7 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
             authDomain: "brainbridge-4b8ac.firebaseapp.com",
@@ -241,6 +242,7 @@
             messagingSenderId: "803209683213",
             appId: "1:803209683213:web:b62d13784fa2bbbb9f5044"
         };
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -253,16 +255,20 @@
         let isFollowing = false;
         let isMutual = false;
 
+        // Admin Mock Logic
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
+
+        // URLパラメータから表示対象のUIDを取得
         const urlParams = new URLSearchParams(window.location.search);
         targetUid = urlParams.get('uid');
 
+        // Main Logic
         onAuthStateChanged(auth, async (user) => {
             if (isAdminMock) {
                 currentUser = { uid: 'test_admin_uid' };
                 if (targetUid && targetUid !== 'test_admin_uid') {
                     isSelf = false;
-                    setupViewForOtherUser();
+                    setupViewForOtherUser('admin_mock_target');
                 } else {
                     isSelf = true;
                     targetUid = 'test_admin_uid';
@@ -276,13 +282,15 @@
                 currentUser = user;
                 
                 if (!targetUid || targetUid === user.uid) {
+                    // 自分自身のページ
                     isSelf = true;
                     targetUid = user.uid;
                     enableSelfMode();
                     await loadFullProfile(user.uid);
                 } else {
+                    // 他人のページ
                     isSelf = false;
-                    await checkFollowStatus(user.uid, targetUid);
+                    await checkFollowStatus(user.uid, targetUid); 
                     await loadPublicProfile(targetUid);
                 }
             } else {
@@ -302,7 +310,7 @@
             toggleRestrictedContent(true);
         }
 
-        async function setupViewForOtherUser() {
+        async function setupViewForOtherUser(mockMode) {
             const mockTarget = getAdminMockData();
             mockTarget.name = "サンプル太郎";
             mockTarget.userId = "target_user";
@@ -315,23 +323,24 @@
 
         async function loadFullProfile(uid) {
             try {
-                // 自分用: Privateデータ
+                // Private Profileの読み込み
                 const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     updateDashboardUI(docSnap.data());
                 } else {
+                    console.log("No profile data found for:", uid);
                     updateDashboardUI({ userId: uid, name: '（未設定）' });
                 }
             } catch (e) {
                 console.error("Load self profile error", e);
                 updateDashboardUI({ userId: uid, name: '（読み込みエラー）' });
+                showNotification('プロフィールの読み込みに失敗しました', 'error');
             }
         }
 
         async function loadPublicProfile(uid) {
             try {
-                // 他人用: Publicデータ
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
                 const docSnap = await getDoc(docRef);
                 
@@ -358,7 +367,25 @@
 
                 isMutual = isFollowing && isFollowedBack;
                 renderFollowButton();
-                toggleRestrictedContent(isMutual);
+                
+                if (isMutual) {
+                    try {
+                        const privateRef = doc(db, 'artifacts', appId, 'users', targetUid, 'profile', 'data');
+                        const privateSnap = await getDoc(privateRef);
+                        if (privateSnap.exists()) {
+                            // PublicデータにPrivateデータをマージしてUI更新
+                            const publicData = (await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', targetUid))).data();
+                            const mergedData = { ...publicData, ...privateSnap.data() };
+                            updateDashboardUI(mergedData);
+                        }
+                    } catch (e) {
+                        console.log("Failed to load private data (Mutual)", e);
+                    }
+                } else {
+                    // Mutualでなくなった場合、UI更新が必要（制限適用）
+                    const publicData = (await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', targetUid))).data();
+                    updateDashboardUI(publicData);
+                }
 
             } catch (e) {
                 console.error("Follow check error", e);
@@ -400,7 +427,6 @@
                     showNotification('フォローしました！', 'success');
                 }
                 await checkFollowStatus(myUid, targetUid);
-                // UI update already handled by toggleRestrictedContent inside checkFollowStatus
 
             } catch (e) {
                 console.error(e);
@@ -477,30 +503,48 @@
 
 
             // 2. 制限情報 (Mutual or Self)
-            // データはあるので、UIで隠すだけ
             const showRestricted = isMutual || isSelf;
-            
             toggleRestrictedContent(showRestricted);
 
-            // Set Restricted Text content regardless of visibility (so it's ready when unhidden)
+            // Basic Info Restricted
             const setText = (id, text) => {
                 const el = document.getElementById(id);
                 if (el) el.textContent = text || '-';
             };
-            setText('dashboard-gender', data.gender);
-            setText('dashboard-kana', data.nameKana);
-            setText('dashboard-email', data.contactEmail || data.email);
-            
-            // Birth Date Logic
-            let birthDisplay = '-';
-            if (data.birthDate) {
-                if (data.birthVisibility === 'full' || isSelf) birthDisplay = data.birthDate; 
-                else if (data.birthVisibility === 'monthDay') birthDisplay = data.birthDate.substring(5);
-                else birthDisplay = '非公開';
+            if (showRestricted) {
+                setText('dashboard-gender', data.gender);
+                setText('dashboard-kana', data.nameKana);
+                setText('dashboard-email', data.contactEmail || data.email);
             }
+            
+            // Birth Date Logic (Modified)
+            let birthDisplay = '';
+            const visibility = data.birthVisibility;
+            const dateVal = data.birthDate;
+
+            if (dateVal) {
+                if (isSelf) {
+                    // 自分自身は常に表示
+                    birthDisplay = dateVal;
+                } else if (isMutual) {
+                    // 相互フォロー時は設定に従う
+                    if (visibility === 'full') {
+                        birthDisplay = dateVal;
+                    } else if (visibility === 'monthDay') {
+                        birthDisplay = dateVal.substring(5); // MM-DD
+                    } else {
+                        // 非公開設定なら非公開
+                        birthDisplay = '非公開';
+                    }
+                } else {
+                    // 非相互フォロー時は非表示（そもそも制限がかかっているのでここは通らないはずだが念のため）
+                    birthDisplay = '';
+                }
+            }
+
             const birthEl = document.getElementById('dashboard-birth');
             if (birthEl) {
-                if (showRestricted) {
+                if (showRestricted && birthDisplay) {
                     birthEl.textContent = birthDisplay;
                     birthEl.parentElement.classList.remove('hidden');
                 } else {
@@ -508,33 +552,36 @@
                 }
             }
 
-            // SNS
-            const snsContainer = document.getElementById('dashboard-sns-links');
-            snsContainer.innerHTML = '';
-            if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="text-gray-400 hover:text-blue-500 transition-colors"><i class="fa-solid fa-globe text-lg"></i></a>`;
-            if (data.snsInstagram) snsContainer.innerHTML += `<a href="${data.snsInstagram.startsWith('http') ? data.snsInstagram : 'https://instagram.com/'+data.snsInstagram}" target="_blank" class="text-gray-400 hover:text-pink-500 transition-colors"><i class="fa-brands fa-instagram text-lg"></i></a>`;
-            if (data.snsX) snsContainer.innerHTML += `<a href="${data.snsX.startsWith('http') ? data.snsX : 'https://twitter.com/'+data.snsX}" target="_blank" class="text-gray-400 hover:text-gray-900 transition-colors"><i class="fa-brands fa-x-twitter text-lg"></i></a>`;
+            // Fill Content (even if hidden by toggleRestrictedContent, we populate data)
+            if (showRestricted) {
+                // SNS
+                const snsContainer = document.getElementById('dashboard-sns-links');
+                snsContainer.innerHTML = '';
+                if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="text-gray-400 hover:text-blue-500 transition-colors"><i class="fa-solid fa-globe text-lg"></i></a>`;
+                if (data.snsInstagram) snsContainer.innerHTML += `<a href="${data.snsInstagram.startsWith('http') ? data.snsInstagram : 'https://instagram.com/'+data.snsInstagram}" target="_blank" class="text-gray-400 hover:text-pink-500 transition-colors"><i class="fa-brands fa-instagram text-lg"></i></a>`;
+                if (data.snsX) snsContainer.innerHTML += `<a href="${data.snsX.startsWith('http') ? data.snsX : 'https://twitter.com/'+data.snsX}" target="_blank" class="text-gray-400 hover:text-gray-900 transition-colors"><i class="fa-brands fa-x-twitter text-lg"></i></a>`;
 
-            // Message & Goals
-            document.getElementById('dashboard-message').textContent = data.message || 'まだメッセージがありません。';
-            document.getElementById('dashboard-goals').textContent = data.goals || 'まだ目標が設定されていません。';
+                // Message & Goals
+                document.getElementById('dashboard-message').textContent = data.message || 'まだメッセージがありません。';
+                document.getElementById('dashboard-goals').textContent = data.goals || 'まだ目標が設定されていません。';
 
-            // Career
-            const careerContainer = document.getElementById('dashboard-career');
-            careerContainer.innerHTML = '';
-            if (data.career && data.career.length > 0) {
-                data.career.forEach(c => {
-                    careerContainer.innerHTML += `
-                        <div class="relative">
-                            <div class="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 border-white bg-blue-400 ring-4 ring-blue-50"></div>
-                            <h4 class="font-bold text-gray-900">${c.company || '会社名不明'}</h4>
-                            <p class="text-sm text-blue-600 font-medium mb-1">${c.role || ''} <span class="text-gray-400 text-xs ml-1">(${c.start || '?'} 〜 ${c.end || '現在'})</span></p>
-                            <p class="text-sm text-gray-600 leading-relaxed">${c.description || ''}</p>
-                        </div>
-                    `;
-                });
-            } else {
-                careerContainer.innerHTML = '<p class="text-sm text-gray-500 italic">経歴情報はありません。</p>';
+                // Career
+                const careerContainer = document.getElementById('dashboard-career');
+                careerContainer.innerHTML = '';
+                if (data.career && data.career.length > 0) {
+                    data.career.forEach(c => {
+                        careerContainer.innerHTML += `
+                            <div class="relative">
+                                <div class="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 border-white bg-blue-400 ring-4 ring-blue-50"></div>
+                                <h4 class="font-bold text-gray-900">${c.company || '会社名不明'}</h4>
+                                <p class="text-sm text-blue-600 font-medium mb-1">${c.role || ''} <span class="text-gray-400 text-xs ml-1">(${c.start || '?'} 〜 ${c.end || '現在'})</span></p>
+                                <p class="text-sm text-gray-600 leading-relaxed">${c.description || ''}</p>
+                            </div>
+                        `;
+                    });
+                } else {
+                    careerContainer.innerHTML = '<p class="text-sm text-gray-500 italic">経歴情報はありません。</p>';
+                }
             }
 
             // Score (Self)
