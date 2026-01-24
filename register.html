@@ -11,7 +11,7 @@
 </head>
 <body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
 
-    <!-- トップページに戻るリンク (追加) -->
+    <!-- トップページに戻るリンク -->
     <div class="absolute top-4 left-4 sm:top-8 sm:left-8">
         <a href="index.html" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">
             <i class="fa-solid fa-arrow-left mr-2"></i>
@@ -56,7 +56,6 @@
 
         <div class="mt-6 text-center">
             <p class="text-sm text-gray-600">すでにアカウントをお持ちの方は <a href="login.html" class="font-bold text-blue-600 hover:text-blue-500 underline decoration-2 underline-offset-2">ログインはこちら</a></p>
-            <p class="mt-4"><a href="index.html" class="text-xs text-gray-400 hover:text-gray-600">トップページに戻る</a></p>
         </div>
     </div>
 
@@ -70,7 +69,6 @@
         import { getAuth, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ▼▼▼▼ Firebase Config (更新) ▼▼▼▼
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
             authDomain: "brainbridge-4b8ac.firebaseapp.com",
@@ -79,7 +77,6 @@
             messagingSenderId: "803209683213",
             appId: "1:803209683213:web:b62d13784fa2bbbb9f5044"
         };
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -89,10 +86,9 @@
         let isReferrerValid = false;
         let referrerCheckTimeout = null;
 
-        // 初期化: 匿名ログインしてDB検索権限を得る（本番ルール次第）
+        // DB検索用に匿名認証
         signInAnonymously(auth).catch(e => console.log("Anon auth:", e));
 
-        // ログイン済みならマイページへ（匿名以外）
         onAuthStateChanged(auth, (user) => {
             if (user && !user.isAnonymous) {
                 window.location.href = 'user.html';
@@ -144,7 +140,6 @@
                     }
                 } catch (error) {
                     console.error("Referrer check error:", error);
-                    // 開発環境用にエラーでも通す場合はここを変更。今回は厳密に。
                     msgElement.textContent = '確認できませんでした';
                     msgElement.className = 'mt-1 text-xs text-red-500';
                     iconContainer.innerHTML = '<i class="fa-solid fa-circle-exclamation text-red-500"></i>';
@@ -179,7 +174,6 @@
             showNotification('登録処理中...', 'info');
 
             try {
-                // 1. ユーザーIDの重複チェック
                 const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
                 const idQuery = query(usersRef, where("userId", "==", userId));
                 const idCheckSnapshot = await getDocs(idQuery);
@@ -188,19 +182,17 @@
                     throw new Error("このユーザーIDは既に使用されています。");
                 }
 
-                // 2. Auth作成
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 3. 基本データの保存（Private）
-                // 登録時は最低限の情報を保存
-                await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile'), {
+                // 登録時は非公開データのみ作成 (/profile/data)
+                await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data'), {
                     userId: userId,
                     referrerId: referrerId,
                     email: email,
-                    name: userId, // 仮の名前
+                    name: userId,
                     createdAt: new Date().toISOString(),
-                    profilePublic: "false" // 初期状態は非公開
+                    profilePublic: "false"
                 });
 
                 showNotification('登録完了！マイページへ移動します', 'success');
