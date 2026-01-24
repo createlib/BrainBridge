@@ -71,6 +71,7 @@
                         <label class="block text-sm font-medium text-gray-700">プロフィールアイコン</label>
                         <input type="file" id="icon-upload" accept="image/*" class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                         <p class="mt-1 text-xs text-gray-500">推奨: 正方形の画像 (JPG, PNG)</p>
+                        <p id="upload-status" class="text-xs text-red-500 hidden mt-1"></p>
                     </div>
                 </div>
 
@@ -107,6 +108,7 @@
                                 <option value="monthDay">月日のみ公開</option>
                                 <option value="full">全て公開（年齢表示）</option>
                             </select>
+                            <p class="text-xs text-gray-500 mt-1">※相互フォロー相手への公開設定です</p>
                         </div>
                     </div>
                 </div>
@@ -312,7 +314,7 @@
         const appId = 'default-app-id';
 
         let currentUser = null;
-        let currentUserData = {}; // 初期化時に空オブジェクトにしておく
+        let currentUserData = {}; 
 
         // Data Definitions
         const hobbyCategories = {
@@ -372,8 +374,6 @@
                 if (docSnap.exists()) {
                     currentUserData = docSnap.data();
                 } else {
-                    // データが無い場合、新規登録直後ならAuth情報から補完できる場合もあるが、
-                    // 基本はregister.htmlで作成されたはずのデータを待つ
                     currentUserData = { userId: uid };
                 }
                 populateForm(currentUserData);
@@ -495,12 +495,24 @@
             let photoURL = currentUserData.photoURL || null;
             if (iconFile && currentUser.uid !== 'test_admin_uid') {
                 try {
+                    // ★重要: StorageBucketの設定確認
+                    if (!firebaseConfig.storageBucket) {
+                        throw new Error('Storage Bucketが設定されていません。firebaseConfigを確認してください。');
+                    }
                     const storagePath = `users/${currentUser.uid}/profile_icon.jpg`;
                     const storageRef = ref(storage, storagePath);
                     const snapshot = await uploadBytes(storageRef, iconFile);
                     photoURL = await getDownloadURL(snapshot.ref);
                 } catch (e) {
                     console.error("Upload failed", e);
+                    let msg = '画像のアップロードに失敗しました';
+                    if (e.code === 'storage/unauthorized') msg += ': 権限がありません (Storage Rules)';
+                    else if (e.message.includes('CORS')) msg += ': CORS設定が必要です';
+                    document.getElementById('upload-status').textContent = msg + ' (ログを確認)';
+                    document.getElementById('upload-status').classList.remove('hidden');
+                    showNotification(msg, 'error');
+                    // 画像以外の保存は続行させたい場合はreturnしない
+                    // return; 
                 }
             } else if (iconFile && currentUser.uid === 'test_admin_uid') {
                 const reader = new FileReader();
@@ -546,9 +558,7 @@
             data.profileScore = Math.min(100, Math.round((score/totalWeight)*100));
             data.updatedAt = new Date().toISOString();
 
-            // ★重要: currentUserData（元データ）をマージするが、
-            // 新規入力データ(data)に含まれない重要項目（userId, email, createdAt等）が
-            // currentUserData に含まれていることを前提とする。
+            // 重要データの引継ぎ (userId, email等はフォームにないため)
             const finalData = { ...currentUserData, ...data };
 
             if (currentUser.uid === 'test_admin_uid') {
@@ -573,8 +583,7 @@
                     };
                     await setDoc(publicDocRef, publicData, { merge: true });
                 } else {
-                    // 非公開時の処理: 検索結果からは消すが、IDログインのための最小データは残す
-                    // これがないとIDでログインできなくなる
+                    // 非公開時の処理: IDログインのための最小データは残す
                     const minimalData = {
                         userId: finalData.userId,
                         email: finalData.email,
