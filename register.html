@@ -27,7 +27,7 @@
 
         <form class="mt-8 space-y-4" onsubmit="handleRegister(event)">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">紹介者ID <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">紹介者ID (紹介者のユーザーID) <span class="text-red-500">*</span></label>
                 <div class="relative">
                     <input name="referrer" type="text" required pattern="^[a-zA-Z0-9_]+$" oninput="validateInput(this); checkReferrer(this.value);" class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="紹介者のIDを入力">
                     <div id="referrer-status-icon" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none hidden"></div>
@@ -35,8 +35,8 @@
                 <p id="referrer-msg" class="mt-1 text-xs text-gray-500">半角英数字とアンダーバーのみ</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">ユーザーID <span class="text-red-500">*</span></label>
-                <input name="userid" type="text" required pattern="^[a-zA-Z0-9_]+$" oninput="validateInput(this)" class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="希望ID（英数字・_のみ）">
+                <label class="block text-sm font-medium text-gray-700 mb-1">ユーザーID (あなたのID) <span class="text-red-500">*</span></label>
+                <input name="userid" type="text" required pattern="^[a-zA-Z0-9_]+$" oninput="validateInput(this)" class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="希望ID（ログインに使用します）">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">メールアドレス <span class="text-red-500">*</span></label>
@@ -69,6 +69,7 @@
         import { getAuth, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
             authDomain: "brainbridge-4b8ac.firebaseapp.com",
@@ -77,6 +78,7 @@
             messagingSenderId: "803209683213",
             appId: "1:803209683213:web:b62d13784fa2bbbb9f5044"
         };
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -90,8 +92,9 @@
         signInAnonymously(auth).catch(e => console.log("Anon auth:", e));
 
         onAuthStateChanged(auth, (user) => {
+            // 新規登録直後のリダイレクトは handleRegister で制御するためここは最小限に
             if (user && !user.isAnonymous) {
-                window.location.href = 'user.html';
+                // window.location.href = 'user.html'; 
             }
         });
 
@@ -122,6 +125,7 @@
 
             referrerCheckTimeout = setTimeout(async () => {
                 try {
+                    // ID検索: Publicデータから検索
                     const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
                     const q = query(usersRef, where("userId", "==", value));
                     const querySnapshot = await getDocs(q);
@@ -140,6 +144,7 @@
                     }
                 } catch (error) {
                     console.error("Referrer check error:", error);
+                    // 開発中はエラーでも進めるようにする場合もあるが、原則NG
                     msgElement.textContent = '確認できませんでした';
                     msgElement.className = 'mt-1 text-xs text-red-500';
                     iconContainer.innerHTML = '<i class="fa-solid fa-circle-exclamation text-red-500"></i>';
@@ -174,25 +179,41 @@
             showNotification('登録処理中...', 'info');
 
             try {
+                // 1. ユーザーIDの重複チェック
                 const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
                 const idQuery = query(usersRef, where("userId", "==", userId));
                 const idCheckSnapshot = await getDocs(idQuery);
                 
                 if (!idCheckSnapshot.empty) {
-                    throw new Error("このユーザーIDは既に使用されています。");
+                    throw new Error("このユーザーIDは既に使用されています。別のIDを指定してください。");
                 }
 
+                // 2. Authユーザー作成
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 登録時は非公開データのみ作成 (/profile/data)
+                // 3. データ保存
+                const timestamp = new Date().toISOString();
+                
+                // A. 非公開データ (Private Profile)
                 await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data'), {
                     userId: userId,
                     referrerId: referrerId,
                     email: email,
+                    name: userId, // 初期表示名はID
+                    createdAt: timestamp,
+                    profilePublic: "false" // 初期は非公開
+                });
+
+                // B. 公開データ (Public Data) - ★ここが重要★
+                // IDログインを実現するため、検索用データにもこの時点で登録する
+                // （Emailを含めることで、ID検索 -> Email取得 -> ログイン が可能になる）
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid), {
+                    userId: userId,
                     name: userId,
-                    createdAt: new Date().toISOString(),
-                    profilePublic: "false"
+                    email: email, // ログイン用に必須
+                    createdAt: timestamp,
+                    // 他のプロフィール項目はまだ空
                 });
 
                 showNotification('登録完了！マイページへ移動します', 'success');
