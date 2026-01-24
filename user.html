@@ -115,15 +115,13 @@
                             </div>
 
                             <div class="mb-4">
-                                <h1 class="text-2xl font-bold text-slate-900 leading-tight">
-                                    <span id="profile-name" class="shimmer block w-32 h-8 rounded mb-1"></span>
-                                </h1>
+                                <h1 class="text-2xl font-bold text-slate-900 leading-tight"><span id="profile-name" class="shimmer block w-32 h-8 rounded mb-1"></span></h1>
                                 <div class="flex items-center gap-2 mt-1">
                                     <p class="text-sm text-slate-500 font-medium" id="profile-id">@...</p>
                                     <span id="mutual-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100">相互フォロー</span>
+                                    <span id="admin-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-100"><i class="fa-solid fa-crown mr-1"></i>管理者閲覧中</span>
                                 </div>
                             </div>
-
                             <div class="mb-6"><p id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p></div>
 
                             <div class="flex items-center gap-6 py-4 border-t border-slate-100">
@@ -159,10 +157,7 @@
             <div class="flex-1 min-w-0">
                 <div class="space-y-6">
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-500 pl-3">想い・メッセージ</h2>
-                            <i id="message-lock-icon" class="fa-solid fa-lock text-slate-300 hidden"></i>
-                        </div>
+                        <div class="flex items-center justify-between mb-4"><h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">想い・メッセージ</h2><i id="message-lock-icon" class="fa-solid fa-lock text-slate-300 hidden"></i></div>
                         <div id="message-container" class="hidden">
                             <div class="relative"><i class="fa-solid fa-quote-left text-brand-100 text-4xl absolute -top-2 -left-2 z-0"></i><div id="profile-message" class="relative z-10 text-[15px] leading-8 text-slate-700 whitespace-pre-wrap font-medium pl-4"></div></div>
                         </div>
@@ -172,28 +167,28 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-blue-200 transition-colors">
                             <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-                            <h3 class="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wide relative z-10 bg-blue-50 text-blue-700 px-3 py-1 rounded inline-block">提供できること</h3>
+                            <h3 class="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wide relative z-10">提供できること</h3>
                             <ul id="list-can-offer" class="space-y-3 relative z-10"><li class="text-slate-400 italic text-sm">未設定</li></ul>
                         </div>
                         <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-pink-200 transition-colors">
                             <div class="absolute top-0 right-0 w-24 h-24 bg-pink-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-                            <h3 class="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wide relative z-10 bg-pink-50 text-pink-700 px-3 py-1 rounded inline-block">求めていること</h3>
+                            <h3 class="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wide relative z-10">求めていること</h3>
                             <ul id="list-looking-for" class="space-y-3 relative z-10"><li class="text-slate-400 italic text-sm">未設定</li></ul>
                         </div>
                     </div>
 
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
-                        <h2 class="text-lg font-bold text-slate-900 mb-4 border-l-4 border-brand-500 pl-3">スキル・趣味</h2>
+                        <h2 class="text-lg font-bold text-slate-900 mb-4">スキル・趣味</h2>
                         <div id="tags-container" class="flex flex-wrap gap-2"><span class="text-sm text-slate-400 italic">未設定</span></div>
                     </div>
 
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
-                        <h2 class="text-lg font-bold text-slate-900 mb-4 border-l-4 border-brand-500 pl-3">目標・ビジョン</h2>
+                        <h2 class="text-lg font-bold text-slate-900 mb-4">目標・ビジョン</h2>
                         <div id="profile-goals" class="text-slate-700 text-sm leading-7 whitespace-pre-wrap">未設定</div>
                     </div>
 
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
-                        <div class="flex items-center justify-between mb-6"><h2 class="text-lg font-bold text-slate-900 border-l-4 border-brand-500 pl-3">経歴</h2><i id="career-lock-icon" class="fa-solid fa-lock text-slate-300"></i></div>
+                        <div class="flex items-center justify-between mb-6"><h2 class="text-lg font-bold text-slate-900">経歴</h2><i id="career-lock-icon" class="fa-solid fa-lock text-slate-300"></i></div>
                         <div id="career-container" class="space-y-8 mt-2 relative"><div class="absolute left-[7px] top-2 bottom-2 w-0.5 bg-slate-100"></div></div>
                         <div id="career-mask" class="hidden py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center"><p class="text-sm font-bold text-slate-500">相互フォローで経歴を表示</p></div>
                     </div>
@@ -226,11 +221,11 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        // 環境に応じたappIdの安全な取得
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const appId = 'default-app-id';
 
         let currentUser = null;
         let isSelf = false;
+        let isAdmin = false; // 管理者フラグ
         let targetUid = null;
         let isFollowing = false;
         let isMutual = false;
@@ -239,7 +234,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         targetUid = urlParams.get('uid');
 
-        // Helper: Format Text
+        // Helper
         function formatText(text) {
             if (!text) return '';
             let safeText = text.replace(/[&<>"']/g, function(m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]; });
@@ -249,20 +244,13 @@
                 return match;
             });
         }
-
-        // Helper: Safety Element Setter
-        function setElText(id, text) {
-            const el = document.getElementById(id);
-            if(el) el.textContent = text || '-';
-        }
-        function setElHtml(id, html) {
-            const el = document.getElementById(id);
-            if(el) el.innerHTML = html || '';
-        }
+        function setElText(id, text) { const el = document.getElementById(id); if(el) el.textContent = text || '-'; }
+        function setElHtml(id, html) { const el = document.getElementById(id); if(el) el.innerHTML = html || ''; }
 
         onAuthStateChanged(auth, async (user) => {
             if (isAdminMock) {
                 currentUser = { uid: 'test_admin_uid', displayName: '管理者' };
+                isAdmin = true;
                 if (targetUid && targetUid !== 'test_admin_uid') {
                     isSelf = false;
                     setupViewForOtherUser();
@@ -279,11 +267,21 @@
                 currentUser = user;
                 checkUnreadNotifications(user.uid);
                 
+                // 自分のプロフィールをロードして管理者かどうか確認
+                const myProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+                const myProfileSnap = await getDoc(myProfileRef);
+                if (myProfileSnap.exists() && myProfileSnap.data().userId === 'admin') {
+                    isAdmin = true;
+                    // 管理者バッジを表示（自分が見ているときのみ）
+                    // document.getElementById('admin-badge').classList.remove('hidden');
+                }
+
                 if (!targetUid || targetUid === user.uid) {
                     isSelf = true;
                     targetUid = user.uid;
                     enableSelfMode();
-                    await loadFullProfile(user.uid);
+                    if (myProfileSnap.exists()) updateDashboardUI(myProfileSnap.data());
+                    else updateDashboardUI({ userId: user.uid, name: '（未設定）' });
                 } else {
                     isSelf = false;
                     await checkFollowStatus(user.uid, targetUid); 
@@ -332,33 +330,40 @@
             setElText('count-followers', '45');
         }
 
-        async function loadFullProfile(uid) {
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    updateDashboardUI(docSnap.data());
-                } else {
-                    updateDashboardUI({ userId: uid, name: '（未設定）' });
-                }
-            } catch (e) {
-                console.error("Load error:", e);
-                // エラーでも止まらないようにダミー表示
-                updateDashboardUI({ userId: uid, name: '（読み込みエラー）' });
-            }
-        }
-
         async function loadPublicProfile(uid) {
             try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    updateDashboardUI(docSnap.data());
+                // 通常は公開データを取得
+                let dataToUse = null;
+                const publicRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
+                const publicSnap = await getDoc(publicRef);
+
+                if (publicSnap.exists()) {
+                    dataToUse = publicSnap.data();
+                }
+                
+                // 管理者の場合、非公開データも読み込みに行く（権限があれば読める）
+                // または相互フォローの場合
+                if (isAdmin || isMutual) {
+                    try {
+                        const privateRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
+                        const privateSnap = await getDoc(privateRef);
+                        if (privateSnap.exists()) {
+                            // 公開データに非公開データをマージ（非公開の方が情報が正確・豊富）
+                            dataToUse = { ...(dataToUse || {}), ...privateSnap.data() };
+                            console.log("Loaded private data for detail view");
+                        }
+                    } catch (e) {
+                        console.log("Private load failed", e);
+                    }
+                }
+
+                if (dataToUse) {
+                    updateDashboardUI(dataToUse);
                 } else {
                     document.getElementById('error-container').classList.remove('hidden');
                 }
             } catch (e) {
-                console.error("Load public error:", e);
+                console.error("Load error:", e);
             }
         }
 
@@ -395,19 +400,7 @@
                     else badge.classList.add('hidden');
                 }
 
-                toggleRestrictedContent(isMutual);
-
-                if (isMutual) {
-                    try {
-                        const privateRef = doc(db, 'artifacts', appId, 'users', targetUid, 'profile', 'data');
-                        const privateSnap = await getDoc(privateRef);
-                        if (privateSnap.exists()) {
-                            const publicData = (await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', targetUid))).data();
-                            const mergedData = { ...publicData, ...privateSnap.data() };
-                            updateDashboardUI(mergedData);
-                        }
-                    } catch (e) { console.log("Mutual load err:", e); }
-                }
+                toggleRestrictedContent(isMutual || isAdmin); // 管理者は無条件で制限解除
 
             } catch (e) { console.error("Check follow err:", e); }
         }
@@ -415,13 +408,24 @@
         function renderFollowButton() {
             const container = document.getElementById('header-actions');
             if(!container) return;
+            
             let btnHtml = '';
+            
+            // フォローボタン
             if (isFollowing) {
-                btnHtml = `<button onclick="toggleFollow()" class="w-full lg:w-auto inline-flex justify-center items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-900 bg-white hover:bg-slate-50 transition-all">フォロー中</button>`;
+                btnHtml += `<button onclick="toggleFollow()" class="inline-flex items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-900 bg-white hover:bg-slate-50 transition-all mr-2">フォロー中</button>`;
             } else {
-                btnHtml = `<button onclick="toggleFollow()" class="w-full lg:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-md text-sm font-bold rounded-xl text-white bg-slate-900 hover:bg-slate-800 transition-all">フォロー</button>`;
+                btnHtml += `<button onclick="toggleFollow()" class="inline-flex items-center px-4 py-2 border border-transparent shadow-md text-sm font-bold rounded-xl text-white bg-slate-900 hover:bg-slate-800 transition-all mr-2">フォロー</button>`;
             }
+
+            // 管理者用編集ボタン
+            if (isAdmin && !isSelf) {
+                btnHtml += `<a href="profile.html?uid=${targetUid}" class="inline-flex items-center px-3 py-2 border border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-xl text-sm font-bold transition-all"><i class="fa-solid fa-pen-to-square mr-1"></i>編集</a>`;
+                document.getElementById('admin-badge').classList.remove('hidden');
+            }
+
             container.innerHTML = btnHtml;
+            // モバイル用にボトム固定などが望ましいが、今回はヘッダーアイコンエリアに配置
         }
 
         window.toggleFollow = async () => {
@@ -457,6 +461,8 @@
                 }
                 await checkFollowStatus(myUid, targetUid);
                 updateFollowCounts(targetUid);
+                // 再ロードして表示更新（相互になった場合のため）
+                loadPublicProfile(targetUid);
             } catch (e) {
                 console.error(e);
                 showNotification('エラーが発生しました');
@@ -519,7 +525,8 @@
             const snsContainer = document.getElementById('profile-sns-links');
             if (snsContainer) {
                 snsContainer.innerHTML = '';
-                const showSns = isMutual || isSelf;
+                // 管理者ならSNSも見せる
+                const showSns = isMutual || isSelf || isAdmin;
                 if (showSns) {
                     if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"><i class="fa-solid fa-globe"></i></a>`;
                     if (data.snsInstagram) snsContainer.innerHTML += `<a href="${data.snsInstagram.startsWith('http') ? data.snsInstagram : 'https://instagram.com/'+data.snsInstagram}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-pink-50 hover:text-pink-500 transition-colors"><i class="fa-brands fa-instagram"></i></a>`;
@@ -564,7 +571,7 @@
                 }
             }
 
-            const showRestricted = isMutual || isSelf;
+            const showRestricted = isMutual || isSelf || isAdmin;
             toggleRestrictedContent(showRestricted);
 
             if (showRestricted) {
@@ -572,9 +579,15 @@
                 
                 let birthDisplay = '-';
                 if (data.birthDate) {
-                    if (data.birthVisibility === 'full' || isSelf) birthDisplay = data.birthDate; 
-                    else if (data.birthVisibility === 'monthDay') birthDisplay = data.birthDate.substring(5);
-                    else birthDisplay = '非公開';
+                    // 管理者は全見え、自分も全見え
+                    // 相互の場合は公開設定に従う
+                    if (isAdmin || isSelf || data.birthVisibility === 'full') {
+                        birthDisplay = data.birthDate;
+                    } else if (data.birthVisibility === 'monthDay') {
+                        birthDisplay = data.birthDate.substring(5);
+                    } else {
+                        birthDisplay = '非公開';
+                    }
                 }
                 setElText('data-birth', birthDisplay);
 
