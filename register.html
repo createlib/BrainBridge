@@ -32,7 +32,7 @@
                     <input name="referrer" type="text" required pattern="^[a-zA-Z0-9_]+$" oninput="validateInput(this); checkReferrer(this.value);" class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="紹介者のIDを入力">
                     <div id="referrer-status-icon" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none hidden"></div>
                 </div>
-                <p id="referrer-msg" class="mt-1 text-xs text-gray-500">半角英数字とアンダーバーのみ<br><span class="text-xs text-gray-400"></span></p>
+                <p id="referrer-msg" class="mt-1 text-xs text-gray-500">半角英数字とアンダーバーのみ</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">ユーザーID (あなたのID) <span class="text-red-500">*</span></label>
@@ -88,15 +88,14 @@
         let isReferrerValid = false;
         let referrerCheckTimeout = null;
 
-        // ★管理者登録用のシークレットコード
-        // 紹介者ID欄にこの文字列を入力すると、紹介者チェックをスキップできます。
-        const ADMIN_SECRET = "admin_start"; 
-
         // DB検索用に匿名認証
         signInAnonymously(auth).catch(e => console.log("Anon auth:", e));
 
         onAuthStateChanged(auth, (user) => {
-            // リダイレクト制御はhandleRegisterで行うため空
+            // 新規登録直後のリダイレクトは handleRegister で制御するためここは最小限に
+            if (user && !user.isAnonymous) {
+                // window.location.href = 'user.html'; 
+            }
         });
 
         window.validateInput = (input) => {
@@ -116,18 +115,6 @@
                 iconContainer.classList.add('hidden');
                 return;
             }
-
-            // --- ★管理者バックドア処理 ---
-            if (value === ADMIN_SECRET) {
-                msgElement.textContent = '管理者モード: 紹介者チェックをスキップします';
-                msgElement.className = 'mt-1 text-xs text-purple-600 font-bold';
-                iconContainer.classList.remove('hidden');
-                iconContainer.innerHTML = '<i class="fa-solid fa-crown text-purple-500"></i>';
-                isReferrerValid = true;
-                updateRegisterButton();
-                return;
-            }
-            // ---------------------------
 
             msgElement.textContent = '確認中...';
             msgElement.className = 'mt-1 text-xs text-blue-500';
