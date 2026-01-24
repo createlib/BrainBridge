@@ -4,130 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>プロフィール | BRAIN BRIDGE</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'Noto Sans JP', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            900: '#312e81',
-                        }
-                    }
+                    fontFamily: { sans: ['Inter', 'Noto Sans JP', 'sans-serif'] },
+                    colors: { brand: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 900: '#312e81' } }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #f8fafc; } /* より明るいグレー背景 */
-        
-        /* PCレイアウト調整 */
+        body { background-color: #f8fafc; }
         @media (min-width: 1024px) {
-            .profile-sidebar {
-                position: sticky;
-                top: 5rem; /* ヘッダー分の余白 */
-                height: calc(100vh - 6rem);
-                overflow-y: auto;
-                scrollbar-width: none; /* Firefox */
-            }
-            .profile-sidebar::-webkit-scrollbar {
-                display: none; /* Chrome/Safari */
-            }
+            .profile-sidebar { position: sticky; top: 5rem; height: calc(100vh - 6rem); overflow-y: auto; scrollbar-width: none; }
+            .profile-sidebar::-webkit-scrollbar { display: none; }
         }
-
-        .cover-gradient {
-            background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
-        }
-        
-        .glass-header {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-
-        /* Shimmer Effect */
+        .cover-gradient { background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); }
+        .glass-header { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .shimmer {
             background: #f6f7f8;
             background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
             background-repeat: no-repeat;
             background-size: 800px 100%; 
-            animation-duration: 1s;
-            animation-fill-mode: forwards; 
-            animation-iteration-count: infinite;
-            animation-name: placeholderShimmer;
-            animation-timing-function: linear;
+            animation: placeholderShimmer 1s linear infinite forwards;
         }
-        @keyframes placeholderShimmer {
-            0% { background-position: -468px 0; }
-            100% { background-position: 468px 0; }
-        }
+        @keyframes placeholderShimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
     </style>
 </head>
 <body class="text-slate-800 antialiased">
 
-    <!-- Navigation -->
     <nav class="glass-header border-b border-slate-200 fixed w-full z-50 top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
-            <!-- Logo / Back (Mobile) -->
             <div class="flex items-center gap-4">
                 <a href="javascript:history.back()" class="lg:hidden text-slate-500 hover:text-slate-900 transition-colors">
                     <i class="fa-solid fa-arrow-left text-xl"></i>
                 </a>
                 <a href="user.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                    <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm">
-                        <i class="fa-solid fa-layer-group"></i>
-                    </span>
+                    <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fa-solid fa-layer-group"></i></span>
                     BRAIN BRIDGE
                 </a>
             </div>
-
-            <!-- Actions -->
             <div class="flex items-center gap-3">
-                <!-- 検索ページへのリンクを追加 -->
-                <a href="search.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="ユーザー検索">
-                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
-                </a>
-                
-                <button onclick="location.reload()" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="更新">
-                    <i class="fa-solid fa-rotate-right"></i>
-                </button>
+                <a href="search.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="ユーザー検索"><i class="fa-solid fa-magnifying-glass text-lg"></i></a>
+                <button onclick="location.reload()" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="更新"><i class="fa-solid fa-rotate-right"></i></button>
                 <div class="h-6 w-px bg-slate-200 mx-1"></div>
-                <button onclick="handleLogout()" class="text-sm font-bold text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
-                    <span class="hidden sm:inline">ログアウト</span>
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
+                <button onclick="handleLogout()" class="text-sm font-bold text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2"><span class="hidden sm:inline">ログアウト</span><i class="fa-solid fa-right-from-bracket"></i></button>
             </div>
         </div>
     </nav>
 
-    <!-- Main Container -->
+    <!-- Error Message Container (Hidden by default) -->
+    <div id="error-container" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-red-100 text-center max-w-sm mx-4">
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
+                <i class="fa-solid fa-user-slash"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">ユーザーが見つかりません</h3>
+            <p class="text-slate-500 text-sm mb-6">IDが間違っているか、削除された可能性があります。</p>
+            <a href="user.html" class="inline-block w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-colors">
+                自分のページに戻る
+            </a>
+        </div>
+    </div>
+
     <div class="max-w-7xl mx-auto pt-16 px-0 sm:px-6 lg:px-8">
-        
         <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:py-8">
             
-            <!-- Left Column: Profile Card (Sticky on Desktop) -->
             <aside class="w-full lg:w-[360px] flex-shrink-0">
                 <div class="profile-sidebar">
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative">
-                        
-                        <!-- Cover -->
                         <div class="h-32 bg-slate-200 cover-gradient w-full"></div>
-                        
-                        <!-- Avatar & Actions -->
                         <div class="px-6 relative">
                             <div class="-mt-12 flex justify-between items-end mb-4">
                                 <div class="relative">
@@ -136,30 +86,18 @@
                                         <img id="header-icon-img" src="" class="hidden w-full h-full object-cover" alt="Profile">
                                     </div>
                                 </div>
-                                <div id="header-actions" class="mb-1">
-                                    <!-- JS Injected Button -->
-                                </div>
+                                <div id="header-actions" class="mb-1"></div>
                             </div>
 
-                            <!-- Names -->
                             <div class="mb-4">
-                                <h1 class="text-2xl font-bold text-slate-900 leading-tight">
-                                    <span id="profile-name" class="shimmer block w-32 h-8 rounded mb-1"></span>
-                                </h1>
+                                <h1 class="text-2xl font-bold text-slate-900 leading-tight"><span id="profile-name" class="shimmer block w-32 h-8 rounded mb-1"></span></h1>
                                 <div class="flex items-center gap-2 mt-1">
                                     <p class="text-sm text-slate-500 font-medium" id="profile-id">@...</p>
-                                    <span id="mutual-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100">
-                                        相互フォロー
-                                    </span>
+                                    <span id="mutual-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100">相互フォロー</span>
                                 </div>
                             </div>
+                            <div class="mb-6"><p id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p></div>
 
-                            <!-- Bio -->
-                            <div class="mb-6">
-                                <p id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p>
-                            </div>
-
-                            <!-- Stats -->
                             <div class="flex items-center gap-6 py-4 border-t border-slate-100">
                                 <div class="text-center cursor-pointer hover:opacity-75 transition-opacity">
                                     <span class="block font-bold text-slate-900 text-lg" id="count-following">-</span>
@@ -171,148 +109,72 @@
                                 </div>
                             </div>
 
-                            <!-- Meta Info List -->
                             <div class="py-4 border-t border-slate-100 space-y-3">
-                                <div class="flex items-center gap-3 text-sm text-slate-600">
-                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0">
-                                        <i class="fa-solid fa-briefcase"></i>
-                                    </div>
-                                    <span id="profile-job" class="font-medium">-</span>
-                                </div>
-                                <div class="flex items-center gap-3 text-sm text-slate-600">
-                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0">
-                                        <i class="fa-solid fa-location-dot"></i>
-                                    </div>
-                                    <span id="profile-location" class="font-medium">-</span>
-                                </div>
-                                
-                                <!-- Restricted Info -->
+                                <div class="flex items-center gap-3 text-sm text-slate-600"><div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fa-solid fa-briefcase"></i></div><span id="profile-job" class="font-medium">-</span></div>
+                                <div class="flex items-center gap-3 text-sm text-slate-600"><div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fa-solid fa-location-dot"></i></div><span id="profile-location" class="font-medium">-</span></div>
                                 <div class="mutual-only hidden space-y-3">
-                                    <div class="flex items-center gap-3 text-sm text-slate-600">
-                                        <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0">
-                                            <i class="fa-solid fa-venus-mars"></i>
-                                        </div>
-                                        <span id="data-gender" class="font-medium">-</span>
-                                    </div>
-                                    <div class="flex items-center gap-3 text-sm text-slate-600">
-                                        <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0">
-                                            <i class="fa-solid fa-cake-candles"></i>
-                                        </div>
-                                        <span id="data-birth" class="font-medium">-</span>
-                                    </div>
+                                    <div class="flex items-center gap-3 text-sm text-slate-600"><div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fa-solid fa-venus-mars"></i></div><span id="data-gender" class="font-medium">-</span></div>
+                                    <div class="flex items-center gap-3 text-sm text-slate-600"><div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fa-solid fa-cake-candles"></i></div><span id="data-birth" class="font-medium">-</span></div>
                                 </div>
-
-                                <!-- SNS -->
                                 <div id="profile-sns-links" class="flex gap-3 pt-2"></div>
                             </div>
 
-                            <!-- Completion Bar (Self Only) -->
                             <div id="completion-bar-container" class="hidden my-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-xs font-bold text-slate-500">プロフィール充実度</span>
-                                    <span id="score-text" class="text-sm font-bold text-brand-600">0%</span>
-                                </div>
-                                <div class="w-full bg-slate-200 rounded-full h-2">
-                                    <div id="score-bar" class="bg-brand-500 h-2 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
-                                </div>
+                                <div class="flex justify-between items-center mb-2"><span class="text-xs font-bold text-slate-500">プロフィール充実度</span><span id="score-text" class="text-sm font-bold text-brand-600">0%</span></div>
+                                <div class="w-full bg-slate-200 rounded-full h-2"><div id="score-bar" class="bg-brand-500 h-2 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div></div>
                             </div>
-
                         </div>
                     </div>
                 </div>
             </aside>
 
-            <!-- Right Column: Details Content -->
             <div class="flex-1 min-w-0">
                 <div class="space-y-6">
-
-                    <!-- Message (Mutual Only) -->
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                                想い・メッセージ
-                            </h2>
-                            <i id="message-lock-icon" class="fa-solid fa-lock text-slate-300 hidden"></i>
-                        </div>
-                        
+                        <div class="flex items-center justify-between mb-4"><h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">想い・メッセージ</h2><i id="message-lock-icon" class="fa-solid fa-lock text-slate-300 hidden"></i></div>
                         <div id="message-container" class="hidden">
-                            <div class="relative">
-                                <i class="fa-solid fa-quote-left text-brand-100 text-4xl absolute -top-2 -left-2 z-0"></i>
-                                <div id="profile-message" class="relative z-10 text-[15px] leading-8 text-slate-700 whitespace-pre-wrap font-medium pl-4"></div>
-                            </div>
+                            <div class="relative"><i class="fa-solid fa-quote-left text-brand-100 text-4xl absolute -top-2 -left-2 z-0"></i><div id="profile-message" class="relative z-10 text-[15px] leading-8 text-slate-700 whitespace-pre-wrap font-medium pl-4"></div></div>
                         </div>
-
                         <div id="message-mask" class="hidden py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center">
-                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white mb-3 shadow-sm">
-                                <i class="fa-solid fa-lock text-slate-400"></i>
-                            </div>
-                            <p class="text-sm font-bold text-slate-500">相互フォローで想いを読む</p>
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white mb-3 shadow-sm"><i class="fa-solid fa-lock text-slate-400"></i></div><p class="text-sm font-bold text-slate-500">相互フォローで想いを読む</p>
                         </div>
                     </div>
 
-                    <!-- Matching (Bento Grid Style) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Can Offer -->
                         <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-blue-200 transition-colors">
                             <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                             <h3 class="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wide relative z-10">提供できること</h3>
-                            <ul id="list-can-offer" class="space-y-3 relative z-10">
-                                <li class="text-slate-400 italic text-sm">未設定</li>
-                            </ul>
+                            <ul id="list-can-offer" class="space-y-3 relative z-10"><li class="text-slate-400 italic text-sm">未設定</li></ul>
                         </div>
-                        <!-- Looking For -->
                         <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-pink-200 transition-colors">
                             <div class="absolute top-0 right-0 w-24 h-24 bg-pink-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                             <h3 class="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wide relative z-10">求めていること</h3>
-                            <ul id="list-looking-for" class="space-y-3 relative z-10">
-                                <li class="text-slate-400 italic text-sm">未設定</li>
-                            </ul>
+                            <ul id="list-looking-for" class="space-y-3 relative z-10"><li class="text-slate-400 italic text-sm">未設定</li></ul>
                         </div>
                     </div>
 
-                    <!-- Tags -->
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
                         <h2 class="text-lg font-bold text-slate-900 mb-4">スキル・趣味</h2>
-                        <div id="tags-container" class="flex flex-wrap gap-2">
-                            <span class="text-sm text-slate-400 italic">未設定</span>
-                        </div>
+                        <div id="tags-container" class="flex flex-wrap gap-2"><span class="text-sm text-slate-400 italic">未設定</span></div>
                     </div>
 
-                    <!-- Goals -->
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
                         <h2 class="text-lg font-bold text-slate-900 mb-4">目標・ビジョン</h2>
                         <div id="profile-goals" class="text-slate-700 text-sm leading-7 whitespace-pre-wrap">未設定</div>
                     </div>
 
-                    <!-- Career (Mutual Only) -->
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-lg font-bold text-slate-900">経歴</h2>
-                            <i id="career-lock-icon" class="fa-solid fa-lock text-slate-300"></i>
-                        </div>
-
-                        <div id="career-container" class="space-y-8 mt-2 relative">
-                            <!-- Line -->
-                            <div class="absolute left-[7px] top-2 bottom-2 w-0.5 bg-slate-100"></div>
-                            <!-- Items injected here -->
-                        </div>
-
-                        <div id="career-mask" class="hidden py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center">
-                            <p class="text-sm font-bold text-slate-500">相互フォローで経歴を表示</p>
-                        </div>
+                        <div class="flex items-center justify-between mb-6"><h2 class="text-lg font-bold text-slate-900">経歴</h2><i id="career-lock-icon" class="fa-solid fa-lock text-slate-300"></i></div>
+                        <div id="career-container" class="space-y-8 mt-2 relative"><div class="absolute left-[7px] top-2 bottom-2 w-0.5 bg-slate-100"></div></div>
+                        <div id="career-mask" class="hidden py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center"><p class="text-sm font-bold text-slate-500">相互フォローで経歴を表示</p></div>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notification -->
     <div id="notification" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 hidden transition-all duration-300 translate-y-20">
-        <div class="bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 backdrop-blur-md bg-opacity-90">
-            <i class="fa-solid fa-check-circle text-brand-400 text-lg"></i>
-            <span id="notif-message" class="text-sm font-bold"></span>
-        </div>
+        <div class="bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 backdrop-blur-md bg-opacity-90"><i class="fa-solid fa-check-circle text-brand-400 text-lg"></i><span id="notif-message" class="text-sm font-bold"></span></div>
     </div>
 
     <script type="module">
@@ -344,39 +206,20 @@
 
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
         const urlParams = new URLSearchParams(window.location.search);
+        // targetUid を URLパラメータから取得。なければ null
         targetUid = urlParams.get('uid');
 
-        // Helper: Format Text (URL Link & Markdown Link)
+        // Helper: Format Text
         function formatText(text) {
             if (!text) return '';
-            
-            // 1. Escape HTML
-            let safeText = text.replace(/[&<>"']/g, function(m) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                }[m];
+            let safeText = text.replace(/[&<>"']/g, function(m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]; });
+            return safeText.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)|(https?:\/\/[a-zA-Z0-9.\/?=&%#_:-]+)/g, (match, mdText, mdUrl, rawUrl) => {
+                if (mdText && mdUrl) return `<a href="${mdUrl}" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:underline cursor-pointer">${mdText}</a>`;
+                if (rawUrl) return `<a href="${rawUrl}" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:underline break-all cursor-pointer">${rawUrl}</a>`;
+                return match;
             });
-
-            // 2. Linkify
-            return safeText.replace(
-                /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)|(https?:\/\/[a-zA-Z0-9.\/?=&%#_:-]+)/g,
-                (match, mdText, mdUrl, rawUrl) => {
-                    if (mdText && mdUrl) {
-                        return `<a href="${mdUrl}" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:underline cursor-pointer">${mdText}</a>`;
-                    }
-                    if (rawUrl) {
-                        return `<a href="${rawUrl}" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:underline break-all cursor-pointer">${rawUrl}</a>`;
-                    }
-                    return match;
-                }
-            );
         }
 
-        // Main Auth Logic
         onAuthStateChanged(auth, async (user) => {
             if (isAdminMock) {
                 currentUser = { uid: 'test_admin_uid', displayName: '管理者' };
@@ -395,12 +238,14 @@
             if (user && !user.isAnonymous) {
                 currentUser = user;
                 
+                // ターゲットIDがない、または自分のIDと同じ場合は自分モード
                 if (!targetUid || targetUid === user.uid) {
                     isSelf = true;
                     targetUid = user.uid;
                     enableSelfMode();
                     await loadFullProfile(user.uid);
                 } else {
+                    // 他人モード
                     isSelf = false;
                     await checkFollowStatus(user.uid, targetUid); 
                     await loadPublicProfile(targetUid);
@@ -426,26 +271,25 @@
             const mockTarget = getAdminMockData();
             mockTarget.name = "サンプル太郎";
             mockTarget.userId = "target_user";
-            
             isMutual = confirm("【テスト】相互フォロー状態にしますか？\nOK=相互(全表示), Cancel=片思い/未フォロー");
             isFollowing = true;
-            
             renderFollowButton();
             updateDashboardUI(mockTarget);
             toggleRestrictedContent(isMutual);
             if(isMutual) document.getElementById('mutual-badge').classList.remove('hidden');
-            
             document.getElementById('count-following').textContent = '120';
             document.getElementById('count-followers').textContent = '45';
         }
 
         async function loadFullProfile(uid) {
             try {
+                // 自分 (Private)
                 const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     updateDashboardUI(docSnap.data());
                 } else {
+                    console.log("Profile not found in private data.");
                     updateDashboardUI({ userId: uid, name: '（未設定）' });
                 }
             } catch (e) {
@@ -456,14 +300,16 @@
 
         async function loadPublicProfile(uid) {
             try {
+                // 他人 (Public)
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
                 const docSnap = await getDoc(docRef);
                 
                 if (docSnap.exists()) {
                     updateDashboardUI(docSnap.data());
                 } else {
-                    alert('ユーザーが見つかりません');
-                    window.location.href = 'user.html'; 
+                    console.error("User not found in public data:", uid);
+                    // アラートの代わりにエラー画面を表示
+                    document.getElementById('error-container').classList.remove('hidden');
                 }
             } catch (e) {
                 console.error("Load public profile error", e);
@@ -481,7 +327,7 @@
                 document.getElementById('count-following').textContent = followingSnap.data().count;
                 document.getElementById('count-followers').textContent = followersSnap.data().count;
             } catch (e) {
-                console.error("Count error:", e);
+                // console.error("Count error:", e);
                 document.getElementById('count-following').textContent = '-';
                 document.getElementById('count-followers').textContent = '-';
             }
@@ -596,26 +442,19 @@
             if (show) {
                 document.getElementById('message-container').classList.remove('hidden');
                 document.getElementById('message-lock-icon').classList.add('hidden');
-                
                 document.getElementById('career-container').classList.remove('hidden');
                 document.getElementById('career-lock-icon').classList.add('hidden');
-                
                 masks.forEach(id => document.getElementById(id)?.classList.add('hidden'));
             } else {
                 document.getElementById('message-container').classList.add('hidden');
                 document.getElementById('message-lock-icon').classList.remove('hidden');
-                
                 document.getElementById('career-container').classList.add('hidden');
                 document.getElementById('career-lock-icon').classList.remove('hidden');
-                
                 masks.forEach(id => document.getElementById(id)?.classList.remove('hidden'));
             }
         }
 
         function updateDashboardUI(data) {
-            document.getElementById('nav-name').textContent = data.name || 'User';
-            if (data.userId) document.getElementById('nav-id').textContent = '@' + data.userId;
-
             document.querySelectorAll('.shimmer').forEach(el => {
                 el.classList.remove('shimmer', 'w-32', 'h-8');
             });
@@ -624,7 +463,6 @@
             document.getElementById('profile-id').textContent = '@' + (data.userId || '-');
             document.getElementById('profile-job').textContent = data.jobTitle || '職業未設定';
             document.getElementById('profile-location').textContent = data.prefecture || '未設定';
-            // Use formatText for bio
             document.getElementById('profile-bio').innerHTML = formatText(data.bio || '');
             
             const iconImg = document.getElementById('header-icon-img');
@@ -638,7 +476,6 @@
                 iconPh.classList.remove('hidden');
             }
 
-            // Message (Mutual) - Use formatText
             const messageEl = document.getElementById('profile-message');
             if (data.message) {
                 messageEl.innerHTML = formatText(data.message);
@@ -648,7 +485,6 @@
                 messageEl.classList.add('text-slate-400');
             }
 
-            // SNS
             const snsContainer = document.getElementById('profile-sns-links');
             snsContainer.innerHTML = '';
             const showSns = isMutual || isSelf;
@@ -672,7 +508,6 @@
             updateList('list-can-offer', data.canOffer);
             updateList('list-looking-for', data.lookingFor);
 
-            // Use formatText for goals
             const goalsEl = document.getElementById('profile-goals');
             if (data.goals) {
                 goalsEl.innerHTML = formatText(data.goals);
@@ -700,9 +535,7 @@
             toggleRestrictedContent(showRestricted);
 
             if (showRestricted) {
-                // Personal Data
                 document.getElementById('data-gender').textContent = data.gender || '-';
-                
                 let birthDisplay = '-';
                 if (data.birthDate) {
                     if (data.birthVisibility === 'full' || isSelf) birthDisplay = data.birthDate; 
@@ -715,7 +548,6 @@
                 careerContainer.innerHTML = '';
                 if (data.career && data.career.length > 0) {
                     data.career.forEach(c => {
-                        // Use formatText for career description
                         const formattedDesc = formatText(c.description || '');
                         careerContainer.innerHTML += `
                             <div class="relative pl-6 pb-2">
@@ -768,12 +600,8 @@
             return {
                 userId: 'admin', name: 'テスト管理者', jobTitle: 'システム開発', gender: '男性',
                 profileScore: 90, hobbies: ['開発', 'デザイン'], skills: ['Firebase', 'HTML/CSS'], email: 'admin@test.com',
-                prefecture: '東京都', 
-                message: '管理者アカウントです。\nこの画面はSNS風のUIデザインテスト用です。[Google](https://google.com) へのリンクテスト。\nhttps://example.com も自動リンクになります。', 
-                bio: 'ここは誰でも見れる自己紹介エリアです。', 
-                goals: '使いやすいサービスを作ること',
-                canOffer: ['技術相談', 'コードレビュー'], lookingFor: ['UI/UXデザイナー'], 
-                career: [{ company: 'Sample Tech', role: 'Dev', start: '2020', description: '詳細な経歴テキスト。\n[ポートフォリオ](https://portfolio.com) などを記載できます。' }]
+                prefecture: '東京都', message: '管理者アカウントです。\nこの画面はSNS風のUIデザインテスト用です。', bio: 'ここは誰でも見れる自己紹介エリアです。', goals: '使いやすいサービスを作ること',
+                canOffer: ['技術相談', 'コードレビュー'], lookingFor: ['UI/UXデザイナー'], career: []
             };
         }
     </script>
