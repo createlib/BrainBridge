@@ -4,225 +4,302 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>プロフィール | BRAIN BRIDGE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { font-family: 'Noto Sans JP', sans-serif; background-color: #ffffff; color: #0f1419; }
-        /* アプリライクなボーダーレイアウト */
-        .app-layout { max-width: 1000px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
-        @media (min-width: 1024px) {
-            .app-layout { flex-direction: row; border-left: 1px solid #eff3f4; border-right: 1px solid #eff3f4; }
-            .sidebar { width: 350px; position: sticky; top: 0; height: 100vh; overflow-y: auto; border-right: 1px solid #eff3f4; }
-            .main-content { flex: 1; }
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans JP', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
         }
-        .cover-image { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
-        .glass-nav { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); }
-        .shimmer { animation: shimmer 2s infinite linear; background: linear-gradient(to right, #f3f4f6 4%, #e5e7eb 25%, #f3f4f6 36%); background-size: 1000px 100%; }
-        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
-        /* スクロールバー非表示 */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </script>
+    <style>
+        body { background-color: #f8fafc; } /* より明るいグレー背景 */
+        
+        /* PCレイアウト調整 */
+        @media (min-width: 1024px) {
+            .profile-sidebar {
+                position: sticky;
+                top: 5rem; /* ヘッダー分の余白 */
+                height: calc(100vh - 6rem);
+                overflow-y: auto;
+                scrollbar-width: none; /* Firefox */
+            }
+            .profile-sidebar::-webkit-scrollbar {
+                display: none; /* Chrome/Safari */
+            }
+        }
+
+        .cover-gradient {
+            background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+        }
+        
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Shimmer Effect */
+        .shimmer {
+            background: #f6f7f8;
+            background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+            background-repeat: no-repeat;
+            background-size: 800px 100%; 
+            animation-duration: 1s;
+            animation-fill-mode: forwards; 
+            animation-iteration-count: infinite;
+            animation-name: placeholderShimmer;
+            animation-timing-function: linear;
+        }
+        @keyframes placeholderShimmer {
+            0% { background-position: -468px 0; }
+            100% { background-position: 468px 0; }
+        }
     </style>
 </head>
-<body>
+<body class="text-slate-800 antialiased">
 
-    <!-- Navbar (Mobile Only) -->
-    <nav class="glass-nav border-b border-gray-100 fixed w-full z-50 top-0 lg:hidden">
-        <div class="px-4 h-14 flex justify-between items-center">
+    <!-- Navigation -->
+    <nav class="glass-header border-b border-slate-200 fixed w-full z-50 top-0 h-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
+            <!-- Logo / Back (Mobile) -->
             <div class="flex items-center gap-4">
-                <a href="javascript:history.back()" class="text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-colors">
-                    <i class="fa-solid fa-arrow-left"></i>
+                <a href="javascript:history.back()" class="lg:hidden text-slate-500 hover:text-slate-900 transition-colors">
+                    <i class="fa-solid fa-arrow-left text-xl"></i>
                 </a>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight" id="nav-name">読み込み中...</h1>
-                    <p class="text-xs text-gray-500" id="nav-id">Profile</p>
-                </div>
+                <a href="user.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </span>
+                    BRAIN BRIDGE
+                </a>
             </div>
-            
-            <div class="flex items-center gap-2">
-                <button onclick="location.reload()" class="p-2 text-gray-500 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-all">
+
+            <!-- Actions -->
+            <div class="flex items-center gap-3">
+                <button onclick="location.reload()" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="更新">
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
-                <button onclick="handleLogout()" class="p-2 text-gray-500 hover:text-red-600 rounded-full">
+                <div class="h-6 w-px bg-slate-200 mx-1"></div>
+                <button onclick="handleLogout()" class="text-sm font-bold text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
+                    <span class="hidden sm:inline">ログアウト</span>
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>
         </div>
     </nav>
 
-    <!-- Main Layout -->
-    <div class="app-layout pt-14 lg:pt-0">
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto pt-16 px-0 sm:px-6 lg:px-8">
         
-        <!-- Left Column: Basic Info (PC: Sticky Sidebar) -->
-        <aside class="sidebar bg-white lg:py-8 lg:px-6">
-            <div class="relative pb-4 lg:pb-0">
-                <div class="h-32 lg:h-40 cover-image w-full lg:rounded-xl"></div>
-                
-                <div class="px-4 lg:px-2 relative">
-                    <!-- Icon & Actions -->
-                    <div class="-mt-12 mb-3 flex justify-between items-end">
-                        <div class="h-24 w-24 rounded-full border-4 border-white bg-white overflow-hidden relative shadow-sm">
-                            <i id="header-icon-placeholder" class="fa-solid fa-user text-4xl text-gray-300 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
-                            <img id="header-icon-img" src="" class="hidden w-full h-full object-cover" alt="Profile">
-                        </div>
-                        <div id="header-actions" class="mb-2"></div>
-                    </div>
-
-                    <!-- Name & ID -->
-                    <div class="mb-2">
-                        <h1 class="text-xl font-extrabold text-gray-900 leading-tight">
-                            <span id="profile-name" class="shimmer block w-32 h-6 rounded mb-1"></span>
-                        </h1>
-                        <p class="text-sm text-gray-500" id="profile-id">@...</p>
-                        <span id="mutual-badge" class="hidden mt-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                            <i class="fa-solid fa-handshake mr-1.5 text-gray-400"></i>相互フォロー
-                        </span>
-                    </div>
-
-                    <!-- Bio (Public) -->
-                    <div class="mb-4">
-                        <p id="profile-bio" class="text-[15px] text-gray-900 leading-relaxed whitespace-pre-wrap"></p>
-                    </div>
-
-                    <!-- Stats -->
-                    <div class="flex items-center gap-4 text-sm mb-4">
-                        <div class="hover:underline cursor-pointer">
-                            <span class="font-bold text-gray-900" id="count-following">-</span>
-                            <span class="text-gray-500">フォロー中</span>
-                        </div>
-                        <div class="hover:underline cursor-pointer">
-                            <span class="font-bold text-gray-900" id="count-followers">-</span>
-                            <span class="text-gray-500">フォロワー</span>
-                        </div>
-                    </div>
-
-                    <!-- Basic Profile List -->
-                    <div class="space-y-2 text-sm text-gray-600 mb-6">
-                        <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-suitcase w-4 text-center text-gray-400"></i>
-                            <span id="profile-job">-</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-location-dot w-4 text-center text-gray-400"></i>
-                            <span id="profile-location">-</span>
-                        </div>
-                        <!-- Restricted Basics -->
-                        <div class="mutual-only hidden space-y-2">
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-venus-mars w-4 text-center text-gray-400"></i>
-                                <span id="data-gender">-</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-cake-candles w-4 text-center text-gray-400"></i>
-                                <span id="data-birth">-</span>
-                            </div>
-                        </div>
-                        <div id="profile-sns-links" class="flex gap-3 pt-2"></div>
-                    </div>
-
-                    <!-- Completion Bar (Self Only) -->
-                    <div id="completion-bar-container" class="hidden mb-6 p-4 bg-blue-50 rounded-xl">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs font-bold text-blue-800">プロフィール充実度</span>
-                            <span id="score-text" class="text-xs font-bold text-blue-600">0%</span>
-                        </div>
-                        <div class="w-full bg-blue-200 rounded-full h-1.5">
-                            <div id="score-bar" class="bg-blue-600 h-1.5 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- PC用ログアウトボタン -->
-                    <div class="hidden lg:block mt-8 border-t border-gray-100 pt-6">
-                        <button onclick="handleLogout()" class="flex items-center gap-3 text-gray-500 hover:text-red-600 transition-colors w-full font-bold">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                            ログアウト
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Right Column: Main Content -->
-        <div class="main-content bg-white pb-20">
+        <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:py-8">
             
-            <!-- Message (Mutual Only) -->
-            <div class="px-4 py-6 border-b border-gray-100">
-                <h3 class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide flex items-center justify-between">
-                    想い・メッセージ
-                    <i id="message-lock-icon" class="fa-solid fa-lock text-gray-300 hidden"></i>
-                </h3>
-                
-                <div id="message-container" class="hidden">
-                    <p id="profile-message" class="text-[15px] leading-relaxed whitespace-pre-wrap text-gray-900">...</p>
-                </div>
+            <!-- Left Column: Profile Card (Sticky on Desktop) -->
+            <aside class="w-full lg:w-[360px] flex-shrink-0">
+                <div class="profile-sidebar">
+                    <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative">
+                        
+                        <!-- Cover -->
+                        <div class="h-32 bg-slate-200 cover-gradient w-full"></div>
+                        
+                        <!-- Avatar & Actions -->
+                        <div class="px-6 relative">
+                            <div class="-mt-12 flex justify-between items-end mb-4">
+                                <div class="relative">
+                                    <div class="h-24 w-24 rounded-2xl border-4 border-white bg-white shadow-sm overflow-hidden">
+                                        <i id="header-icon-placeholder" class="fa-solid fa-user text-4xl text-slate-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                                        <img id="header-icon-img" src="" class="hidden w-full h-full object-cover" alt="Profile">
+                                    </div>
+                                </div>
+                                <div id="header-actions" class="mb-1">
+                                    <!-- JS Injected Button -->
+                                </div>
+                            </div>
 
-                <div id="message-mask" class="hidden mt-2 p-6 bg-gray-50 rounded-xl text-center border border-gray-100">
-                    <p class="text-xs text-gray-500 font-medium">相互フォローで想いを読む</p>
-                </div>
-            </div>
+                            <!-- Names -->
+                            <div class="mb-4">
+                                <h1 class="text-2xl font-bold text-slate-900 leading-tight">
+                                    <span id="profile-name" class="shimmer block w-32 h-8 rounded mb-1"></span>
+                                </h1>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <p class="text-sm text-slate-500 font-medium" id="profile-id">@...</p>
+                                    <span id="mutual-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100">
+                                        相互フォロー
+                                    </span>
+                                </div>
+                            </div>
 
-            <!-- Tags -->
-            <div class="px-4 py-6 border-b border-gray-100">
-                <h3 class="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wide">スキル・趣味</h3>
-                <div id="tags-container" class="flex flex-wrap gap-2">
-                    <span class="text-sm text-gray-400 italic">未設定</span>
-                </div>
-            </div>
+                            <!-- Bio -->
+                            <div class="mb-6">
+                                <p id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p>
+                            </div>
 
-            <!-- Matching -->
-            <div class="px-4 py-6 border-b border-gray-100">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h3 class="flex items-center gap-2 text-sm font-bold text-gray-900 mb-3">
-                            <span class="bg-blue-100 text-blue-600 w-6 h-6 flex items-center justify-center rounded-full text-xs"><i class="fa-solid fa-hand-holding-heart"></i></span>
-                            提供できること
-                        </h3>
-                        <ul id="list-can-offer" class="space-y-2 text-sm text-gray-700">
-                            <li class="text-gray-400 italic">未設定</li>
-                        </ul>
+                            <!-- Stats -->
+                            <div class="flex items-center gap-6 py-4 border-t border-slate-100">
+                                <div class="text-center cursor-pointer hover:opacity-75 transition-opacity">
+                                    <span class="block font-bold text-slate-900 text-lg" id="count-following">-</span>
+                                    <span class="text-xs text-slate-500 font-medium">フォロー中</span>
+                                </div>
+                                <div class="text-center cursor-pointer hover:opacity-75 transition-opacity">
+                                    <span class="block font-bold text-slate-900 text-lg" id="count-followers">-</span>
+                                    <span class="text-xs text-slate-500 font-medium">フォロワー</span>
+                                </div>
+                            </div>
+
+                            <!-- Meta Info List -->
+                            <div class="py-4 border-t border-slate-100 space-y-3">
+                                <div class="flex items-center gap-3 text-sm text-slate-600">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0">
+                                        <i class="fa-solid fa-briefcase"></i>
+                                    </div>
+                                    <span id="profile-job" class="font-medium">-</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-sm text-slate-600">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                    </div>
+                                    <span id="profile-location" class="font-medium">-</span>
+                                </div>
+                                
+                                <!-- Restricted Info -->
+                                <div class="mutual-only hidden space-y-3">
+                                    <div class="flex items-center gap-3 text-sm text-slate-600">
+                                        <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0">
+                                            <i class="fa-solid fa-cake-candles"></i>
+                                        </div>
+                                        <span id="data-birth" class="font-medium">-</span>
+                                    </div>
+                                </div>
+
+                                <!-- SNS -->
+                                <div id="profile-sns-links" class="flex gap-3 pt-2"></div>
+                            </div>
+
+                            <!-- Completion Bar (Self Only) -->
+                            <div id="completion-bar-container" class="hidden my-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-bold text-slate-500">プロフィール充実度</span>
+                                    <span id="score-text" class="text-sm font-bold text-brand-600">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2">
+                                    <div id="score-bar" class="bg-brand-500 h-2 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="flex items-center gap-2 text-sm font-bold text-gray-900 mb-3">
-                            <span class="bg-pink-100 text-pink-600 w-6 h-6 flex items-center justify-center rounded-full text-xs"><i class="fa-solid fa-magnifying-glass"></i></span>
-                            求めていること
-                        </h3>
-                        <ul id="list-looking-for" class="space-y-2 text-sm text-gray-700">
-                            <li class="text-gray-400 italic">未設定</li>
-                        </ul>
+                </div>
+            </aside>
+
+            <!-- Right Column: Details Content -->
+            <div class="flex-1 min-w-0">
+                <div class="space-y-6">
+
+                    <!-- Message (Mutual Only) -->
+                    <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                想い・メッセージ
+                            </h2>
+                            <i id="message-lock-icon" class="fa-solid fa-lock text-slate-300 hidden"></i>
+                        </div>
+                        
+                        <div id="message-container" class="hidden">
+                            <div class="relative">
+                                <i class="fa-solid fa-quote-left text-brand-100 text-4xl absolute -top-2 -left-2 z-0"></i>
+                                <p id="profile-message" class="relative z-10 text-[15px] leading-8 text-slate-700 whitespace-pre-wrap font-medium pl-4"></p>
+                            </div>
+                        </div>
+
+                        <div id="message-mask" class="hidden py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white mb-3 shadow-sm">
+                                <i class="fa-solid fa-lock text-slate-400"></i>
+                            </div>
+                            <p class="text-sm font-bold text-slate-500">相互フォローで想いを読む</p>
+                        </div>
                     </div>
+
+                    <!-- Matching (Bento Grid Style) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Can Offer -->
+                        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-blue-200 transition-colors">
+                            <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                            <h3 class="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wide relative z-10">提供できること</h3>
+                            <ul id="list-can-offer" class="space-y-3 relative z-10">
+                                <li class="text-slate-400 italic text-sm">未設定</li>
+                            </ul>
+                        </div>
+                        <!-- Looking For -->
+                        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-pink-200 transition-colors">
+                            <div class="absolute top-0 right-0 w-24 h-24 bg-pink-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                            <h3 class="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wide relative z-10">求めていること</h3>
+                            <ul id="list-looking-for" class="space-y-3 relative z-10">
+                                <li class="text-slate-400 italic text-sm">未設定</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
+                        <h2 class="text-lg font-bold text-slate-900 mb-4">スキル・趣味</h2>
+                        <div id="tags-container" class="flex flex-wrap gap-2">
+                            <span class="text-sm text-slate-400 italic">未設定</span>
+                        </div>
+                    </div>
+
+                    <!-- Goals -->
+                    <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
+                        <h2 class="text-lg font-bold text-slate-900 mb-4">目標・ビジョン</h2>
+                        <p id="profile-goals" class="text-slate-700 text-sm leading-7 whitespace-pre-wrap">未設定</p>
+                    </div>
+
+                    <!-- Career (Mutual Only) -->
+                    <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-lg font-bold text-slate-900">経歴</h2>
+                            <i id="career-lock-icon" class="fa-solid fa-lock text-slate-300"></i>
+                        </div>
+
+                        <div id="career-container" class="space-y-8 mt-2 relative">
+                            <!-- Line -->
+                            <div class="absolute left-[7px] top-2 bottom-2 w-0.5 bg-slate-100"></div>
+                            <!-- Items injected here -->
+                        </div>
+
+                        <div id="career-mask" class="hidden py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center">
+                            <p class="text-sm font-bold text-slate-500">相互フォローで経歴を表示</p>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-
-            <!-- Goals -->
-            <div class="px-4 py-6 border-b border-gray-100">
-                <h3 class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">今後やりたいこと・目標</h3>
-                <p id="profile-goals" class="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap">未設定</p>
-            </div>
-
-            <!-- Career -->
-            <div class="px-4 py-6">
-                <h3 class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wide flex items-center justify-between">
-                    経歴
-                    <i id="career-lock-icon" class="fa-solid fa-lock text-gray-300"></i>
-                </h3>
-                
-                <div id="career-container" class="space-y-6">
-                    <!-- JS injected -->
-                </div>
-
-                <div id="career-mask" class="hidden py-8 text-center bg-gray-50 rounded-xl border border-gray-100">
-                    <p class="text-xs text-gray-500 font-medium">相互フォローで経歴を表示</p>
-                </div>
-            </div>
-
         </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="notification" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 hidden transition-all duration-300 translate-y-20">
-        <div class="bg-gray-900 text-white px-5 py-2.5 rounded-full shadow-xl flex items-center gap-3">
-            <i class="fa-solid fa-check text-green-400"></i>
+    <!-- Notification -->
+    <div id="notification" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 hidden transition-all duration-300 translate-y-20">
+        <div class="bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 backdrop-blur-md bg-opacity-90">
+            <i class="fa-solid fa-check-circle text-brand-400 text-lg"></i>
             <span id="notif-message" class="text-sm font-bold"></span>
         </div>
     </div>
@@ -296,7 +373,7 @@
         function enableSelfMode() {
             const headerActions = document.getElementById('header-actions');
             headerActions.innerHTML = `
-                <a href="profile.html" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-bold rounded-full text-gray-900 bg-white hover:bg-gray-50 transition-colors w-full justify-center lg:w-auto">
+                <a href="profile.html" class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-700 bg-white hover:bg-slate-50 transition-all w-full">
                     プロフィール編集
                 </a>`;
             document.getElementById('completion-bar-container').classList.remove('hidden');
@@ -413,12 +490,12 @@
             
             if (isFollowing) {
                 btnHtml = `
-                    <button onclick="toggleFollow()" class="w-full lg:w-auto inline-flex justify-center items-center px-5 py-2 border border-gray-300 shadow-sm text-sm font-bold rounded-full text-gray-900 bg-white hover:bg-gray-50 transition-all">
+                    <button onclick="toggleFollow()" class="w-full inline-flex justify-center items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-900 bg-white hover:bg-slate-50 transition-all">
                         フォロー中
                     </button>`;
             } else {
                 btnHtml = `
-                    <button onclick="toggleFollow()" class="w-full lg:w-auto inline-flex justify-center items-center px-6 py-2 border border-transparent shadow-sm text-sm font-bold rounded-full text-white bg-gray-900 hover:bg-gray-800 transition-all">
+                    <button onclick="toggleFollow()" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-md text-sm font-bold rounded-xl text-white bg-slate-900 hover:bg-slate-800 transition-all">
                         フォロー
                     </button>`;
             }
@@ -478,14 +555,18 @@
             if (show) {
                 document.getElementById('message-container').classList.remove('hidden');
                 document.getElementById('message-lock-icon').classList.add('hidden');
+                
                 document.getElementById('career-container').classList.remove('hidden');
                 document.getElementById('career-lock-icon').classList.add('hidden');
+                
                 masks.forEach(id => document.getElementById(id)?.classList.add('hidden'));
             } else {
                 document.getElementById('message-container').classList.add('hidden');
                 document.getElementById('message-lock-icon').classList.remove('hidden');
+                
                 document.getElementById('career-container').classList.add('hidden');
                 document.getElementById('career-lock-icon').classList.remove('hidden');
+                
                 masks.forEach(id => document.getElementById(id)?.classList.remove('hidden'));
             }
         }
@@ -495,7 +576,7 @@
             if (data.userId) document.getElementById('nav-id').textContent = '@' + data.userId;
 
             document.querySelectorAll('.shimmer').forEach(el => {
-                el.classList.remove('shimmer', 'w-32', 'h-6');
+                el.classList.remove('shimmer', 'w-32', 'h-8');
             });
 
             document.getElementById('profile-name').textContent = data.name || data.userId || '（名称未設定）';
@@ -515,7 +596,7 @@
                 iconPh.classList.remove('hidden');
             }
 
-            // Message (Mutual Only)
+            // Message (Mutual)
             const messageEl = document.getElementById('profile-message');
             messageEl.textContent = data.message || 'まだメッセージがありません。';
 
@@ -524,9 +605,9 @@
             snsContainer.innerHTML = '';
             const showSns = isMutual || isSelf;
             if (showSns) {
-                if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="text-gray-400 hover:text-blue-500 transition-colors"><i class="fa-solid fa-globe text-lg"></i></a>`;
-                if (data.snsInstagram) snsContainer.innerHTML += `<a href="${data.snsInstagram.startsWith('http') ? data.snsInstagram : 'https://instagram.com/'+data.snsInstagram}" target="_blank" class="text-gray-400 hover:text-pink-500 transition-colors"><i class="fa-brands fa-instagram text-lg"></i></a>`;
-                if (data.snsX) snsContainer.innerHTML += `<a href="${data.snsX.startsWith('http') ? data.snsX : 'https://twitter.com/'+data.snsX}" target="_blank" class="text-gray-400 hover:text-gray-900 transition-colors"><i class="fa-brands fa-x-twitter text-lg"></i></a>`;
+                if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"><i class="fa-solid fa-globe"></i></a>`;
+                if (data.snsInstagram) snsContainer.innerHTML += `<a href="${data.snsInstagram.startsWith('http') ? data.snsInstagram : 'https://instagram.com/'+data.snsInstagram}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-pink-50 hover:text-pink-500 transition-colors"><i class="fa-brands fa-instagram"></i></a>`;
+                if (data.snsX) snsContainer.innerHTML += `<a href="${data.snsX.startsWith('http') ? data.snsX : 'https://twitter.com/'+data.snsX}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"><i class="fa-brands fa-x-twitter"></i></a>`;
             }
 
             const updateList = (id, items) => {
@@ -534,10 +615,10 @@
                 el.innerHTML = '';
                 if (items && items.length > 0) {
                     items.forEach(item => {
-                        el.innerHTML += `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-blue-500 mt-1"></i><span>${item}</span></li>`;
+                        el.innerHTML += `<li class="flex items-start gap-2 text-[15px] text-slate-700"><i class="fa-solid fa-check text-brand-500 mt-1 flex-shrink-0"></i><span class="font-medium">${item}</span></li>`;
                     });
                 } else {
-                    el.innerHTML = '<li class="text-gray-400 text-xs">未設定</li>';
+                    el.innerHTML = '<li class="text-slate-400 text-xs italic">未設定</li>';
                 }
             };
             updateList('list-can-offer', data.canOffer);
@@ -551,19 +632,23 @@
             if (allTags.length > 0) {
                 allTags.forEach(tag => {
                     const span = document.createElement('span');
-                    span.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700';
+                    span.className = 'inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold bg-slate-100 text-slate-600 border border-slate-200';
                     span.textContent = tag;
                     tagsContainer.appendChild(span);
                 });
             } else {
-                tagsContainer.innerHTML = '<span class="text-xs text-gray-400">タグ未設定</span>';
+                tagsContainer.innerHTML = '<span class="text-xs text-slate-400 italic">タグ未設定</span>';
             }
 
             const showRestricted = isMutual || isSelf;
             toggleRestrictedContent(showRestricted);
 
             if (showRestricted) {
-                document.getElementById('data-gender').textContent = data.gender || '-';
+                // Personal Data (Hidden Logic is here)
+                // Gender (Public data might not have it, but private does)
+                // If data.gender is available, show it.
+                // NOTE: Public data should ideally NOT have gender per previous instruction, but
+                // private load (mutual) brings it in.
                 
                 let birthDisplay = '-';
                 if (data.birthDate) {
@@ -578,16 +663,19 @@
                 if (data.career && data.career.length > 0) {
                     data.career.forEach(c => {
                         careerContainer.innerHTML += `
-                            <div class="relative pl-4 border-l-2 border-gray-100">
-                                <div class="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-gray-300 ring-4 ring-white"></div>
-                                <h4 class="font-bold text-gray-900 text-sm">${c.company || '会社名不明'}</h4>
-                                <p class="text-xs text-gray-500 mb-1">${c.role || ''} <span class="ml-1 opacity-70">(${c.start || '?'} 〜 ${c.end || '現在'})</span></p>
-                                <p class="text-sm text-gray-700 leading-relaxed">${c.description || ''}</p>
+                            <div class="relative pl-6 pb-2">
+                                <div class="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-brand-500 ring-4 ring-white z-10 shadow-sm"></div>
+                                <h4 class="font-bold text-slate-900 text-base">${c.company || '会社名不明'}</h4>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">${c.role || 'Role'}</span>
+                                    <span class="text-xs text-slate-400 font-medium">${c.start || '?'} 〜 ${c.end || '現在'}</span>
+                                </div>
+                                <p class="text-sm text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl">${c.description || ''}</p>
                             </div>
                         `;
                     });
                 } else {
-                    careerContainer.innerHTML = '<div class="text-gray-400 text-sm italic">経歴情報はありません</div>';
+                    careerContainer.innerHTML = '<div class="text-slate-400 text-sm italic">経歴情報はありません</div>';
                 }
             }
 
