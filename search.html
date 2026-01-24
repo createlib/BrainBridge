@@ -51,9 +51,12 @@
         @media (min-width: 1024px) {
             .card-grid { grid-template-columns: repeat(5, 1fr); gap: 1.5rem; }
         }
+        
+        /* Bottom Nav Safe Area */
+        .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col pb-safe-bottom lg:pb-0">
 
     <!-- Navbar -->
     <nav class="glass-header border-b border-slate-200 fixed w-full z-50 top-0 h-16">
@@ -79,8 +82,9 @@
                     <i class="fa-solid fa-sliders"></i>
                     <span id="filter-badge" class="hidden absolute top-1 right-1 w-2 h-2 bg-brand-500 rounded-full"></span>
                 </button>
-                <a href="user.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors">
-                    <i class="fa-solid fa-user"></i>
+                <!-- PCのみヘッダーにユーザーアイコン表示 -->
+                <a href="user.html" class="hidden lg:flex p-2 text-slate-400 hover:text-brand-600 transition-colors">
+                    <i class="fa-solid fa-user text-xl"></i>
                 </a>
             </div>
         </div>
@@ -94,6 +98,29 @@
                 class="w-full bg-slate-100 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500">
         </div>
     </div>
+
+    <!-- Bottom Navigation (Mobile Only) -->
+    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-50 safe-area-pb">
+        <div class="flex justify-around items-center h-16">
+            <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+                <i class="fa-solid fa-house text-xl mb-1"></i>
+                <span class="text-[10px] font-medium">ホーム</span>
+            </a>
+            <!-- Active State for Search -->
+            <a href="search.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
+                <i class="fa-solid fa-magnifying-glass text-xl mb-1"></i>
+                <span class="text-[10px] font-bold">さがす</span>
+            </a>
+            <button onclick="alert('マッチング機能は準備中です。\nComing Soon!')" class="flex flex-col items-center justify-center w-full h-full text-slate-300 hover:text-slate-400 transition-colors">
+                <i class="fa-solid fa-handshake-simple text-xl mb-1"></i>
+                <span class="text-[10px] font-medium">マッチ</span>
+            </button>
+            <a href="user.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+                <i class="fa-solid fa-user text-xl mb-1"></i>
+                <span class="text-[10px] font-medium">マイページ</span>
+            </a>
+        </div>
+    </nav>
 
     <!-- Filter Panel -->
     <div id="filter-panel" class="fixed top-0 left-0 w-full h-full bg-black/50 z-50 hidden opacity-0 transition-opacity duration-300">
@@ -137,7 +164,7 @@
     </div>
 
     <!-- Main Content -->
-    <main class="flex-1 max-w-7xl mx-auto w-full pt-32 sm:pt-24 px-3 pb-20">
+    <main class="flex-1 max-w-7xl mx-auto w-full pt-32 sm:pt-24 px-3">
         
         <div id="loading-indicator" class="flex justify-center py-12">
             <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand-500"></i>
@@ -309,7 +336,7 @@
 
             users.forEach(user => {
                 const card = document.createElement('a');
-                // ★修正箇所: user.userId ではなく user.authUid (システムID) をリンクに使う
+                // user.userId ではなく user.authUid (システムID) をリンクに使う
                 card.href = `user.html?uid=${user.authUid}`;
                 card.className = "block bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md hover:border-brand-200 transition-all duration-200 flex flex-col h-full";
                 
