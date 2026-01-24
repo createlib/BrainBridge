@@ -206,7 +206,6 @@
 
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
         const urlParams = new URLSearchParams(window.location.search);
-        // targetUid を URLパラメータから取得。なければ null
         targetUid = urlParams.get('uid');
 
         // Helper: Format Text
@@ -238,14 +237,12 @@
             if (user && !user.isAnonymous) {
                 currentUser = user;
                 
-                // ターゲットIDがない、または自分のIDと同じ場合は自分モード
                 if (!targetUid || targetUid === user.uid) {
                     isSelf = true;
                     targetUid = user.uid;
                     enableSelfMode();
                     await loadFullProfile(user.uid);
                 } else {
-                    // 他人モード
                     isSelf = false;
                     await checkFollowStatus(user.uid, targetUid); 
                     await loadPublicProfile(targetUid);
@@ -283,7 +280,6 @@
 
         async function loadFullProfile(uid) {
             try {
-                // 自分 (Private)
                 const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
@@ -300,7 +296,6 @@
 
         async function loadPublicProfile(uid) {
             try {
-                // 他人 (Public)
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
                 const docSnap = await getDoc(docRef);
                 
@@ -308,7 +303,6 @@
                     updateDashboardUI(docSnap.data());
                 } else {
                     console.error("User not found in public data:", uid);
-                    // アラートの代わりにエラー画面を表示
                     document.getElementById('error-container').classList.remove('hidden');
                 }
             } catch (e) {
@@ -411,12 +405,17 @@
                     await setDoc(myFollowingRef, { createdAt: timestamp });
                     await setDoc(targetFollowerRef, { createdAt: timestamp });
                     
-                    await addDoc(notificationColl, {
-                        type: 'follow',
-                        fromUid: myUid,
-                        createdAt: timestamp,
-                        isRead: false
-                    });
+                    // 通知処理（失敗してもフォローは成功とする）
+                    try {
+                        await addDoc(notificationColl, {
+                            type: 'follow',
+                            fromUid: myUid,
+                            createdAt: timestamp,
+                            isRead: false
+                        });
+                    } catch (notifyError) {
+                        console.warn("通知送信失敗（権限不足の可能性）:", notifyError);
+                    }
 
                     isFollowing = true;
                     showNotification('フォローしました');
@@ -442,14 +441,18 @@
             if (show) {
                 document.getElementById('message-container').classList.remove('hidden');
                 document.getElementById('message-lock-icon').classList.add('hidden');
+                
                 document.getElementById('career-container').classList.remove('hidden');
                 document.getElementById('career-lock-icon').classList.add('hidden');
+                
                 masks.forEach(id => document.getElementById(id)?.classList.add('hidden'));
             } else {
                 document.getElementById('message-container').classList.add('hidden');
                 document.getElementById('message-lock-icon').classList.remove('hidden');
+                
                 document.getElementById('career-container').classList.add('hidden');
                 document.getElementById('career-lock-icon').classList.remove('hidden');
+                
                 masks.forEach(id => document.getElementById(id)?.classList.remove('hidden'));
             }
         }
@@ -600,8 +603,11 @@
             return {
                 userId: 'admin', name: 'テスト管理者', jobTitle: 'システム開発', gender: '男性',
                 profileScore: 90, hobbies: ['開発', 'デザイン'], skills: ['Firebase', 'HTML/CSS'], email: 'admin@test.com',
-                prefecture: '東京都', message: '管理者アカウントです。\nこの画面はSNS風のUIデザインテスト用です。', bio: 'ここは誰でも見れる自己紹介エリアです。', goals: '使いやすいサービスを作ること',
-                canOffer: ['技術相談', 'コードレビュー'], lookingFor: ['UI/UXデザイナー'], career: []
+                prefecture: '東京都', message: '管理者アカウントです。\nこの画面はSNS風のUIデザインテスト用です。[Google](https://google.com) へのリンクテスト。\nhttps://example.com も自動リンクになります。', 
+                bio: 'ここは誰でも見れる自己紹介エリアです。', 
+                goals: '使いやすいサービスを作ること',
+                canOffer: ['技術相談', 'コードレビュー'], lookingFor: ['UI/UXデザイナー'], 
+                career: [{ company: 'Sample Tech', role: 'Dev', start: '2020', description: '詳細な経歴テキスト。\n[ポートフォリオ](https://portfolio.com) などを記載できます。' }]
             };
         }
     </script>
