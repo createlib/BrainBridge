@@ -149,7 +149,7 @@
                                 </div>
                             </div>
 
-                            <!-- Bio -->
+                            <!-- Bio (Public) -->
                             <div class="mb-6">
                                 <p id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p>
                             </div>
@@ -233,7 +233,7 @@
                         <div id="message-container" class="hidden">
                             <div class="relative">
                                 <i class="fa-solid fa-quote-left text-brand-100 text-4xl absolute -top-2 -left-2 z-0"></i>
-                                <p id="profile-message" class="relative z-10 text-[15px] leading-8 text-slate-700 whitespace-pre-wrap font-medium pl-4"></p>
+                                <div id="profile-message" class="relative z-10 text-[15px] leading-8 text-slate-700 whitespace-pre-wrap font-medium pl-4"></div>
                             </div>
                         </div>
 
@@ -276,7 +276,7 @@
                     <!-- Goals -->
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
                         <h2 class="text-lg font-bold text-slate-900 mb-4">目標・ビジョン</h2>
-                        <p id="profile-goals" class="text-slate-700 text-sm leading-7 whitespace-pre-wrap">未設定</p>
+                        <div id="profile-goals" class="text-slate-700 text-sm leading-7 whitespace-pre-wrap">未設定</div>
                     </div>
 
                     <!-- Career (Mutual Only) -->
@@ -340,6 +340,37 @@
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
         const urlParams = new URLSearchParams(window.location.search);
         targetUid = urlParams.get('uid');
+
+        // Helper: Format Text (URL Link & Markdown Link)
+        function formatText(text) {
+            if (!text) return '';
+            
+            // 1. Escape HTML
+            let safeText = text.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+
+            // 2. Linkify
+            // Combined pattern for [text](url) and raw http(s) links
+            return safeText.replace(
+                /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)|(https?:\/\/[a-zA-Z0-9.\/?=&%#_:-]+)/g,
+                (match, mdText, mdUrl, rawUrl) => {
+                    if (mdText && mdUrl) {
+                        return `<a href="${mdUrl}" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:underline cursor-pointer">${mdText}</a>`;
+                    }
+                    if (rawUrl) {
+                        return `<a href="${rawUrl}" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:underline break-all cursor-pointer">${rawUrl}</a>`;
+                    }
+                    return match;
+                }
+            );
+        }
 
         // Main Auth Logic
         onAuthStateChanged(auth, async (user) => {
@@ -586,7 +617,8 @@
             document.getElementById('profile-id').textContent = '@' + (data.userId || '-');
             document.getElementById('profile-job').textContent = data.jobTitle || '職業未設定';
             document.getElementById('profile-location').textContent = data.prefecture || '未設定';
-            document.getElementById('profile-bio').textContent = data.bio || '';
+            // Use formatText for bio
+            document.getElementById('profile-bio').innerHTML = formatText(data.bio || '');
             
             const iconImg = document.getElementById('header-icon-img');
             const iconPh = document.getElementById('header-icon-placeholder');
@@ -599,9 +631,15 @@
                 iconPh.classList.remove('hidden');
             }
 
-            // Message (Mutual)
+            // Message (Mutual) - Use formatText
             const messageEl = document.getElementById('profile-message');
-            messageEl.textContent = data.message || 'まだメッセージがありません。';
+            if (data.message) {
+                messageEl.innerHTML = formatText(data.message);
+                messageEl.classList.remove('text-slate-400');
+            } else {
+                messageEl.textContent = 'まだメッセージがありません。';
+                messageEl.classList.add('text-slate-400');
+            }
 
             // SNS
             const snsContainer = document.getElementById('profile-sns-links');
@@ -627,7 +665,15 @@
             updateList('list-can-offer', data.canOffer);
             updateList('list-looking-for', data.lookingFor);
 
-            document.getElementById('profile-goals').textContent = data.goals || '未設定';
+            // Use formatText for goals
+            const goalsEl = document.getElementById('profile-goals');
+            if (data.goals) {
+                goalsEl.innerHTML = formatText(data.goals);
+                goalsEl.classList.remove('text-slate-400');
+            } else {
+                goalsEl.textContent = '未設定';
+                goalsEl.classList.add('text-slate-400');
+            }
 
             const tagsContainer = document.getElementById('tags-container');
             tagsContainer.innerHTML = '';
@@ -662,6 +708,8 @@
                 careerContainer.innerHTML = '';
                 if (data.career && data.career.length > 0) {
                     data.career.forEach(c => {
+                        // Use formatText for career description
+                        const formattedDesc = formatText(c.description || '');
                         careerContainer.innerHTML += `
                             <div class="relative pl-6 pb-2">
                                 <div class="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-brand-500 ring-4 ring-white z-10 shadow-sm"></div>
@@ -670,7 +718,7 @@
                                     <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">${c.role || 'Role'}</span>
                                     <span class="text-xs text-slate-400 font-medium">${c.start || '?'} 〜 ${c.end || '現在'}</span>
                                 </div>
-                                <p class="text-sm text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl">${c.description || ''}</p>
+                                <div class="text-sm text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl">${formattedDesc}</div>
                             </div>
                         `;
                     });
@@ -713,8 +761,12 @@
             return {
                 userId: 'admin', name: 'テスト管理者', jobTitle: 'システム開発', gender: '男性',
                 profileScore: 90, hobbies: ['開発', 'デザイン'], skills: ['Firebase', 'HTML/CSS'], email: 'admin@test.com',
-                prefecture: '東京都', message: '管理者アカウントです。\n相互フォロー状態の確認用テキストです。', bio: 'ここは誰でも見れる自己紹介エリアです。', goals: '使いやすいサービスを作ること',
-                canOffer: ['技術相談', 'コードレビュー'], lookingFor: ['UI/UXデザイナー'], career: []
+                prefecture: '東京都', 
+                message: '管理者アカウントです。\nこの画面はSNS風のUIデザインテスト用です。[Google](https://google.com) へのリンクテスト。\nhttps://example.com も自動リンクになります。', 
+                bio: 'ここは誰でも見れる自己紹介エリアです。', 
+                goals: '使いやすいサービスを作ること',
+                canOffer: ['技術相談', 'コードレビュー'], lookingFor: ['UI/UXデザイナー'], 
+                career: [{ company: 'Sample Tech', role: 'Dev', start: '2020', description: '詳細な経歴テキスト。\n[ポートフォリオ](https://portfolio.com) などを記載できます。' }]
             };
         }
     </script>
