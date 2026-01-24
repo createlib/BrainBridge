@@ -366,210 +366,37 @@
 
         async function loadUserProfile(uid) {
             try {
-                // パス修正: /profile/data
-                const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    currentUserData = docSnap.data();
-                } else {
-                    currentUserData = { userId: uid };
-                }
-                populateForm(currentUserData);
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        function renderFormOptions() {
-            renderCategorySection('hobbies-container', hobbyCategories, 'hobbies');
-            renderCategorySection('skills-container', skillCategories, 'skills');
-        }
-
-        function renderCategorySection(containerId, categoriesData, inputName) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            for (const [category, items] of Object.entries(categoriesData)) {
-                const details = document.createElement('details');
-                details.className = 'group border border-gray-200 rounded-lg bg-white overflow-hidden';
-                details.innerHTML = `
-                    <summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50 bg-gray-50 transition-colors select-none">
-                        <span class="font-bold text-gray-700 text-sm">${category}</span>
-                        <span class="accordion-arrow text-gray-400"><i class="fa-solid fa-chevron-down"></i></span>
-                    </summary>
-                    <div class="p-4 border-t border-gray-100 flex flex-wrap gap-2"></div>`;
-                const contentDiv = details.querySelector('div');
-                items.forEach(item => {
-                    contentDiv.innerHTML += `
-                        <label class="cursor-pointer">
-                            <input type="checkbox" name="${inputName}" value="${item}" class="tag-checkbox hidden">
-                            <div class="px-3 py-1.5 rounded-full border border-gray-300 text-sm text-gray-600 hover:bg-gray-100 transition-colors select-none">${item}</div>
-                        </label>`;
-                });
-                container.appendChild(details);
-            }
-        }
-
-        function populateForm(data) {
-            const form = document.getElementById('profile-form');
-            if (!data) return;
-            const fields = ['name', 'nameKana', 'gender', 'birthDate', 'birthVisibility', 'contactEmail', 'websiteUrl', 'snsInstagram', 'snsX', 'prefecture', 'city', 'hobbyOtherText', 'skillDescription', 'message', 'goals', 'profilePublic', 'jobTitle', 'canOffer', 'lookingFor'];
-            fields.forEach(f => { if (form[f] && data[f]) form[f].value = data[f]; });
-
-            const img = document.getElementById('edit-icon-preview');
-            const ph = document.getElementById('edit-icon-placeholder');
-            if (data.photoURL) {
-                img.src = data.photoURL;
-                img.classList.remove('hidden');
-                ph.classList.add('hidden');
-            }
-
-            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(cb => {
-                cb.checked = false;
-                if (data[cb.name] && data[cb.name].includes(cb.value)) {
-                    cb.checked = true;
-                    cb.closest('details').open = true;
-                }
-            });
-
-            const careerList = document.getElementById('career-list');
-            careerList.innerHTML = '';
-            if (data.career && Array.isArray(data.career)) {
-                data.career.forEach(c => addCareerField(c));
-            } else {
-                addCareerField();
-            }
-        }
-
-        window.addCareerField = (data = {}) => {
-            const container = document.getElementById('career-list');
-            const div = document.createElement('div');
-            div.className = 'bg-gray-50 p-4 rounded border border-gray-200 relative career-item';
-            div.innerHTML = `
-                <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-                    <input type="text" placeholder="会社名・組織名" class="career-company w-full border-gray-300 rounded p-2 text-sm" value="${data.company || ''}">
-                    <input type="text" placeholder="役職・役割" class="career-role w-full border-gray-300 rounded p-2 text-sm" value="${data.role || ''}">
-                </div>
-                <div class="grid grid-cols-2 gap-4 mb-2">
-                    <input type="month" class="career-start w-full border-gray-300 rounded p-2 text-sm" value="${data.start || ''}">
-                    <input type="month" class="career-end w-full border-gray-300 rounded p-2 text-sm" value="${data.end || ''}">
-                </div>
-                <textarea placeholder="詳細（業務内容など）" class="career-desc w-full border-gray-300 rounded p-2 text-sm" rows="2">${data.description || ''}</textarea>
-            `;
-            container.appendChild(div);
-        };
-
-        // Icon Preview
-        document.getElementById('icon-upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById('edit-icon-preview');
-                    const ph = document.getElementById('edit-icon-placeholder');
-                    img.src = e.target.result;
-                    img.classList.remove('hidden');
-                    ph.classList.add('hidden');
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-
-        window.saveProfile = async () => {
-            if (!currentUser) {
-                showNotification('ログインしていません', 'error');
-                return;
-            }
-            showNotification('保存中...', 'info');
-
-            const form = document.getElementById('profile-form');
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-
-            // Image Upload
-            const iconFile = document.getElementById('icon-upload').files[0];
-            let photoURL = currentUserData.photoURL || null;
-            if (iconFile && currentUser.uid !== 'test_admin_uid') {
-                try {
-                    const storagePath = `users/${currentUser.uid}/profile_icon.jpg`;
-                    const storageRef = ref(storage, storagePath);
-                    const snapshot = await uploadBytes(storageRef, iconFile);
-                    photoURL = await getDownloadURL(snapshot.ref);
-                } catch (e) {
-                    console.error("Upload failed", e);
-                }
-            } else if (iconFile && currentUser.uid === 'test_admin_uid') {
-                const reader = new FileReader();
-                reader.readAsDataURL(iconFile); 
-            }
-            data.photoURL = photoURL;
-
-            // Arrays
-            const hobbies = [];
-            form.querySelectorAll('input[name="hobbies"]:checked').forEach(cb => hobbies.push(cb.value));
-            data.hobbies = hobbies;
-            const skills = [];
-            form.querySelectorAll('input[name="skills"]:checked').forEach(cb => skills.push(cb.value));
-            data.skills = skills;
-
-            // Career
-            const career = [];
-            document.querySelectorAll('.career-item').forEach(item => {
-                const comp = item.querySelector('.career-company').value;
-                if (comp) {
-                    career.push({
-                        company: comp,
-                        role: item.querySelector('.career-role').value,
-                        start: item.querySelector('.career-start').value,
-                        end: item.querySelector('.career-end').value,
-                        description: item.querySelector('.career-desc').value
-                    });
-                }
-            });
-            data.career = career;
-
-            if(data.canOffer) data.canOffer = data.canOffer.split(',').map(s=>s.trim()).filter(s=>s);
-            if(data.lookingFor) data.lookingFor = data.lookingFor.split(',').map(s=>s.trim()).filter(s=>s);
-
-            // Calc Score
-            let score = 0; let totalWeight = 0;
-            const scoring = [{k:'name',w:10},{k:'jobTitle',w:10},{k:'prefecture',w:10},{k:'gender',w:5},{k:'contactEmail',w:5},{k:'birthDate',w:5},{k:'hobbies',w:10,isArr:true},{k:'skills',w:10,isArr:true},{k:'message',w:15},{k:'goals',w:15},{k:'canOffer',w:5,isArr:true},{k:'lookingFor',w:5,isArr:true},{k:'photoURL',w:10}];
-            scoring.forEach(item => {
-                totalWeight += item.w;
-                let filled = item.isArr ? (data[item.k] && data[item.k].length>0) : !!data[item.k];
-                if(filled) score += item.w;
-            });
-            data.profileScore = Math.min(100, Math.round((score/totalWeight)*100));
-            data.updatedAt = new Date().toISOString();
-
-            const finalData = { ...currentUserData, ...data };
-
-            if (currentUser.uid === 'test_admin_uid') {
-                showNotification('プロフィールを更新しました(テスト)', 'success');
-                setTimeout(() => window.location.href = 'user.html', 1000);
-                return;
-            }
-
-            try {
-                // 1. Private Master Data (パス修正済み: /profile/data)
+                // 1. Private Master Data (Always saved with ALL fields)
                 await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data'), finalData);
                 
-                // 2. Public Search Index
+                // 2. Public Search Index (Limited fields only)
                 const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid);
                 
                 if (data.profilePublic === 'true') {
                     // 全情報を公開DBにもコピー（表示側で制御）
                     const publicData = {
                         ...finalData,
-                        updatedAt: new Date().toISOString()
+                        updatedAt: new Date().toISOString(),
+                        // 【重要】IDログイン維持のため、必ず userId と email は含める
+                        userId: finalData.userId, 
+                        email: finalData.email 
                     };
                     await setDoc(publicDocRef, publicData, { merge: true });
                 } else {
-                    try {
-                        await deleteDoc(publicDocRef);
-                        console.log("Hidden from public search");
-                    } catch (ignore) {}
+                    // 非公開の場合でも、IDログインができなくならないように
+                    // 「検索結果からは消す（deleteDoc）」のではなく、
+                    // 「検索用フラグを下げる」か「最小限の情報（ID/Email）だけ残す」のが理想ですが、
+                    // 今回の仕様では「非公開＝Publicデータ削除」としているため、
+                    // 非公開にするとIDログインができなくなる可能性があります。
+                    
+                    // ★修正対応: 非公開でもIDログイン用データだけは残す
+                    const minimalData = {
+                        userId: finalData.userId,
+                        email: finalData.email,
+                        isHidden: true // 検索画面で除外するためのフラグ（検索実装時に考慮が必要）
+                    };
+                    await setDoc(publicDocRef, minimalData);
+                    console.log("Profile hidden, but login data preserved");
                 }
 
                 showNotification('プロフィールを更新しました', 'success');
