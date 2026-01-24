@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>プロフィール | BRAIN BRIDGE</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
@@ -33,27 +38,69 @@
             animation: placeholderShimmer 1s linear infinite forwards;
         }
         @keyframes placeholderShimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
+        
+        /* Bottom Nav Safe Area */
+        .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
     </style>
 </head>
-<body class="text-slate-800 antialiased">
+<body class="text-slate-800 antialiased pb-safe-bottom lg:pb-0">
 
+    <!-- Header Navigation (PC: Full, Mobile: Simple) -->
     <nav class="glass-header border-b border-slate-200 fixed w-full z-50 top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
+                <!-- Mobile Back Button -->
                 <a href="javascript:history.back()" class="lg:hidden text-slate-500 hover:text-slate-900 transition-colors">
                     <i class="fa-solid fa-arrow-left text-xl"></i>
                 </a>
+                <!-- Logo -->
                 <a href="user.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                     <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fa-solid fa-layer-group"></i></span>
                     BRAIN BRIDGE
                 </a>
             </div>
-            <div class="flex items-center gap-3">
-                <a href="search.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="ユーザー検索"><i class="fa-solid fa-magnifying-glass text-lg"></i></a>
-                <button onclick="location.reload()" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="更新"><i class="fa-solid fa-rotate-right"></i></button>
-                <div class="h-6 w-px bg-slate-200 mx-1"></div>
-                <button onclick="handleLogout()" class="text-sm font-bold text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2"><span class="hidden sm:inline">ログアウト</span><i class="fa-solid fa-right-from-bracket"></i></button>
+
+            <!-- PC Menu Items -->
+            <div class="flex items-center gap-4">
+                <!-- Search Icon (Hidden on Mobile, shown in Bottom Nav) -->
+                <a href="search.html" class="hidden lg:flex p-2 text-slate-400 hover:text-brand-600 transition-colors" title="ユーザー検索">
+                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                </a>
+                
+                <button onclick="location.reload()" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="更新">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+                
+                <div class="h-6 w-px bg-slate-200 mx-1 hidden lg:block"></div>
+                
+                <button onclick="handleLogout()" class="text-sm font-bold text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
+                    <span class="hidden sm:inline">ログアウト</span>
+                    <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                </button>
             </div>
+        </div>
+    </nav>
+
+    <!-- Bottom Navigation (Mobile Only) -->
+    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-50 safe-area-pb">
+        <div class="flex justify-around items-center h-16">
+            <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+                <i class="fa-solid fa-house text-xl mb-1"></i>
+                <span class="text-[10px] font-medium">ホーム</span>
+            </a>
+            <a href="search.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+                <i class="fa-solid fa-magnifying-glass text-xl mb-1"></i>
+                <span class="text-[10px] font-medium">さがす</span>
+            </a>
+            <button onclick="alert('マッチング機能は準備中です。\nComing Soon!')" class="flex flex-col items-center justify-center w-full h-full text-slate-300 hover:text-slate-400 transition-colors">
+                <i class="fa-solid fa-handshake-simple text-xl mb-1"></i>
+                <span class="text-[10px] font-medium">マッチ</span>
+            </button>
+            <!-- Active State for MyPage -->
+            <a href="user.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
+                <i class="fa-solid fa-user text-xl mb-1"></i>
+                <span class="text-[10px] font-bold">マイページ</span>
+            </a>
         </div>
     </nav>
 
@@ -71,9 +118,11 @@
         </div>
     </div>
 
+    <!-- Main Content -->
     <div class="max-w-7xl mx-auto pt-16 px-0 sm:px-6 lg:px-8">
         <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:py-8">
             
+            <!-- Left Column: Profile Card -->
             <aside class="w-full lg:w-[360px] flex-shrink-0">
                 <div class="profile-sidebar">
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative">
@@ -128,6 +177,7 @@
                 </div>
             </aside>
 
+            <!-- Right Column: Details Content -->
             <div class="flex-1 min-w-0">
                 <div class="space-y-6">
                     <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
@@ -173,7 +223,7 @@
         </div>
     </div>
 
-    <div id="notification" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 hidden transition-all duration-300 translate-y-20">
+    <div id="notification" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 hidden transition-all duration-300 translate-y-20">
         <div class="bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 backdrop-blur-md bg-opacity-90"><i class="fa-solid fa-check-circle text-brand-400 text-lg"></i><span id="notif-message" class="text-sm font-bold"></span></div>
     </div>
 
@@ -405,7 +455,6 @@
                     await setDoc(myFollowingRef, { createdAt: timestamp });
                     await setDoc(targetFollowerRef, { createdAt: timestamp });
                     
-                    // 通知処理（失敗してもフォローは成功とする）
                     try {
                         await addDoc(notificationColl, {
                             type: 'follow',
