@@ -111,6 +111,13 @@
                             <p class="text-xs text-gray-500 mt-1">※相互フォロー相手への公開設定です</p>
                         </div>
                     </div>
+                    
+                    <!-- 自己紹介 (New) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">自己紹介（公開・369文字以内）</label>
+                        <textarea name="bio" rows="3" maxlength="369" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border" placeholder="はじめまして！〇〇をしています。興味があることは..."></textarea>
+                        <p class="text-xs text-gray-500 mt-1 text-right">※誰でも見れる情報です</p>
+                    </div>
                 </div>
             </div>
 
@@ -255,7 +262,7 @@
                 <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">⑦ 想い・⑧ やりたいこと</h2>
                 <div class="space-y-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">想い・メッセージ</label>
+                        <label class="block text-sm font-medium text-gray-700">想い・メッセージ <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded ml-2">相互フォロワー限定</span></label>
                         <textarea name="message" rows="5" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"></textarea>
                     </div>
                     <div>
@@ -314,7 +321,7 @@
         const appId = 'default-app-id';
 
         let currentUser = null;
-        let currentUserData = {}; 
+        let currentUserData = {};
 
         // Data Definitions
         const hobbyCategories = {
@@ -415,7 +422,7 @@
         function populateForm(data) {
             const form = document.getElementById('profile-form');
             if (!data) return;
-            const fields = ['name', 'nameKana', 'gender', 'birthDate', 'birthVisibility', 'contactEmail', 'websiteUrl', 'snsInstagram', 'snsX', 'prefecture', 'city', 'hobbyOtherText', 'skillDescription', 'message', 'goals', 'profilePublic', 'jobTitle', 'canOffer', 'lookingFor'];
+            const fields = ['name', 'nameKana', 'gender', 'birthDate', 'birthVisibility', 'bio', 'contactEmail', 'websiteUrl', 'snsInstagram', 'snsX', 'prefecture', 'city', 'hobbyOtherText', 'skillDescription', 'message', 'goals', 'profilePublic', 'jobTitle', 'canOffer', 'lookingFor'];
             fields.forEach(f => { if (form[f] && data[f]) form[f].value = data[f]; });
 
             const img = document.getElementById('edit-icon-preview');
@@ -549,7 +556,7 @@
 
             // Calc Score
             let score = 0; let totalWeight = 0;
-            const scoring = [{k:'name',w:10},{k:'jobTitle',w:10},{k:'prefecture',w:10},{k:'gender',w:5},{k:'contactEmail',w:5},{k:'birthDate',w:5},{k:'hobbies',w:10,isArr:true},{k:'skills',w:10,isArr:true},{k:'message',w:15},{k:'goals',w:15},{k:'canOffer',w:5,isArr:true},{k:'lookingFor',w:5,isArr:true},{k:'photoURL',w:10}];
+            const scoring = [{k:'name',w:10},{k:'jobTitle',w:10},{k:'prefecture',w:10},{k:'gender',w:5},{k:'contactEmail',w:5},{k:'birthDate',w:5},{k:'hobbies',w:10,isArr:true},{k:'skills',w:10,isArr:true},{k:'message',w:15},{k:'goals',w:15},{k:'canOffer',w:5,isArr:true},{k:'lookingFor',w:5,isArr:true},{k:'photoURL',w:10},{k:'bio',w:5}];
             scoring.forEach(item => {
                 totalWeight += item.w;
                 let filled = item.isArr ? (data[item.k] && data[item.k].length>0) : !!data[item.k];
