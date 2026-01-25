@@ -68,22 +68,29 @@
                 <span class="font-bold text-lg">探す</span>
             </div>
             
-            <!-- Search Bar (Desktop) -->
+            <!-- Search Bar (Desktop Only) -->
             <div class="hidden sm:block flex-1 max-w-md mx-8">
                 <div class="relative">
-            <!-- Actions -->
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="desktop-search" placeholder="キーワードで検索 (名前, ID, 職業...)" 
+                        class="w-full bg-slate-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500 transition-all">
+                </div>
+            </div>
+
+            <!-- Header Actions (Filter for Desktop, Notification, User Icon) -->
             <div class="flex items-center gap-3">
-                <button onclick="toggleFilters()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">
+                <!-- Filter Button (Desktop Only) -->
+                <button onclick="toggleFilters()" class="hidden sm:flex p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative" title="フィルター">
                     <i class="fa-solid fa-sliders"></i>
-                    <span id="filter-badge" class="hidden absolute top-1 right-1 w-2 h-2 bg-brand-500 rounded-full"></span>
+                    <span id="filter-badge-desktop" class="hidden absolute top-1 right-1 w-2 h-2 bg-brand-500 rounded-full"></span>
                 </button>
                 
-                <!-- Notification Bell (Added) -->
+                <!-- Notification Bell -->
                 <a href="notifications.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors">
                     <i class="fa-regular fa-bell text-xl"></i>
                 </a>
 
-                <!-- PCのみヘッダーにユーザーアイコン表示 -->
+                <!-- User Icon (PC only) -->
                 <a href="user.html" class="hidden lg:flex p-2 text-slate-400 hover:text-brand-600 transition-colors">
                     <i class="fa-solid fa-user text-xl"></i>
                 </a>
@@ -91,23 +98,94 @@
         </div>
     </nav>
 
-    <!-- Search Bar (Mobile) -->
-    <div class="sm:hidden fixed top-16 w-full bg-white/95 backdrop-blur-sm z-40 px-4 py-2 border-b border-slate-100">
-        <div class="relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="mobile-search" placeholder="キーワードで検索" 
-                class="w-full bg-slate-100 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500">
+    <!-- Search Bar & Filter (Mobile Only) -->
+    <div class="sm:hidden fixed top-16 w-full bg-white/95 backdrop-blur-sm z-40 px-4 py-3 border-b border-slate-100 shadow-sm">
+        <div class="flex gap-3">
+            <div class="relative flex-1">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="mobile-search" placeholder="キーワードで検索" 
+                    class="w-full bg-slate-100 border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500 transition-all">
+            </div>
+            <!-- Mobile Filter Button -->
+            <button onclick="toggleFilters()" class="flex-shrink-0 w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors relative">
+                <i class="fa-solid fa-sliders"></i>
+                <span id="filter-badge-mobile" class="hidden absolute top-2 right-2 w-2 h-2 bg-brand-500 rounded-full border border-white"></span>
+            </button>
         </div>
     </div>
 
+    <!-- Filter Panel -->
+    <div id="filter-panel" class="fixed top-0 left-0 w-full h-full bg-black/50 z-[60] hidden opacity-0 transition-opacity duration-300">
+        <div class="absolute right-0 top-0 h-full w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col" id="filter-content">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-white z-10">
+                <h3 class="font-bold text-lg">フィルター</h3>
+                <button onclick="toggleFilters()" class="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 flex-1 overflow-y-auto space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">エリア (都道府県)</label>
+                    <select id="filter-prefecture" class="w-full border-slate-200 rounded-lg text-sm p-3 focus:border-brand-500 focus:ring-brand-500 bg-slate-50">
+                        <option value="">すべて</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">職業・肩書</label>
+                    <input type="text" id="filter-job" placeholder="例: エンジニア" class="w-full border-slate-200 rounded-lg text-sm p-3 bg-slate-50 focus:border-brand-500 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">並び順</label>
+                    <select id="filter-sort" class="w-full border-slate-200 rounded-lg text-sm p-3 bg-slate-50 focus:border-brand-500 focus:ring-brand-500">
+                        <option value="random">ランダム</option>
+                        <option value="newest">新着順</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-100 bg-slate-50 pb-safe-bottom">
+                <button onclick="applyFilters()" class="w-full bg-brand-600 text-white font-bold py-3.5 rounded-xl hover:bg-brand-700 transition-colors shadow-lg shadow-brand-500/30">
+                    検索結果を表示
+                </button>
+                <button onclick="resetFilters()" class="w-full mt-3 text-sm text-slate-500 hover:text-slate-800 py-2 font-medium">
+                    条件をリセット
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl mx-auto w-full pt-32 sm:pt-24 px-3 pb-20">
+        
+        <div id="loading-indicator" class="flex flex-col items-center justify-center py-20">
+            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand-500 mb-3"></i>
+            <p class="text-slate-400 text-sm">ユーザーを読み込み中...</p>
+        </div>
+
+        <div id="users-grid" class="card-grid hidden"></div>
+
+        <div id="no-results" class="hidden text-center py-20">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-100 mb-4 text-slate-400">
+                <i class="fa-solid fa-users-slash text-3xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">ユーザーが見つかりません</h3>
+            <p class="text-slate-500 text-sm">検索条件を変えて試してみてください</p>
+            <button onclick="resetFilters()" class="mt-6 text-brand-600 font-bold text-sm hover:underline">
+                条件をクリアする
+            </button>
+        </div>
+
+    </main>
+
     <!-- Bottom Navigation (Mobile Only) -->
-    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-50 safe-area-pb">
+    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-40 safe-area-pb">
         <div class="flex justify-around items-center h-16">
             <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">ホーム</span>
             </a>
-            <!-- Active State for Search -->
+            <!-- Active State -->
             <a href="search.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
                 <i class="fa-solid fa-magnifying-glass text-xl mb-1"></i>
                 <span class="text-[10px] font-bold">さがす</span>
@@ -122,66 +200,6 @@
             </a>
         </div>
     </nav>
-
-    <!-- Filter Panel -->
-    <div id="filter-panel" class="fixed top-0 left-0 w-full h-full bg-black/50 z-50 hidden opacity-0 transition-opacity duration-300">
-        <div class="absolute right-0 top-0 h-full w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col" id="filter-content">
-            <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-lg">フィルター</h3>
-                <button onclick="toggleFilters()" class="p-2 text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-            
-            <div class="p-6 flex-1 overflow-y-auto space-y-6">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">エリア (都道府県)</label>
-                    <select id="filter-prefecture" class="w-full border-slate-200 rounded-lg text-sm p-2.5 focus:border-brand-500 focus:ring-brand-500">
-                        <option value="">すべて</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">職業・肩書</label>
-                    <input type="text" id="filter-job" placeholder="例: エンジニア" class="w-full border-slate-200 rounded-lg text-sm p-2.5">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">並び順</label>
-                    <select id="filter-sort" class="w-full border-slate-200 rounded-lg text-sm p-2.5">
-                        <option value="random">ランダム</option>
-                        <option value="newest">新着順</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="p-4 border-t border-slate-100 bg-slate-50">
-                <button onclick="applyFilters()" class="w-full bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 transition-colors shadow-sm">
-                    検索結果を表示
-                </button>
-                <button onclick="resetFilters()" class="w-full mt-2 text-sm text-slate-500 hover:text-slate-800 py-2">
-                    リセット
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <main class="flex-1 max-w-7xl mx-auto w-full pt-32 sm:pt-24 px-3">
-        
-        <div id="loading-indicator" class="flex justify-center py-12">
-            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand-500"></i>
-        </div>
-
-        <div id="users-grid" class="card-grid hidden"></div>
-
-        <div id="no-results" class="hidden text-center py-20">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4 text-slate-400">
-                <i class="fa-solid fa-users-slash text-2xl"></i>
-            </div>
-            <h3 class="text-lg font-bold text-slate-900 mb-1">ユーザーが見つかりません</h3>
-            <p class="text-slate-500 text-sm">検索条件を変えて試してみてください</p>
-        </div>
-
-    </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -211,12 +229,16 @@
             initPrefectureSelect();
             fetchUsers();
 
-            document.getElementById('desktop-search').addEventListener('input', (e) => filterUsers(e.target.value));
-            document.getElementById('mobile-search').addEventListener('input', (e) => filterUsers(e.target.value));
+            const desktopInput = document.getElementById('desktop-search');
+            const mobileInput = document.getElementById('mobile-search');
+
+            if (desktopInput) desktopInput.addEventListener('input', (e) => filterUsers(e.target.value));
+            if (mobileInput) mobileInput.addEventListener('input', (e) => filterUsers(e.target.value));
         });
 
         function initPrefectureSelect() {
             const select = document.getElementById('filter-prefecture');
+            if (!select) return;
             prefectures.forEach(pref => {
                 const option = document.createElement('option');
                 option.value = pref;
@@ -227,6 +249,7 @@
 
         async function fetchUsers() {
             try {
+                // 公開データからユーザー一覧を取得
                 const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
                 const q = query(usersRef); 
                 const snapshot = await getDocs(q);
@@ -234,9 +257,10 @@
                 allUsers = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    // ★重要: システム用ID (Auth UID) を保持しておく
+                    // Auth UIDをリンク用に保持 (doc.id)
                     data.authUid = doc.id; 
                     
+                    // 最低限のデータがあるユーザーのみ表示
                     if (data.userId && data.name) {
                         allUsers.push(data);
                     }
@@ -245,28 +269,45 @@
                 shuffleArray(allUsers);
                 filteredUsers = [...allUsers];
                 
-                renderGrid(filteredUsers);
                 document.getElementById('loading-indicator').classList.add('hidden');
-                document.getElementById('users-grid').classList.remove('hidden');
+                renderGrid(filteredUsers);
 
             } catch (error) {
                 console.error("Fetch users error:", error);
-                document.getElementById('loading-indicator').innerHTML = '<p class="text-red-500">読み込みに失敗しました</p>';
+                const loader = document.getElementById('loading-indicator');
+                if (loader) {
+                    loader.innerHTML = `
+                        <div class="text-center text-red-500">
+                            <i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i>
+                            <p>データの読み込みに失敗しました。</p>
+                            <p class="text-xs mt-1">ネットワークまたは設定を確認してください。</p>
+                        </div>`;
+                }
             }
         }
 
         window.filterUsers = (keyword = "") => {
             const term = keyword.toLowerCase();
-            document.getElementById('desktop-search').value = keyword;
-            document.getElementById('mobile-search').value = keyword;
+            const dInput = document.getElementById('desktop-search');
+            const mInput = document.getElementById('mobile-search');
+            
+            if (dInput && dInput.value !== keyword) dInput.value = keyword;
+            if (mInput && mInput.value !== keyword) mInput.value = keyword;
 
             const pref = document.getElementById('filter-prefecture').value;
             const job = document.getElementById('filter-job').value.toLowerCase();
             
             const hasFilter = pref || job;
-            const badge = document.getElementById('filter-badge');
-            if (hasFilter) badge.classList.remove('hidden');
-            else badge.classList.add('hidden');
+            const badgeD = document.getElementById('filter-badge-desktop');
+            const badgeM = document.getElementById('filter-badge-mobile');
+            
+            if (hasFilter) {
+                badgeD?.classList.remove('hidden');
+                badgeM?.classList.remove('hidden');
+            } else {
+                badgeD?.classList.add('hidden');
+                badgeM?.classList.add('hidden');
+            }
 
             filteredUsers = allUsers.filter(user => {
                 const searchTarget = `${user.name} ${user.userId} ${user.jobTitle || ''} ${user.bio || ''} ${user.hobbies?.join(' ') || ''}`.toLowerCase();
@@ -279,6 +320,8 @@
             const sortType = document.getElementById('filter-sort').value;
             if (sortType === 'newest') {
                 filteredUsers.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+            } else {
+                // random sort is applied at init, or re-apply shuffle if needed
             }
 
             renderGrid(filteredUsers);
@@ -324,6 +367,8 @@
         function renderGrid(users) {
             const grid = document.getElementById('users-grid');
             const noResults = document.getElementById('no-results');
+            
+            if (!grid) return;
             grid.innerHTML = '';
 
             if (users.length === 0) {
@@ -337,19 +382,19 @@
 
             users.forEach(user => {
                 const card = document.createElement('a');
-                // user.userId ではなく user.authUid (システムID) をリンクに使う
+                // システムID (authUid) を使用してリンクを作成
                 card.href = `user.html?uid=${user.authUid}`;
-                card.className = "block bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md hover:border-brand-200 transition-all duration-200 flex flex-col h-full";
+                card.className = "block bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md hover:border-brand-200 transition-all duration-200 flex flex-col h-full group";
                 
                 let iconHtml = '';
                 if (user.photoURL) {
-                    iconHtml = `<img src="${user.photoURL}" class="w-full h-full object-cover" loading="lazy">`;
+                    iconHtml = `<img src="${user.photoURL}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">`;
                 } else {
                     iconHtml = `<div class="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300"><i class="fa-solid fa-user text-3xl"></i></div>`;
                 }
 
                 card.innerHTML = `
-                    <div class="aspect-square w-full relative">
+                    <div class="aspect-square w-full relative overflow-hidden">
                         ${iconHtml}
                         ${user.prefecture ? `<span class="absolute bottom-1 right-1 bg-black/60 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded font-medium">${user.prefecture}</span>` : ''}
                     </div>
