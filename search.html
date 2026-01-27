@@ -307,7 +307,7 @@
         let allUsers = []; 
         let filteredUsers = [];
         let currentUser = null;
-        let isAdmin = false; // 管理者フラグ
+        let isAdmin = false;
 
         const hobbyCategories = {
             "🏃 スポーツ・運動系": ["ランニング", "ウォーキング", "筋トレ", "ヨガ", "ピラティス", "ダンス", "バスケットボール", "サッカー", "フットサル", "野球", "テニス", "バドミントン", "卓球", "ゴルフ", "ボルダリング", "登山", "サーフィン", "スノーボード", "スキー", "サイクリング", "水泳", "格闘技", "武道"],
@@ -352,11 +352,8 @@
                     if (profileSnap.exists()) {
                         const data = profileSnap.data();
                         const rank = data.membershipRank || 'walker';
-                        
-                        // 管理者判定
                         if (data.userId === 'admin') isAdmin = true;
 
-                        // WALKERチェック (管理者は免除)
                         if (rank === 'walker' && !isAdmin) {
                             alert('検索機能を利用するにはメンバーシップのアップグレードが必要です。');
                             window.location.href = 'upgrade.html';
@@ -417,13 +414,21 @@
                     const data = doc.data();
                     data.authUid = doc.id; 
                     
-                    // ★修正: 管理者はisHiddenユーザーも表示する
-                    // 一般ユーザーは isHidden が false のユーザーのみ
-                    const isVisible = !data.isHidden || isAdmin;
+                    // ★ 公開条件チェック (profilePublicが'false'なら非公開とみなす)
+                    const isHiddenBySystem = data.isHidden === true;
+                    const isPrivateByUser = data.profilePublic === 'false';
+                    
+                    let isVisible = true;
+                    if (!isAdmin) {
+                        if (isHiddenBySystem || isPrivateByUser) {
+                            isVisible = false;
+                        }
+                    }
 
-                    // ★修正: data.userId があれば、名前がなくてもリストに追加（フォールバックあり）
                     if (data.userId && isVisible) {
                         if (!data.name) data.name = "名称未設定";
+                        // 管理者用フラグ
+                        data._isMasked = (isHiddenBySystem || isPrivateByUser);
                         allUsers.push(data);
                     }
                 });
@@ -542,7 +547,12 @@
             users.forEach(user => {
                 const card = document.createElement('a');
                 card.href = `user.html?uid=${user.authUid}`;
-                card.className = `block bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md hover:border-brand-200 transition-all duration-200 flex flex-col h-full group ${user.isHidden ? 'opacity-60 grayscale' : ''}`;
+                
+                // 非公開(管理者用)の場合は薄くする
+                const isMasked = user._isMasked;
+                const opacityClass = isMasked ? 'opacity-60 grayscale' : '';
+                
+                card.className = `block bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md hover:border-brand-200 transition-all duration-200 flex flex-col h-full group ${opacityClass}`;
                 
                 let iconHtml = '';
                 if (user.photoURL) {
@@ -551,8 +561,8 @@
                     iconHtml = `<div class="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300"><i class="fa-solid fa-user text-3xl"></i></div>`;
                 }
 
-                // 非公開バッジ (管理者用)
-                const hiddenBadge = user.isHidden ? `<span class="absolute top-1 left-1 bg-gray-800 text-white text-[9px] px-1.5 py-0.5 rounded font-bold">非公開</span>` : '';
+                // 非公開バッジ
+                const hiddenBadge = isMasked ? `<span class="absolute top-1 left-1 bg-gray-800 text-white text-[9px] px-1.5 py-0.5 rounded font-bold z-10">非公開</span>` : '';
 
                 card.innerHTML = `
                     <div class="aspect-square w-full relative overflow-hidden">
