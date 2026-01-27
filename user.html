@@ -34,11 +34,15 @@
         }
         @keyframes placeholderShimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
         .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+
+        /* バッジスタイル */
+        .badge-walker { background-color: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+        .badge-builder { background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%); color: #334155; border: 1px solid #94a3b8; }
+        .badge-guardian { background: linear-gradient(135deg, #fef9c3 0%, #fde047 100%); color: #854d0e; border: 1px solid #facc15; }
     </style>
 </head>
 <body class="text-slate-800 antialiased pb-safe-bottom lg:pb-0">
 
-    <!-- Navbar -->
     <nav class="glass-header border-b border-slate-200 fixed w-full z-50 top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
@@ -51,11 +55,14 @@
                 </a>
             </div>
             <div class="flex items-center gap-3">
+                <!-- 検索ボタンは WALKER には使えないが、リンク自体は置いておき search.html 側で弾く -->
                 <a href="search.html" class="hidden lg:flex p-2 text-slate-400 hover:text-brand-600 transition-colors" title="ユーザー検索"><i class="fa-solid fa-magnifying-glass text-lg"></i></a>
-                <a href="notifications.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors relative" title="通知">
-                    <i class="fa-regular fa-bell text-xl"></i>
-                    <span id="nav-badge" class="hidden absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                
+                <!-- UPGRADE Button -->
+                <a href="upgrade.html" class="hidden sm:inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-arrow-up mr-1"></i> UPGRADE
                 </a>
+
                 <button onclick="location.reload()" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="更新"><i class="fa-solid fa-rotate-right"></i></button>
                 <div class="h-6 w-px bg-slate-200 mx-1 hidden lg:block"></div>
                 <button onclick="handleLogout()" class="text-sm font-bold text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2"><span class="hidden sm:inline">ログアウト</span><i class="fa-solid fa-right-from-bracket text-lg"></i></button>
@@ -63,7 +70,7 @@
         </div>
     </nav>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Nav -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-50 safe-area-pb">
         <div class="flex justify-around items-center h-16">
             <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
@@ -85,17 +92,6 @@
         </div>
     </nav>
 
-    <!-- Error Container -->
-    <div id="error-container" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-2xl shadow-xl border border-red-100 text-center max-w-sm mx-4">
-            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl"><i class="fa-solid fa-user-slash"></i></div>
-            <h3 class="text-lg font-bold text-slate-900 mb-2">ユーザーが見つかりません</h3>
-            <p class="text-slate-500 text-sm mb-6">IDが間違っているか、データが取得できませんでした。</p>
-            <a href="user.html" class="inline-block w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-colors">自分のページに戻る</a>
-        </div>
-    </div>
-
-    <!-- Main Content -->
     <div class="max-w-7xl mx-auto pt-16 px-0 sm:px-6 lg:px-8">
         <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:py-8">
             
@@ -116,10 +112,20 @@
 
                             <div class="mb-4">
                                 <h1 class="text-2xl font-bold text-slate-900 leading-tight"><span id="profile-name" class="shimmer block w-32 h-8 rounded mb-1"></span></h1>
-                                <div class="flex items-center gap-2 mt-1">
+                                <div class="flex flex-wrap items-center gap-2 mt-1">
                                     <p class="text-sm text-slate-500 font-medium" id="profile-id">@...</p>
-                                    <span id="mutual-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100">相互フォロー</span>
-                                    <span id="admin-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-100"><i class="fa-solid fa-crown mr-1"></i>管理者閲覧中</span>
+                                    
+                                    <!-- Rank Badge -->
+                                    <span id="rank-badge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border badge-walker">
+                                        <i class="fa-solid fa-person-walking mr-1"></i>WALKER
+                                    </span>
+
+                                    <span id="mutual-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100">
+                                        <i class="fa-solid fa-handshake mr-1"></i>相互フォロー
+                                    </span>
+                                    <span id="admin-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-100">
+                                        <i class="fa-solid fa-crown mr-1"></i>管理者閲覧中
+                                    </span>
                                 </div>
                             </div>
                             <div class="mb-6"><p id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p></div>
@@ -149,6 +155,17 @@
                                 <div class="flex justify-between items-center mb-2"><span class="text-xs font-bold text-slate-500">プロフィール充実度</span><span id="score-text" class="text-sm font-bold text-brand-600">0%</span></div>
                                 <div class="w-full bg-slate-200 rounded-full h-2"><div id="score-bar" class="bg-brand-500 h-2 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div></div>
                             </div>
+
+                            <!-- Debug: Rank Switcher (Self Only) -->
+                            <div id="debug-rank-switcher" class="hidden mt-6 pt-6 border-t border-dashed border-gray-200">
+                                <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wide">【デバッグ用】ランク変更 (DB保存)</p>
+                                <div class="flex gap-2">
+                                    <button onclick="changeRank('walker')" class="flex-1 py-1.5 text-[10px] font-bold bg-gray-100 text-gray-600 rounded hover:bg-gray-200 border border-gray-200">WALKER</button>
+                                    <button onclick="changeRank('builder')" class="flex-1 py-1.5 text-[10px] font-bold bg-slate-200 text-slate-700 rounded hover:bg-slate-300 border border-slate-300">BUILDER</button>
+                                    <button onclick="changeRank('guardian')" class="flex-1 py-1.5 text-[10px] font-bold bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 border border-yellow-300">GUARDIAN</button>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -205,7 +222,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp, collection, getCountFromServer, addDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp, collection, getCountFromServer, addDoc, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
@@ -225,7 +242,7 @@
 
         let currentUser = null;
         let isSelf = false;
-        let isAdmin = false; // 管理者フラグ
+        let isAdmin = false;
         let targetUid = null;
         let isFollowing = false;
         let isMutual = false;
@@ -265,15 +282,11 @@
 
             if (user && !user.isAnonymous) {
                 currentUser = user;
-                checkUnreadNotifications(user.uid);
                 
-                // 自分のプロフィールをロードして管理者かどうか確認
                 const myProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                 const myProfileSnap = await getDoc(myProfileRef);
                 if (myProfileSnap.exists() && myProfileSnap.data().userId === 'admin') {
                     isAdmin = true;
-                    // 管理者バッジを表示（自分が見ているときのみ）
-                    // document.getElementById('admin-badge').classList.remove('hidden');
                 }
 
                 if (!targetUid || targetUid === user.uid) {
@@ -293,25 +306,25 @@
             }
         });
 
-        async function checkUnreadNotifications(uid) {
-            try {
-                const notifRef = collection(db, 'artifacts', appId, 'users', uid, 'notifications');
-                const q = query(notifRef, where('isRead', '==', false));
-                const snap = await getCountFromServer(q);
-                if (snap.data().count > 0) document.getElementById('nav-badge').classList.remove('hidden');
-            } catch (e) { console.error(e); }
-        }
-
         function enableSelfMode() {
             const headerActions = document.getElementById('header-actions');
             if(headerActions) {
                 headerActions.innerHTML = `
-                <a href="profile.html" class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-700 bg-white hover:bg-slate-50 transition-all w-full">
-                    プロフィール編集
-                </a>`;
+                <div class="flex gap-2 w-full lg:w-auto">
+                    <a href="profile.html" class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-700 bg-white hover:bg-slate-50 transition-all">
+                        編集
+                    </a>
+                    <a href="upgrade.html" class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-bold rounded-xl text-white bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 transition-all">
+                        UP
+                    </a>
+                </div>`;
             }
             const compBar = document.getElementById('completion-bar-container');
             if(compBar) compBar.classList.remove('hidden');
+            
+            // Show Debug Rank Switcher (Self Only)
+            document.getElementById('debug-rank-switcher').classList.remove('hidden');
+            
             isMutual = true; 
             toggleRestrictedContent(true);
         }
@@ -332,7 +345,6 @@
 
         async function loadPublicProfile(uid) {
             try {
-                // 通常は公開データを取得
                 let dataToUse = null;
                 const publicRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
                 const publicSnap = await getDoc(publicRef);
@@ -341,20 +353,14 @@
                     dataToUse = publicSnap.data();
                 }
                 
-                // 管理者の場合、非公開データも読み込みに行く（権限があれば読める）
-                // または相互フォローの場合
                 if (isAdmin || isMutual) {
                     try {
                         const privateRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
                         const privateSnap = await getDoc(privateRef);
                         if (privateSnap.exists()) {
-                            // 公開データに非公開データをマージ（非公開の方が情報が正確・豊富）
                             dataToUse = { ...(dataToUse || {}), ...privateSnap.data() };
-                            console.log("Loaded private data for detail view");
                         }
-                    } catch (e) {
-                        console.log("Private load failed", e);
-                    }
+                    } catch (e) { console.log("Private load failed", e); }
                 }
 
                 if (dataToUse) {
@@ -400,7 +406,7 @@
                     else badge.classList.add('hidden');
                 }
 
-                toggleRestrictedContent(isMutual || isAdmin); // 管理者は無条件で制限解除
+                toggleRestrictedContent(isMutual || isAdmin); 
 
             } catch (e) { console.error("Check follow err:", e); }
         }
@@ -411,21 +417,18 @@
             
             let btnHtml = '';
             
-            // フォローボタン
             if (isFollowing) {
                 btnHtml += `<button onclick="toggleFollow()" class="inline-flex items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-900 bg-white hover:bg-slate-50 transition-all mr-2">フォロー中</button>`;
             } else {
                 btnHtml += `<button onclick="toggleFollow()" class="inline-flex items-center px-4 py-2 border border-transparent shadow-md text-sm font-bold rounded-xl text-white bg-slate-900 hover:bg-slate-800 transition-all mr-2">フォロー</button>`;
             }
 
-            // 管理者用編集ボタン
             if (isAdmin && !isSelf) {
                 btnHtml += `<a href="profile.html?uid=${targetUid}" class="inline-flex items-center px-3 py-2 border border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-xl text-sm font-bold transition-all"><i class="fa-solid fa-pen-to-square mr-1"></i>編集</a>`;
                 document.getElementById('admin-badge').classList.remove('hidden');
             }
 
             container.innerHTML = btnHtml;
-            // モバイル用にボトム固定などが望ましいが、今回はヘッダーアイコンエリアに配置
         }
 
         window.toggleFollow = async () => {
@@ -461,7 +464,6 @@
                 }
                 await checkFollowStatus(myUid, targetUid);
                 updateFollowCounts(targetUid);
-                // 再ロードして表示更新（相互になった場合のため）
                 loadPublicProfile(targetUid);
             } catch (e) {
                 console.error(e);
@@ -493,7 +495,6 @@
         function updateDashboardUI(data) {
             setElText('nav-name', data.name || 'User');
             if (data.userId) setElText('nav-id', '@' + data.userId);
-
             document.querySelectorAll('.shimmer').forEach(el => el.classList.remove('shimmer', 'w-32', 'h-8'));
 
             setElText('profile-name', data.name || data.userId || '（名称未設定）');
@@ -502,6 +503,21 @@
             setElText('profile-location', data.prefecture || '未設定');
             setElHtml('profile-bio', formatText(data.bio || ''));
             
+            // Rank Badge Logic
+            const rank = data.membershipRank || 'walker';
+            const badgeEl = document.getElementById('rank-badge');
+            badgeEl.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border';
+            if (rank === 'guardian') {
+                badgeEl.classList.add('badge-guardian');
+                badgeEl.innerHTML = '<i class="fa-solid fa-shield-halved mr-1"></i>GUARDIAN';
+            } else if (rank === 'builder') {
+                badgeEl.classList.add('badge-builder');
+                badgeEl.innerHTML = '<i class="fa-solid fa-hammer mr-1"></i>BUILDER';
+            } else {
+                badgeEl.classList.add('badge-walker');
+                badgeEl.innerHTML = '<i class="fa-solid fa-person-walking mr-1"></i>WALKER';
+            }
+
             const iconImg = document.getElementById('header-icon-img');
             const iconPh = document.getElementById('header-icon-placeholder');
             if (iconImg && iconPh) {
@@ -525,7 +541,6 @@
             const snsContainer = document.getElementById('profile-sns-links');
             if (snsContainer) {
                 snsContainer.innerHTML = '';
-                // 管理者ならSNSも見せる
                 const showSns = isMutual || isSelf || isAdmin;
                 if (showSns) {
                     if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"><i class="fa-solid fa-globe"></i></a>`;
@@ -579,8 +594,6 @@
                 
                 let birthDisplay = '-';
                 if (data.birthDate) {
-                    // 管理者は全見え、自分も全見え
-                    // 相互の場合は公開設定に従う
                     if (isAdmin || isSelf || data.birthVisibility === 'full') {
                         birthDisplay = data.birthDate;
                     } else if (data.birthVisibility === 'monthDay') {
@@ -622,6 +635,28 @@
             }
         }
 
+        // --- Debug: Change Rank Function ---
+        window.changeRank = async (newRole) => {
+            if (!currentUser) return;
+            const uid = currentUser.uid;
+            try {
+                const privateRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
+                await updateDoc(privateRef, { membershipRank: newRole });
+                
+                const publicRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
+                const pubSnap = await getDoc(publicRef);
+                if (pubSnap.exists()) {
+                    await updateDoc(publicRef, { membershipRank: newRole });
+                }
+                
+                alert(`ランクを ${newRole} に変更しました。\n画面をリロードします。`);
+                window.location.reload();
+            } catch (e) {
+                console.error(e);
+                alert("変更に失敗しました");
+            }
+        };
+
         window.handleLogout = () => {
             if (isAdminMock) {
                 localStorage.removeItem('isAdminMock');
@@ -649,11 +684,8 @@
             return {
                 userId: 'admin', name: 'テスト管理者', jobTitle: 'システム開発', gender: '男性',
                 profileScore: 90, hobbies: ['開発', 'デザイン'], skills: ['Firebase', 'HTML/CSS'], email: 'admin@test.com',
-                prefecture: '東京都', message: '管理者アカウントです。\nこの画面はSNS風のUIデザインテスト用です。[Google](https://google.com) へのリンクテスト。\nhttps://example.com も自動リンクになります。', 
-                bio: 'ここは誰でも見れる自己紹介エリアです。', 
-                goals: '使いやすいサービスを作ること',
-                canOffer: ['技術相談', 'コードレビュー'], lookingFor: ['UI/UXデザイナー'], 
-                career: [{ company: 'Sample Tech', role: 'Dev', start: '2020', description: '詳細な経歴テキスト。\n[ポートフォリオ](https://portfolio.com) などを記載できます。' }]
+                prefecture: '東京都', message: '管理者アカウントです。', bio: '自己紹介エリア', goals: '目標',
+                canOffer: ['技術'], lookingFor: ['デザイン'], career: [], membershipRank: 'guardian'
             };
         }
     </script>
