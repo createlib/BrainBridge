@@ -24,7 +24,7 @@
             .profile-sidebar::-webkit-scrollbar { display: none; }
         }
         .cover-gradient { background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); }
-        .glass-header { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .shimmer {
             background: #f6f7f8;
             background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
@@ -42,7 +42,7 @@
 </head>
 <body class="text-slate-800 antialiased pb-safe-bottom lg:pb-0">
 
-    <!-- Navbar -->
+    <!-- Header Navigation -->
     <nav class="glass-header border-b border-slate-200 fixed w-full z-50 top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
@@ -55,19 +55,26 @@
                 </a>
             </div>
             <div class="flex items-center gap-3">
-                <a href="search.html" class="hidden lg:flex p-2 text-slate-400 hover:text-brand-600 transition-colors" title="ユーザー検索"><i class="fa-solid fa-magnifying-glass text-lg"></i></a>
-                <a href="upgrade.html" class="hidden sm:inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"><i class="fa-solid fa-arrow-up mr-1"></i> UPGRADE</a>
+                <!-- PC Navigation Links -->
+                <div class="hidden lg:flex items-center gap-6 mr-4">
+                    <a href="home.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-house"></i> ホーム</a>
+                    <a href="events.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-map-location-dot"></i> イベント</a>
+                    <a href="search.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-magnifying-glass"></i> さがす</a>
+                    <a href="user.html" class="text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-user"></i> マイページ</a>
+                </div>
+
+                <!-- PC用 UPGRADEボタン -->
+                <a href="upgrade.html" class="hidden lg:inline-flex items-center px-4 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-crown mr-1"></i> UPGRADE
+                </a>
+                
                 <a href="notifications.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors relative" title="通知">
                     <i class="fa-regular fa-bell text-xl"></i>
                     <span id="nav-badge" class="hidden absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                 </a>
                 <button onclick="location.reload()" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="更新"><i class="fa-solid fa-rotate-right"></i></button>
                 <div class="h-6 w-px bg-slate-200 mx-1 hidden lg:block"></div>
-                <!-- Logout Button: Ensure Visibility -->
-                <button onclick="handleLogout()" class="text-sm font-bold text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
-                    <span class="hidden sm:inline">ログアウト</span>
-                    <i class="fa-solid fa-right-from-bracket text-lg"></i>
-                </button>
+                <button onclick="handleLogout()" class="text-sm font-bold text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2"><span class="hidden sm:inline">ログアウト</span><i class="fa-solid fa-right-from-bracket text-lg"></i></button>
             </div>
         </div>
     </nav>
@@ -75,9 +82,13 @@
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-50 safe-area-pb">
         <div class="flex justify-around items-center h-16">
-            <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+            <a href="home.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">ホーム</span>
+            </a>
+            <a href="events.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+                <i class="fa-solid fa-map-location-dot text-xl mb-1"></i>
+                <span class="text-[10px] font-medium">イベント</span>
             </a>
             <a href="search.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
                 <i class="fa-solid fa-magnifying-glass text-xl mb-1"></i>
@@ -133,7 +144,7 @@
                                 </div>
                             </div>
 
-                            <!-- Upgrade CTA -->
+                            <!-- Upgrade CTA (Displayed if Walker) -->
                             <div id="upgrade-cta-container" class="hidden mb-6">
                                 <a href="upgrade.html" class="block w-full bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 group">
                                     <div class="px-3 py-2.5 flex items-center justify-between">
@@ -151,7 +162,7 @@
                                 </a>
                             </div>
 
-                            <div class="mb-6"><p id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p></div>
+                            <div class="mb-6"><div id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></div></div>
 
                             <div class="flex items-center gap-6 py-4 border-t border-slate-100">
                                 <div class="text-center cursor-pointer hover:opacity-75 transition-opacity">
@@ -174,8 +185,9 @@
                                 </div>
                                 <div id="profile-sns-links" class="flex gap-3 pt-2"></div>
                                 
+                                <!-- Personal Mask Overlay -->
                                 <div id="personal-mask" class="hidden mt-2 p-3 bg-gray-50 rounded border border-gray-100 text-center">
-                                    <p class="text-xs text-gray-500 font-medium"><i class="fa-solid fa-lock mr-1"></i>詳細は相互フォローで公開</p>
+                                    <p class="text-xs text-gray-500 font-medium"></p>
                                 </div>
                             </div>
 
@@ -200,14 +212,17 @@
 
             <div class="flex-1 min-w-0">
                 <div class="space-y-6">
+                    
+                    <!-- Message Section -->
                     <div id="section-message" class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
                         <div class="flex items-center justify-between mb-4"><h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">想い・メッセージ</h2><i id="message-lock-icon" class="fa-solid fa-lock text-slate-300 hidden"></i></div>
                         <div id="message-container" class="hidden">
                             <div class="relative"><i class="fa-solid fa-quote-left text-brand-100 text-4xl absolute -top-2 -left-2 z-0"></i><div id="profile-message" class="relative z-10 text-[15px] leading-8 text-slate-700 whitespace-pre-wrap font-medium pl-4"></div></div>
                         </div>
-                        <div id="message-mask" class="hidden py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center"><div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white mb-3 shadow-sm"><i class="fa-solid fa-lock text-slate-400"></i></div><p class="text-sm font-bold text-slate-500">相互フォローで想いを読む</p></div>
+                        <div id="message-mask" class="hidden py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center"><div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white mb-3 shadow-sm"><i class="fa-solid fa-lock text-slate-400"></i></div><p class="text-sm font-bold text-slate-500"></p></div>
                     </div>
 
+                    <!-- Matching Section -->
                     <div id="section-matching" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-blue-200 transition-colors">
                             <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
@@ -221,34 +236,38 @@
                         </div>
                     </div>
 
+                    <!-- Tags Section -->
                     <div id="section-tags" class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
                         <h2 class="text-lg font-bold text-slate-900 mb-4">スキル・趣味</h2>
                         <div id="tags-container" class="flex flex-wrap gap-2"><span class="text-sm text-slate-400 italic">未設定</span></div>
                     </div>
 
+                    <!-- Goals Section -->
                     <div id="section-goals" class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
                         <h2 class="text-lg font-bold text-slate-900 mb-4">目標・ビジョン</h2>
                         <div id="profile-goals" class="text-slate-700 text-sm leading-7 whitespace-pre-wrap">未設定</div>
                     </div>
 
+                    <!-- Career Section -->
                     <div id="section-career" class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
                         <div class="flex items-center justify-between mb-6"><h2 class="text-lg font-bold text-slate-900">経歴</h2><i id="career-lock-icon" class="fa-solid fa-lock text-slate-300"></i></div>
                         <div id="career-container" class="space-y-8 mt-2 relative"><div class="absolute left-[7px] top-2 bottom-2 w-0.5 bg-slate-100"></div></div>
-                        <div id="career-mask" class="hidden py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center"><p class="text-sm font-bold text-slate-500">相互フォローで経歴を表示</p></div>
+                        <div id="career-mask" class="hidden py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center"><p class="text-sm font-bold text-slate-500"></p></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Notification Toast -->
     <div id="notification" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 hidden transition-all duration-300 translate-y-20">
         <div class="bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 backdrop-blur-md bg-opacity-90"><i class="fa-solid fa-check-circle text-brand-400 text-lg"></i><span id="notif-message" class="text-sm font-bold"></span></div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp, collection, getCountFromServer, addDoc, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp, collection, getCountFromServer, addDoc, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
         // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
@@ -357,7 +376,6 @@
                     <a href="profile.html" class="inline-flex items-center justify-center px-6 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-700 bg-white hover:bg-slate-50 transition-all active:scale-95">
                         プロフィール編集
                     </a>
-                    <!-- 有料会員向けにもさりげなく表示 -->
                     <a href="upgrade.html" class="text-[10px] font-bold text-slate-400 hover:text-brand-600 transition-colors mr-1 underline decoration-dotted">
                         プランの確認・変更
                     </a>
@@ -366,7 +384,6 @@
             document.getElementById('completion-bar-container').classList.remove('hidden');
             document.getElementById('debug-rank-switcher').classList.remove('hidden'); 
             
-            // ★ WALKER会員なら、目立つアップグレードバナーを表示
             if (currentRank === 'walker') {
                 document.getElementById('upgrade-cta-container').classList.remove('hidden');
             } else {
@@ -401,8 +418,6 @@
                     dataToUse = publicSnap.data();
                 }
                 
-                // 自分がWALKERなら詳細データ(Private)は取れない（制限のため）
-                // ただし管理者は取れる
                 if (isAdmin || (isMutual && myRank !== 'walker')) {
                     try {
                         const privateRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
@@ -455,8 +470,6 @@
                     if (isMutual && !isSelf) badge.classList.remove('hidden');
                     else badge.classList.add('hidden');
                 }
-
-                // 表示制限判定の呼び出し
             } catch (e) { console.error("Check follow err:", e); }
         }
 
