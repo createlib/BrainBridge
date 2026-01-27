@@ -31,9 +31,10 @@
             </h1>
             <div class="flex space-x-3">
                 <button type="button" onclick="history.back()" class="text-gray-600 hover:text-gray-900 text-sm font-medium py-2">キャンセル</button>
-                <!-- フォーム送信ボタンとして機能させるため form属性を指定 -->
-                <button type="submit" form="profile-form" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold shadow-sm transition-colors">
-                    保存する
+                <!-- 保存ボタン -->
+                <button type="button" id="save-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold shadow-sm transition-colors flex items-center gap-2">
+                    <span id="save-btn-text">保存する</span>
+                    <i id="save-spinner" class="fa-solid fa-circle-notch fa-spin hidden"></i>
                 </button>
             </div>
         </div>
@@ -46,9 +47,9 @@
             <span class="block sm:inline" id="error-text"></span>
         </div>
 
-        <form id="profile-form" class="space-y-8" onsubmit="saveProfile(event)">
+        <form id="profile-form" class="space-y-8">
             
-            <!-- 0. 公開設定・職業 -->
+            <!-- 0. 公開設定 -->
             <div class="bg-white shadow rounded-lg p-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">基本設定</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -87,7 +88,7 @@
                 <div class="grid grid-cols-1 gap-6">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">氏名（表示用） <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700">氏名（表示用）</label>
                             <input type="text" name="name" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
                         </div>
                         <div>
@@ -233,10 +234,16 @@
         </form>
     </main>
 
+    <!-- Notification -->
+    <div id="notification" class="fixed top-4 right-4 z-50 hidden max-w-sm w-full bg-white shadow-lg rounded-lg p-4 border-l-4">
+        <p id="notif-message" class="text-sm font-medium"></p>
+    </div>
+
     <script type="module">
+        // ★修正点: 正しいバージョン 10.13.1 を使用
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
         // Firebase Config
@@ -264,8 +271,6 @@
 
         // Master Data
         const prefectures = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県","海外","その他"];
-        
-        // カテゴリデータの再定義
         const hobbyCategories = {
             "🏃 スポーツ・運動系": ["ランニング", "ウォーキング", "筋トレ", "ヨガ", "ピラティス", "ダンス", "バスケットボール", "サッカー", "フットサル", "野球", "テニス", "バドミントン", "卓球", "ゴルフ", "ボルダリング", "登山", "サーフィン", "スノーボード", "スキー", "サイクリング", "水泳", "格闘技", "武道"],
             "🎵 音楽・エンタメ": ["カラオケ", "楽器演奏（ギター）", "楽器演奏（ピアノ）", "作曲", "歌", "ライブ鑑賞", "フェス", "DJ", "映画鑑賞", "アニメ鑑賞", "漫画", "ゲーム", "ボードゲーム"],
@@ -286,6 +291,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initUI();
+            
+            // ボタンにイベントリスナーを追加 (念のため)
+            document.getElementById('save-btn').addEventListener('click', saveProfile);
         });
 
         onAuthStateChanged(auth, async (user) => {
@@ -300,10 +308,10 @@
             if (user) {
                 currentUser = user;
                 
+                // 1. 管理者チェック
                 try {
                     const myProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     const myProfileSnap = await getDoc(myProfileRef);
-                    // 本人確認
                     if (myProfileSnap.exists() && myProfileSnap.data().userId === 'admin') {
                         isAdmin = true;
                         document.getElementById('admin-label').classList.remove('hidden');
@@ -314,6 +322,7 @@
                     }
                 } catch(e) { console.error("Admin Check Error", e); }
 
+                // 2. ターゲット決定
                 const urlParams = new URLSearchParams(window.location.search);
                 const paramUid = urlParams.get('uid');
                 
@@ -364,11 +373,13 @@
 
         async function loadUserProfile(uid) {
             try {
+                // 正しいパス: /profile/data
                 const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     currentUserData = docSnap.data();
                 } else {
+                    // 新規の場合やデータがない場合
                     currentUserData = { userId: uid };
                 }
                 populateForm(currentUserData);
@@ -442,69 +453,81 @@
         });
 
         // window.saveProfileの定義
-        window.saveProfile = async (event) => {
-            // submitイベントの場合デフォルト動作をキャンセル
-            if(event) event.preventDefault();
-
+        window.saveProfile = async () => {
             if (!currentUser) return;
+            
+            // ボタンの状態更新
+            const btn = document.getElementById('save-btn');
+            const btnText = document.getElementById('save-btn-text');
+            const spinner = document.getElementById('save-spinner');
+            btn.disabled = true;
+            btnText.textContent = "保存中...";
+            spinner.classList.remove('hidden');
+            
             showNotification('保存中...', 'info');
             document.getElementById('error-banner').classList.add('hidden');
 
-            const form = document.getElementById('profile-form');
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            
-            data.hobbies = Array.from(form.querySelectorAll('input[name="hobbies"]:checked')).map(cb => cb.value);
-            data.skills = Array.from(form.querySelectorAll('input[name="skills"]:checked')).map(cb => cb.value);
-            
-            data.career = [];
-            document.querySelectorAll('.career-item').forEach(item => {
-                data.career.push({
-                    company: item.querySelector('.career-company').value,
-                    role: item.querySelector('.career-role').value,
-                    start: item.querySelector('.career-start').value,
-                    end: item.querySelector('.career-end').value,
-                    description: item.querySelector('.career-desc').value
-                });
-            });
-            
-            if(data.canOffer) data.canOffer = data.canOffer.split(',').map(s=>s.trim());
-            if(data.lookingFor) data.lookingFor = data.lookingFor.split(',').map(s=>s.trim());
-
-            const iconFile = document.getElementById('icon-upload').files[0];
-            let photoURL = currentUserData.photoURL || null;
-            if (iconFile && !isAdminMock) {
-                try {
-                    const snap = await uploadBytes(ref(storage, `users/${targetUid}/profile_icon.jpg`), iconFile);
-                    photoURL = await getDownloadURL(snap.ref);
-                } catch(e) { console.error("Img upload err", e); }
-            }
-            data.photoURL = photoURL;
-            
-            data.profileScore = 80; // 簡易計算
-            data.updatedAt = new Date().toISOString();
-
-            const finalData = { ...currentUserData, ...data };
-            if (!finalData.userId) {
-                finalData.userId = targetUid;
-            }
-
-            finalData.membershipRank = currentUserData.membershipRank || 'walker';
-            finalData.profilePublic = data.profilePublic;
-
-            if (currentUser.uid === 'test_admin_uid') {
-                showNotification('プロフィールを更新しました(テスト)', 'success');
-                setTimeout(() => window.location.href = 'user.html', 1000);
-                return;
-            }
-
             try {
-                // 1. Private Data
+                const form = document.getElementById('profile-form');
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                
+                data.hobbies = Array.from(form.querySelectorAll('input[name="hobbies"]:checked')).map(cb => cb.value);
+                data.skills = Array.from(form.querySelectorAll('input[name="skills"]:checked')).map(cb => cb.value);
+                
+                data.career = [];
+                document.querySelectorAll('.career-item').forEach(item => {
+                    data.career.push({
+                        company: item.querySelector('.career-company').value,
+                        role: item.querySelector('.career-role').value,
+                        start: item.querySelector('.career-start').value,
+                        end: item.querySelector('.career-end').value,
+                        description: item.querySelector('.career-desc').value
+                    });
+                });
+                
+                if(data.canOffer) data.canOffer = data.canOffer.split(',').map(s=>s.trim());
+                if(data.lookingFor) data.lookingFor = data.lookingFor.split(',').map(s=>s.trim());
+
+                const iconFile = document.getElementById('icon-upload').files[0];
+                let photoURL = currentUserData.photoURL || null;
+                if (iconFile && !isAdminMock) {
+                    try {
+                        const snap = await uploadBytes(ref(storage, `users/${targetUid}/profile_icon.jpg`), iconFile);
+                        photoURL = await getDownloadURL(snap.ref);
+                    } catch(e) { console.error("Img upload err", e); }
+                }
+                data.photoURL = photoURL;
+                
+                data.profileScore = 80; 
+                data.updatedAt = new Date().toISOString();
+
+                // --- データの引き継ぎ ---
+                const finalData = { ...currentUserData, ...data };
+                
+                // ★重要: userId が undefined になるのを防ぐ
+                if (!finalData.userId) {
+                    finalData.userId = targetUid;
+                }
+
+                // ランクはフォームにないので既存を維持 (なければwalker)
+                finalData.membershipRank = currentUserData.membershipRank || 'walker';
+                
+                // 公開設定 (文字列 "true" / "false")
+                finalData.profilePublic = data.profilePublic;
+
+                if (currentUser.uid === 'test_admin_uid') {
+                    showNotification('プロフィールを更新しました(テスト)', 'success');
+                    setTimeout(() => window.location.href = 'user.html', 1000);
+                    return;
+                }
+
+                // 1. Private Data (マスター)
                 const privateDocRef = doc(db, 'artifacts', appId, 'users', targetUid, 'profile', 'data');
                 await setDoc(privateDocRef, finalData);
                 console.log("Master data saved.");
 
-                // 2. Public Data
+                // 2. Public Data (検索用)
                 const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', targetUid);
                 
                 const isPaidMember = (finalData.membershipRank === 'builder' || finalData.membershipRank === 'guardian');
@@ -515,11 +538,12 @@
                     const publicData = {
                         ...finalData,
                         updatedAt: new Date().toISOString(),
-                        isHidden: false
+                        isHidden: false // 明示的に表示
                     };
                     await setDoc(publicDocRef, publicData);
                     console.log("Public data updated.");
                 } else {
+                    // 非公開条件 (WALKER または 設定OFF)
                     const minimalData = {
                         userId: finalData.userId,
                         email: finalData.email || null, 
@@ -544,6 +568,11 @@
                 else if (e.message.includes('undefined')) errorMsg += ': 必須データ(UserIDなど)が不足しています。';
                 else errorMsg += `: ${e.message}`;
                 showError(errorMsg);
+                
+                // ボタンリセット
+                btn.disabled = false;
+                btnText.textContent = "保存する";
+                spinner.classList.add('hidden');
             }
         };
 
