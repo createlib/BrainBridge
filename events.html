@@ -35,7 +35,7 @@
         .sheet-open { transform: translateY(0%) !important; }
         .sheet-closed { transform: translateY(100%); }
 
-        /* Tag Selection (Create Modal) - !important added to ensure override */
+        /* Tag Selection */
         .tag-btn.selected { 
             background-color: #4f46e5 !important; 
             color: white !important; 
@@ -54,7 +54,7 @@
 </head>
 <body class="text-slate-800 antialiased h-screen w-screen relative flex flex-col">
 
-    <!-- Navbar -->
+    <!-- Navbar (PC & Mobile Common) -->
     <nav class="glass-header border-b border-slate-200 fixed w-full z-[1500] top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
@@ -158,11 +158,15 @@
                 <!-- Date & Time -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-2">日時 <span class="text-red-500">*</span></label>
+                    
+                    <!-- Start -->
                     <div class="flex gap-2 mb-2 items-center">
                         <span class="text-xs font-bold text-slate-400 w-8">開始</span>
                         <input type="date" id="event-start-date" class="flex-1 border-slate-200 rounded-lg text-sm p-2.5 bg-slate-50" required>
                         <input type="time" id="event-start-time" class="w-24 border-slate-200 rounded-lg text-sm p-2.5 bg-slate-50" required>
                     </div>
+
+                    <!-- End -->
                     <div class="flex gap-2 items-center">
                         <span class="text-xs font-bold text-slate-400 w-8">終了</span>
                         <input type="date" id="event-end-date" class="flex-1 border-slate-200 rounded-lg text-sm p-2.5 bg-slate-50" required>
@@ -173,6 +177,7 @@
                 <!-- Location Search -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <label class="block text-xs font-bold text-slate-700 mb-2">開催場所の設定 <span class="text-red-500">*</span></label>
+                    
                     <div class="flex gap-2 mb-2">
                         <div class="relative flex-1">
                             <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
@@ -181,9 +186,11 @@
                         <button onclick="searchLocation()" class="bg-slate-800 text-white px-3 rounded-lg text-sm font-bold whitespace-nowrap hover:bg-slate-700">検索</button>
                     </div>
                     <div id="location-results" class="hidden mb-3 border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto shadow-sm bg-white"></div>
+                    
                     <button onclick="startLocationAdjust()" class="w-full py-2 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors mb-4 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-map-location-dot"></i> 地図を見ながら位置を微調整する
                     </button>
+
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1">表示する場所名</label>
                         <input type="text" id="event-location-name" placeholder="例: ミッドランドスクエア 42階" class="w-full border-slate-200 rounded-lg text-sm p-2.5 bg-white focus:ring-2 focus:ring-brand-500">
@@ -243,7 +250,7 @@
                     </select>
                 </div>
 
-                <!-- Tag Filter (New) -->
+                <!-- Tag Filter -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">タグで絞り込み</label>
                     <div id="filter-tag-container" class="flex flex-wrap gap-2">
@@ -253,13 +260,14 @@
             </div>
 
             <div class="p-4 border-t border-slate-100 bg-slate-50 pb-safe-bottom">
-                <button onclick="applyFilters()" class="w-full bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 shadow-md">適用する</button>
+                <!-- applyFilters() + toggleFilters() を呼ぶように修正 -->
+                <button onclick="applyFilters(); toggleFilters();" class="w-full bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 shadow-md">適用する</button>
                 <button onclick="resetFilters()" class="w-full mt-3 text-sm text-slate-500">リセット</button>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation (Mobile Only) -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-[1900] safe-area-pb">
         <div class="flex justify-around items-center h-16">
             <a href="home.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
@@ -294,7 +302,6 @@
         import { getFirestore, collection, addDoc, getDocs, doc, getDoc, query, where, orderBy, serverTimestamp, setDoc, deleteDoc, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
-        // Firebase Config (Replace with yours)
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
             authDomain: "brainbridge-4b8ac.firebaseapp.com",
@@ -330,14 +337,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             initMap();
             renderTagButtons();
-            renderFilterTags(); // Initialize Filter Tags
+            renderFilterTags();
             
             const pcSearch = document.getElementById('pc-map-search');
             const mobileSearch = document.getElementById('mobile-map-search');
             const handleSearch = (e) => {
                 const val = e.target.value.toLowerCase();
-                // Filter by text first, applyFilters handles the rest
-                applyFilters(); 
+                // 検索バー入力時は、フィルターパネル開閉を伴わず、マーカーのみ更新
+                renderMarkers(allEvents.filter(evt => evt.title.toLowerCase().includes(val)));
             };
             if(pcSearch) pcSearch.addEventListener('input', handleSearch);
             if(mobileSearch) mobileSearch.addEventListener('input', handleSearch);
@@ -377,10 +384,27 @@
         });
 
         function initMap() {
+            // Default center (Tokyo)
             map = L.map('map', { zoomControl: false }).setView([35.6895, 139.6917], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
+
+            // Get Current Location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        map.setView([lat, lng], 13);
+                        // 現在地マーカー（任意：青丸など）
+                        // L.marker([lat, lng]).addTo(map).bindPopup("現在地"); 
+                    },
+                    () => {
+                        console.log("Location access denied or error");
+                    }
+                );
+            }
         }
 
         window.searchLocation = async () => {
@@ -462,7 +486,6 @@
             });
         }
         
-        // Filter Tag Rendering
         function renderFilterTags() {
             const container = document.getElementById('filter-tag-container');
             container.innerHTML = '';
@@ -511,14 +534,12 @@
             const file = document.getElementById('event-image').files[0];
             if (file) {
                 try {
-                    // Check if storage bucket is configured
-                    if (!firebaseConfig.storageBucket) throw new Error("Storage not configured");
                     const path = `events/${currentUser.uid}/${Date.now()}_${file.name}`;
                     const snap = await uploadBytes(ref(storage, path), file);
                     thumbnailUrl = await getDownloadURL(snap.ref);
                 } catch (e) {
                     console.error(e);
-                    return alert("画像のアップロードに失敗しました (Storage未設定またはCORSエラー)");
+                    return alert("画像のアップロードに失敗しました");
                 }
             }
 
@@ -572,11 +593,9 @@
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     data.id = doc.id;
-                    // Filter ended events on client side (for simplicity)
                     if (data.endTimestamp && data.endTimestamp < now) return; 
                     allEvents.push(data);
                 });
-                // Initial Render
                 applyFilters(); 
             } catch (e) { console.error(e); }
         }
@@ -631,11 +650,21 @@
 
             const thumb = evt.thumbnailUrl || 'https://via.placeholder.com/400x200?text=No+Image';
             const tags = evt.tags ? evt.tags.map(t => `<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">#${t}</span>`).join('') : '';
+
             const btnText = isJoined ? 'キャンセルする' : 'イベントに参加する';
             const btnClass = isJoined ? 'bg-slate-200 text-slate-600 hover:bg-slate-300' : 'bg-brand-600 text-white hover:bg-brand-700 shadow-brand-500/30 shadow-lg';
             const dateStr = (evt.startDate === evt.endDate) 
                 ? `${evt.startDate} ${evt.startTime} 〜 ${evt.endTime}`
                 : `${evt.startDate} ${evt.startTime} 〜 ${evt.endDate} ${evt.endTime}`;
+
+            // Delete Button (Only for Organizer)
+            let deleteBtnHtml = '';
+            if (currentUser && currentUser.uid === evt.organizerId) {
+                deleteBtnHtml = `
+                    <button onclick="deleteEvent('${evt.id}')" class="mt-3 w-full py-2 rounded-xl text-red-500 font-bold border border-red-200 hover:bg-red-50 transition-colors text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-trash"></i> イベントを削除する
+                    </button>`;
+            }
 
             content.innerHTML = `
                 <div class="relative h-48 w-full rounded-2xl overflow-hidden mb-4 shadow-sm group">
@@ -650,7 +679,9 @@
                 </div>
                 <div class="mb-6"><h3 class="font-bold text-slate-900 mb-2 text-sm">詳細</h3><p class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">${evt.description || '詳細はありません'}</p></div>
                 <div class="mb-6"><h3 class="font-bold text-slate-900 mb-2 text-sm">参加者</h3>${participantsHtml}</div>
+                
                 <button onclick="toggleJoinEvent('${evt.id}', ${isJoined})" class="w-full py-3.5 rounded-xl font-bold transition-all ${btnClass}">${btnText}</button>
+                ${deleteBtnHtml}
             `;
             sheet.classList.remove('sheet-closed', 'hidden');
             sheet.classList.add('sheet-open');
@@ -678,9 +709,23 @@
                 if (evt) showEventSheet(evt);
             } catch (e) {
                 console.error(e);
-                alert('エラーが発生しました');
+                alert('エラーが発生しました (Firestoreルールを確認してください)');
             } finally {
                 isJoining = false;
+            }
+        };
+
+        window.deleteEvent = async (eventId) => {
+            if (!confirm('本当にこのイベントを削除しますか？\nこの操作は取り消せません。')) return;
+            
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', eventId));
+                alert('イベントを削除しました');
+                closeSheet();
+                loadEvents(); // Reload map
+            } catch (e) {
+                console.error(e);
+                alert('削除に失敗しました');
             }
         };
 
@@ -691,19 +736,7 @@
             setTimeout(() => sheet.classList.add('hidden'), 300);
         };
 
-        document.getElementById('event-image').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = document.getElementById('image-preview');
-                    img.src = e.target.result;
-                    img.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
+        // Filter Handlers
         window.toggleFilters = () => {
             const panel = document.getElementById('filter-panel');
             const content = document.getElementById('filter-content');
@@ -716,7 +749,6 @@
                 setTimeout(() => panel.classList.add('hidden'), 300);
             }
         };
-
         window.applyFilters = () => {
             const keyword = (document.getElementById('pc-map-search').value || document.getElementById('mobile-map-search').value || '').toLowerCase();
             const dateFilter = document.getElementById('filter-date').value;
@@ -728,22 +760,15 @@
             const filtered = allEvents.filter(evt => {
                 const matchKeyword = !keyword || evt.title.toLowerCase().includes(keyword) || evt.description.toLowerCase().includes(keyword);
                 
-                // Date Filter Logic (Simple)
                 let matchDate = true;
                 const today = new Date().setHours(0,0,0,0);
                 const evtDate = new Date(evt.startDate).getTime();
                 
-                if (dateFilter === 'today') {
-                    matchDate = (evtDate === today);
-                } else if (dateFilter === 'week') {
-                    matchDate = (evtDate <= today + 7 * 86400000);
-                } else if (dateFilter === 'month') {
-                    matchDate = (evtDate <= today + 30 * 86400000);
-                }
+                if (dateFilter === 'today') matchDate = (evtDate === today);
+                else if (dateFilter === 'week') matchDate = (evtDate <= today + 7 * 86400000);
+                else if (dateFilter === 'month') matchDate = (evtDate <= today + 30 * 86400000);
 
-                // Tag Filter
                 const matchTag = selectedTags.length === 0 || (evt.tags && selectedTags.some(t => evt.tags.includes(t)));
-
                 return matchKeyword && matchDate && matchTag;
             });
 
@@ -754,10 +779,9 @@
                     markers.push(marker);
                 }
             });
-
-            toggleFilters();
+            // Don't close filter on apply automatically if using "Apply" button inside panel
+            // But if it's from search bar, we don't open panel.
         };
-
         window.resetFilters = () => {
             document.getElementById('pc-map-search').value = "";
             document.getElementById('mobile-map-search').value = "";
