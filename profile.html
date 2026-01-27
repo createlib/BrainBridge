@@ -230,15 +230,10 @@
         </form>
     </main>
 
-    <!-- Notification -->
-    <div id="notification" class="fixed top-4 right-4 z-50 hidden max-w-sm w-full bg-white shadow-lg rounded-lg p-4 border-l-4">
-        <p id="notif-message" class="text-sm font-medium"></p>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // ▼▼▼▼ Firebase Config ▼▼▼▼
@@ -260,6 +255,8 @@
 
         let currentUser = null;
         let currentUserData = {};
+        
+        // ★重要: 編集対象のUID
         let targetUid = null;
         let isAdmin = false;
 
@@ -294,28 +291,26 @@
                 currentUser = { uid: 'test_admin_uid' };
                 isAdmin = true;
                 currentUserData = { userId: 'admin', membershipRank: 'guardian' };
-                targetUid = 'test_admin_uid'; 
+                targetUid = 'test_admin_uid'; // Mock
                 document.getElementById('admin-label').classList.remove('hidden');
                 populateForm(currentUserData);
                 return;
             }
 
-            if (user) {
+            if (user && !user.isAnonymous) {
                 currentUser = user;
                 
+                // 1. 管理者チェック (自分のプロフィールを確認)
                 try {
                     const myProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     const myProfileSnap = await getDoc(myProfileRef);
-                    // 本人確認 (Auth UID == "admin" または DBのuserId == "admin")
-                    // セキュリティルールに合わせて調整
                     if (myProfileSnap.exists() && myProfileSnap.data().userId === 'admin') {
                         isAdmin = true;
                         document.getElementById('admin-label').classList.remove('hidden');
                     }
-                    // AuthのUIDが特定の管理者UIDなら管理者とするロジックも可
-                    // if (user.uid === 'Zm7FWRopJKVfyzbp8KXXokMFjNC3') isAdmin = true;
-                } catch(e) { console.error(e); }
+                } catch(e) { console.error("Admin Check Error", e); }
 
+                // 2. 編集対象の決定
                 const urlParams = new URLSearchParams(window.location.search);
                 const paramUid = urlParams.get('uid');
 
@@ -332,6 +327,7 @@
                     targetUid = user.uid;
                 }
 
+                // 3. データ読み込み
                 await loadUserProfile(targetUid);
             } else {
                 window.location.href = 'login.html';
@@ -355,10 +351,19 @@
             for (const [category, items] of Object.entries(categoriesData)) {
                 const details = document.createElement('details');
                 details.className = 'group border border-gray-200 rounded-lg bg-white overflow-hidden';
-                details.innerHTML = `<summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50 bg-gray-50 transition-colors select-none font-bold text-sm text-gray-700">${category} <span class="accordion-arrow">▼</span></summary><div class="p-4 border-t border-gray-100 flex flex-wrap gap-2"></div>`;
-                const div = details.querySelector('div');
+                details.innerHTML = `
+                    <summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50 bg-gray-50 transition-colors select-none">
+                        <span class="font-bold text-gray-700 text-sm">${category}</span>
+                        <span class="accordion-arrow text-gray-400"><i class="fa-solid fa-chevron-down"></i></span>
+                    </summary>
+                    <div class="p-4 border-t border-gray-100 flex flex-wrap gap-2"></div>`;
+                const contentDiv = details.querySelector('div');
                 items.forEach(item => {
-                    div.innerHTML += `<label class="cursor-pointer"><input type="checkbox" name="${inputName}" value="${item}" class="tag-checkbox hidden"><div class="px-3 py-1.5 rounded-full border border-gray-300 text-sm text-gray-600 hover:bg-gray-100 transition-colors select-none">${item}</div></label>`;
+                    contentDiv.innerHTML += `
+                        <label class="cursor-pointer">
+                            <input type="checkbox" name="${inputName}" value="${item}" class="tag-checkbox hidden">
+                            <div class="px-3 py-1.5 rounded-full border border-gray-300 text-sm text-gray-600 hover:bg-gray-100 transition-colors select-none">${item}</div>
+                        </label>`;
                 });
                 container.appendChild(details);
             }
@@ -372,11 +377,12 @@
                 if (docSnap.exists()) {
                     currentUserData = docSnap.data();
                 } else {
+                    // 新規の場合やデータがない場合
                     currentUserData = { userId: uid };
                 }
                 populateForm(currentUserData);
             } catch (e) {
-                console.error("Load Error:", e);
+                console.error(e);
                 showError("データの読み込みに失敗しました: " + e.message);
             }
         }
@@ -417,9 +423,15 @@
             div.className = 'bg-gray-50 p-4 rounded border border-gray-200 relative career-item';
             div.innerHTML = `
                 <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2"><input type="text" class="career-company w-full border border-gray-300 rounded p-2 text-sm" placeholder="会社名" value="${data.company||''}"><input type="text" class="career-role w-full border border-gray-300 rounded p-2 text-sm" placeholder="役職" value="${data.role||''}"></div>
-                <div class="grid grid-cols-2 gap-4 mb-2"><input type="month" class="career-start w-full border border-gray-300 rounded p-2 text-sm" value="${data.start||''}"><input type="month" class="career-end w-full border border-gray-300 rounded p-2 text-sm" value="${data.end||''}"></div>
-                <textarea class="career-desc w-full border border-gray-300 rounded p-2 text-sm" rows="2" placeholder="詳細">${data.description||''}</textarea>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                    <input type="text" class="career-company w-full border-gray-300 rounded p-2 text-sm" placeholder="会社名" value="${data.company||''}">
+                    <input type="text" class="career-role w-full border-gray-300 rounded p-2 text-sm" placeholder="役職" value="${data.role||''}">
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-2">
+                    <input type="month" class="career-start w-full border-gray-300 rounded p-2 text-sm" value="${data.start||''}">
+                    <input type="month" class="career-end w-full border-gray-300 rounded p-2 text-sm" value="${data.end||''}">
+                </div>
+                <textarea class="career-desc w-full border-gray-300 rounded p-2 text-sm" rows="2" placeholder="詳細">${data.description||''}</textarea>
             `;
             container.appendChild(div);
         };
@@ -477,45 +489,60 @@
             data.profileScore = 80; 
             data.updatedAt = new Date().toISOString();
 
+            // --- データの引き継ぎ ---
+            // 既存データ（ランク等）を維持しつつ、フォームデータを上書き
             const finalData = { ...currentUserData, ...data };
-            // 重要: 元のランクを維持。なければwalker
+            
+            // ★重要修正: userId が undefined になるのを防ぐ
+            // 既存データにIDがなければ、現在の編集対象ID(targetUid)をセット
+            if (!finalData.userId) {
+                finalData.userId = targetUid;
+            }
+
+            // ランクはフォームにないので既存を維持 (なければwalker)
             finalData.membershipRank = currentUserData.membershipRank || 'walker';
             
-            // ユーザーが選択した「公開設定」
-            const isPublicSetting = (data.profilePublic === 'true');
-            finalData.profilePublic = isPublicSetting ? 'true' : 'false';
+            // 公開設定 (文字列 "true" / "false")
+            finalData.profilePublic = data.profilePublic;
 
-            if (isAdminMock) { alert("保存しました(Mock)"); return; }
+            if (currentUser.uid === 'test_admin_uid') {
+                showNotification('プロフィールを更新しました(テスト)', 'success');
+                setTimeout(() => window.location.href = 'user.html', 1000);
+                return;
+            }
 
             try {
-                // 1. Private Data (マスター) - ここは必ず保存
+                // 1. Private Data (マスター)
                 const privateDocRef = doc(db, 'artifacts', appId, 'users', targetUid, 'profile', 'data');
                 await setDoc(privateDocRef, finalData);
-                
+                console.log("Master data saved.");
+
                 // 2. Public Data (検索用)
                 const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', targetUid);
                 
-                // 「有料会員」または「管理者」の場合のみ、公開設定に従って処理
                 const isPaidMember = (finalData.membershipRank === 'builder' || finalData.membershipRank === 'guardian');
+                const isPublicSetting = (finalData.profilePublic === 'true');
                 const canPublish = isPaidMember || isAdmin;
 
                 if (isPublicSetting && canPublish) {
-                    // 条件を満たす場合のみ公開データを作成/更新 (isHiddenを外す)
                     const publicData = {
                         ...finalData,
-                        isHidden: false, // 明示的に表示
-                        updatedAt: new Date().toISOString()
+                        updatedAt: new Date().toISOString(),
+                        isHidden: false // 明示的に表示
                     };
-                    await setDoc(publicDocRef, publicData, { merge: true });
+                    await setDoc(publicDocRef, publicData);
+                    console.log("Public data updated.");
                 } else {
                     // 非公開条件 (WALKER または 設定OFF)
                     // IDログイン維持のため、最小限のデータで上書きし、isHidden=trueにする
+                    // ★修正: undefined回避のため email がなければ null をセット
                     const minimalData = {
                         userId: finalData.userId,
-                        email: finalData.email,
+                        email: finalData.email || null, 
                         isHidden: true 
                     };
                     await setDoc(publicDocRef, minimalData);
+                    console.log("Public data masked (Hidden).");
                 }
 
                 if (isPublicSetting && !canPublish) {
@@ -529,8 +556,8 @@
             } catch (e) {
                 console.error("Save error details:", e);
                 let errorMsg = '保存に失敗しました';
-                if (e.code === 'permission-denied') errorMsg += ': 書き込み権限がありません (Firestoreルールを確認してください)';
-                else errorMsg += `: ${e.message}`;
+                if (e.code === 'permission-denied') errorMsg += ': 権限がありません。';
+                else if (e.message.includes('undefined')) errorMsg += ': 必須データ(UserIDなど)が不足しています。';
                 showError(errorMsg);
             }
         };
