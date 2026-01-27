@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ホーム | BRAIN BRIDGE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'Noto Sans JP', 'sans-serif'] },
+                    colors: { brand: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 900: '#312e81' } }
+                }
+            }
+        }
+    </script>
+    <style>body { background-color: #f8fafc; }</style>
+</head>
+<body class="text-slate-800 antialiased pb-20">
+
+    <!-- Header / Nav -->
+    <nav class="bg-white/90 backdrop-blur-md border-b border-slate-200 fixed w-full z-50 top-0 h-16">
+        <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <span class="text-xl font-black text-slate-900 tracking-tight">BRAIN BRIDGE</span>
+            </div>
+
+            <!-- PC Navigation -->
+            <div class="hidden lg:flex items-center gap-6">
+                <a href="home.html" class="text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-house"></i> ホーム</a>
+                <a href="events.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-map-location-dot"></i> イベント</a>
+                <a href="search.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-magnifying-glass"></i> さがす</a>
+                <a href="user.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-user"></i> マイページ</a>
+                <div class="h-6 w-px bg-slate-200 mx-1"></div>
+                <button onclick="handleLogout()" class="text-sm font-bold text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2"><i class="fa-solid fa-right-from-bracket"></i> ログアウト</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto pt-24 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Welcome Card -->
+                <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-3xl p-8 shadow-xl relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h1 class="text-2xl font-bold mb-2">Welcome to BRAIN BRIDGE</h1>
+                        <p class="text-slate-300 text-sm mb-6">つながり、学び、創り出すためのコミュニティプラットフォーム。</p>
+                        <div class="flex gap-3">
+                            <a href="search.html" class="bg-white text-slate-900 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-100 transition-colors">
+                                仲間を探す
+                            </a>
+                            <a href="events.html" class="bg-white/10 text-white border border-white/20 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-white/20 transition-colors">
+                                イベントへ
+                            </a>
+                        </div>
+                    </div>
+                    <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-10 translate-y-10">
+                        <i class="fa-solid fa-brain text-[12rem]"></i>
+                    </div>
+                </div>
+
+                <!-- Recent Events -->
+                <h2 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                    <span class="w-1 h-6 bg-brand-500 rounded-full"></span>
+                    直近のイベント
+                </h2>
+                <div id="recent-events-list" class="space-y-4">
+                    <!-- Loading -->
+                    <div class="animate-pulse flex space-x-4 p-4 bg-white rounded-xl shadow-sm">
+                        <div class="rounded-full bg-slate-200 h-12 w-12"></div>
+                        <div class="flex-1 space-y-2 py-1">
+                            <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+                            <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column (Sidebar) -->
+            <div class="space-y-6">
+                <!-- User Card Mini -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
+                    <div class="w-20 h-20 bg-slate-100 rounded-full mx-auto mb-3 overflow-hidden">
+                        <img id="home-user-icon" src="" class="w-full h-full object-cover hidden">
+                        <div id="home-user-placeholder" class="w-full h-full flex items-center justify-center text-slate-300"><i class="fa-solid fa-user text-3xl"></i></div>
+                    </div>
+                    <h3 class="font-bold text-slate-900" id="home-user-name">Guest</h3>
+                    <p class="text-xs text-slate-400 mb-4" id="home-user-id">@...</p>
+                    <a href="user.html" class="block w-full py-2 bg-slate-50 text-slate-600 text-sm font-bold rounded-lg hover:bg-slate-100 transition-colors">
+                        プロフィールを表示
+                    </a>
+                </div>
+
+                <!-- Info -->
+                <div class="bg-brand-50 rounded-2xl p-6 border border-brand-100">
+                    <h3 class="font-bold text-brand-900 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-crown text-brand-600"></i> プランについて
+                    </h3>
+                    <p class="text-xs text-brand-700 leading-relaxed mb-4">
+                        有料会員になると、より詳細なプロフィール閲覧や検索機能が利用できます。
+                    </p>
+                    <a href="upgrade.html" class="text-xs font-bold text-brand-600 hover:underline">
+                        詳細を見る &rarr;
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Bottom Navigation (Mobile Only) -->
+    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-40 pb-safe-bottom">
+        <div class="flex justify-around items-center h-16">
+            <a href="home.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
+                <i class="fa-solid fa-house text-xl mb-1"></i>
+                <span class="text-[10px] font-bold">ホーム</span>
+            </a>
+            <a href="events.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+                <i class="fa-solid fa-map-location-dot text-xl mb-1"></i>
+                <span class="text-[10px] font-medium">イベント</span>
+            </a>
+            <a href="search.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+                <i class="fa-solid fa-magnifying-glass text-xl mb-1"></i>
+                <span class="text-[10px] font-medium">さがす</span>
+            </a>
+            <button onclick="alert('マッチング機能は準備中です。\nComing Soon!')" class="flex flex-col items-center justify-center w-full h-full text-slate-300 hover:text-slate-400 transition-colors">
+                <i class="fa-solid fa-handshake-simple text-xl mb-1"></i>
+                <span class="text-[10px] font-medium">マッチ</span>
+            </button>
+            <a href="user.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+                <i class="fa-solid fa-user text-xl mb-1"></i>
+                <span class="text-[10px] font-medium">マイページ</span>
+            </a>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+        // ▼▼▼▼ Firebase Config ▼▼▼▼
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
+            authDomain: "brainbridge-4b8ac.firebaseapp.com",
+            projectId: "brainbridge-4b8ac",
+            storageBucket: "brainbridge-4b8ac.firebasestorage.app",
+            messagingSenderId: "803209683213",
+            appId: "1:803209683213:web:b62d13784fa2bbbb9f5044"
+        };
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'default-app-id';
+
+        const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (isAdminMock) {
+                updateUI({ name: 'テスト管理者', userId: 'admin' });
+                loadEvents();
+                return;
+            }
+
+            if (user && !user.isAnonymous) {
+                try {
+                    const docSnap = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data'));
+                    if (docSnap.exists()) {
+                        updateUI(docSnap.data());
+                    } else {
+                        updateUI({ name: 'User', userId: user.uid });
+                    }
+                } catch (e) { console.error(e); }
+                
+                loadEvents();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function updateUI(data) {
+            document.getElementById('home-user-name').textContent = data.name || 'User';
+            document.getElementById('home-user-id').textContent = '@' + (data.userId || '-');
+            
+            if (data.photoURL) {
+                const img = document.getElementById('home-user-icon');
+                img.src = data.photoURL;
+                img.classList.remove('hidden');
+                document.getElementById('home-user-placeholder').classList.add('hidden');
+            }
+        }
+
+        async function loadEvents() {
+            try {
+                const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
+                const q = query(eventsRef, orderBy('date', 'asc'), limit(3));
+                const snapshot = await getDocs(q);
+                
+                const container = document.getElementById('recent-events-list');
+                container.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="text-sm text-slate-400 italic p-4">予定されているイベントはありません</div>';
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const evt = doc.data();
+                    const thumb = evt.thumbnailUrl || 'https://via.placeholder.com/80';
+                    const el = document.createElement('a');
+                    el.href = 'events.html'; 
+                    el.className = 'flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-100 hover:border-brand-200 transition-colors shadow-sm';
+                    el.innerHTML = `
+                        <img src="${thumb}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-slate-900 truncate">${evt.title}</h4>
+                            <p class="text-xs text-slate-500 mt-1 flex items-center gap-2">
+                                <span><i class="fa-regular fa-calendar mr-1"></i>${evt.date}</span>
+                                <span><i class="fa-solid fa-location-dot mr-1"></i>${evt.locationName}</span>
+                            </p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300"></i>
+                    `;
+                    container.appendChild(el);
+                });
+
+            } catch (e) {
+                console.error("Events load err", e);
+            }
+        }
+
+        window.handleLogout = () => {
+            if (isAdminMock) localStorage.removeItem('isAdminMock');
+            signOut(auth);
+            window.location.href = 'login.html';
+        };
+    </script>
+</body>
+</html>
