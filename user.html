@@ -55,7 +55,10 @@
             </div>
             <div class="flex items-center gap-3">
                 <a href="search.html" class="hidden lg:flex p-2 text-slate-400 hover:text-brand-600 transition-colors" title="ユーザー検索"><i class="fa-solid fa-magnifying-glass text-lg"></i></a>
-                <a href="upgrade.html" class="hidden sm:inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"><i class="fa-solid fa-arrow-up mr-1"></i> UPGRADE</a>
+                
+                <!-- PC用 UPGRADEボタン (スマホでは非表示) -->
+                <a href="upgrade.html" class="hidden lg:inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"><i class="fa-solid fa-arrow-up mr-1"></i> UPGRADE</a>
+                
                 <a href="notifications.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors relative" title="通知">
                     <i class="fa-regular fa-bell text-xl"></i>
                     <span id="nav-badge" class="hidden absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
@@ -339,13 +342,14 @@
         function enableSelfMode() {
             const headerActions = document.getElementById('header-actions');
             if(headerActions) {
+                // スマホ向けに見やすいボタン配置
                 headerActions.innerHTML = `
-                <div class="flex gap-2 w-full lg:w-auto">
-                    <a href="profile.html" class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-700 bg-white hover:bg-slate-50 transition-all">
-                        編集
+                <div class="flex items-center gap-2">
+                    <a href="upgrade.html" class="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-sm hover:shadow-md hover:scale-105 transition-all" title="プランをアップグレード">
+                        <i class="fa-solid fa-crown text-sm"></i>
                     </a>
-                    <a href="upgrade.html" class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-bold rounded-xl text-white bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 transition-all">
-                        UP
+                    <a href="profile.html" class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-xs font-bold rounded-full text-slate-700 bg-white hover:bg-slate-50 transition-all active:scale-95">
+                        プロフィール編集
                     </a>
                 </div>`;
             }
@@ -435,9 +439,7 @@
                     else badge.classList.add('hidden');
                 }
 
-                // 表示制限判定の呼び出し (UI更新へ)
-                // データロード後に行われるが、ステータス変更時も反映が必要
-
+                // 表示制限判定の呼び出し
             } catch (e) { console.error("Check follow err:", e); }
         }
 
@@ -560,16 +562,18 @@
                 }
             }
 
-            // ★ 制限ロジック: 
+            // ★ 制限ロジック (更新版): 
             // 1. 相手がWALKERなら隠す
-            // 2. 自分がWALKERなら隠す (追加)
-            // ただし特権(自分、管理者)を除く
+            // 2. 自分がWALKERなら隠す
+            // 特権(自分、管理者)は除く
             const isTargetWalker = rank === 'walker';
             const isViewerWalker = myRank === 'walker';
             const isViewerPrivileged = isSelf || isAdmin;
+            
+            // どちらか一方がWALKERなら制限適用（特権なしの場合）
             const applyWalkerRestriction = (isTargetWalker || isViewerWalker) && !isViewerPrivileged;
 
-            // 1. 公開情報の強制非表示 (Bio, Tags, Goals, Matching)
+            // 1. 公開情報の強制非表示
             const hideIfWalker = (id) => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -586,28 +590,36 @@
             hideIfWalker('section-message'); 
 
             // 2. 詳細情報の制御 (Mutual or Self)
-            // 相互フォローでも、どちらかがWALKERなら隠す
-            // 表示許可 = (相互 or 特権) AND (制限なし)
+            // 制限対象なら、相互であっても隠す
             const showRestricted = (isMutual || isViewerPrivileged) && !applyWalkerRestriction;
             toggleRestrictedContent(showRestricted);
 
             // 制限時のマスク文言変更
             if (applyWalkerRestriction) {
-                const maskMsg = isViewerWalker 
-                    ? '<span class="text-brand-600 font-bold cursor-pointer" onclick="location.href=\'upgrade.html\'">BUILDERにアップグレード</span>して詳細を表示'
-                    : 'このユーザーの情報は制限されています';
+                let maskMsg = '';
+                if (isViewerWalker) {
+                    maskMsg = '<span class="text-brand-600 font-bold cursor-pointer underline" onclick="location.href=\'upgrade.html\'">BUILDERにアップグレード</span>して詳細を表示';
+                } else {
+                    // 自分が有料で相手が無料の場合
+                    maskMsg = 'このユーザーはWALKER会員のため情報は制限されています';
+                }
                 
                 document.querySelector('#message-mask p').innerHTML = maskMsg;
                 document.querySelector('#career-mask p').innerHTML = maskMsg;
                 document.querySelector('#personal-mask p').innerHTML = '<i class="fa-solid fa-lock mr-2"></i>' + maskMsg;
 
-                // 制限がかかっている場合でもマスク自体を表示するために強制表示
                 if (!isViewerPrivileged) {
                     // セクションを表示に戻してマスクを見せる
                     document.getElementById('section-message').classList.remove('hidden');
                     document.getElementById('message-mask').classList.remove('hidden');
                     document.getElementById('personal-mask').classList.remove('hidden');
                 }
+            } else if (!isMutual && !isViewerPrivileged) {
+                // 制限はないが相互でない場合（通常の相互待ち）
+                const normalMsg = '相互フォローで詳細を表示';
+                document.querySelector('#message-mask p').textContent = normalMsg;
+                document.querySelector('#career-mask p').textContent = normalMsg;
+                document.querySelector('#personal-mask p').textContent = normalMsg;
             }
 
             if (showRestricted) {
