@@ -57,7 +57,8 @@
     <nav class="glass-header border-b border-slate-200 fixed w-full z-[1500] top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <a href="home.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <!-- リンク先を events.html に修正 -->
+                <a href="events.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                     <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fa-solid fa-map-location-dot"></i></span>
                     イベント
                 </a>
@@ -108,7 +109,7 @@
     </button>
 
     <!-- Location Adjustment Mode UI -->
-    <div id="adjust-location-ui" class="hidden absolute bottom-24 lg:bottom-10 left-1/2 transform -translate-x-1/2 z-[3100] w-full max-w-sm px-4">
+    <div id="adjust-location-ui" class="hidden absolute bottom-24 lg:bottom-10 left-1/2 transform -translate-x-1/2 z-[3100] w-full max-w-sm px-4 pointer-events-auto">
         <div class="bg-white p-4 rounded-2xl shadow-2xl border border-slate-200 text-center animate-bounce-up">
             <p class="font-bold text-slate-800 mb-2">赤色のピンをドラッグして調整</p>
             <button onclick="finishLocationAdjust()" class="w-full bg-brand-600 text-white font-bold py-3 rounded-xl shadow-lg">
@@ -196,7 +197,7 @@
                     </div>
                     <div id="location-results" class="hidden mb-3 border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto shadow-sm bg-white"></div>
                     
-                    <button onclick="startLocationAdjust()" class="w-full py-2 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors mb-4 flex items-center justify-center gap-2">
+                    <button type="button" onclick="startLocationAdjust()" class="w-full py-2 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors mb-4 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-map-location-dot"></i> 地図を見ながら位置を微調整する
                     </button>
 
@@ -336,7 +337,6 @@
 
         const presetTags = ["交流会", "勉強会", "スポーツ", "音楽", "アート", "グルメ", "アウトドア", "ビジネス", "初心者歓迎", "オンライン"];
         
-        // Red Marker Icon for creating/editing
         const redIcon = new L.Icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -481,8 +481,13 @@
 
         window.startLocationAdjust = () => {
             if (!selectedCoords) return alert('先に場所を検索するか、地図をタップしてください');
+            
+            // モーダルを非表示にする
             document.getElementById('create-modal').classList.add('hidden');
+            
+            // 調整用UIを表示する
             document.getElementById('adjust-location-ui').classList.remove('hidden');
+            
             map.invalidateSize();
         };
 
@@ -658,7 +663,7 @@
                 loadEvents();
             } catch (e) {
                 console.error(e);
-                alert('処理に失敗しました。Firestoreルールを確認してください。');
+                alert('処理に失敗しました。データベースの権限（Firestoreルール）を確認してください。');
             }
         };
 
@@ -832,19 +837,21 @@
             try {
                 if (isJoined) {
                     await deleteDoc(partRef);
-                    await deleteDoc(myJoinRef);
+                    // ユーザー側の削除も試みるが、失敗してもエラーにしない（権限がない場合の保険）
+                    try { await deleteDoc(myJoinRef); } catch(e) { console.warn("My list update failed", e); }
                     alert('参加をキャンセルしました');
                 } else {
                     const ts = serverTimestamp();
                     await setDoc(partRef, { joinedAt: ts, uid: currentUser.uid });
-                    await setDoc(myJoinRef, { joinedAt: ts, eventId: eventId });
+                    // ユーザー側の書き込みも試みる
+                    try { await setDoc(myJoinRef, { joinedAt: ts, eventId: eventId }); } catch(e) { console.warn("My list update failed", e); }
                     alert('イベントに参加しました！');
                 }
                 const evt = allEvents.find(e => e.id === eventId);
                 if (evt) showEventSheet(evt);
             } catch (e) {
                 console.error(e);
-                alert('エラーが発生しました (Firestoreルールを確認してください)');
+                alert('参加処理に失敗しました。データベースの権限（Firestoreルール）を確認してください。');
             } finally {
                 isJoining = false;
             }
