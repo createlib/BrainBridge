@@ -48,8 +48,6 @@
         }
 
         .search-result-item:hover { background-color: #f1f5f9; }
-        
-        /* List Item Hover */
         .event-list-item:active { background-color: #f8fafc; }
     </style>
 </head>
@@ -112,22 +110,19 @@
     <!-- Location Adjustment Mode UI -->
     <div id="adjust-location-ui" class="hidden absolute bottom-24 lg:bottom-10 left-1/2 transform -translate-x-1/2 z-[3100] w-full max-w-sm px-4">
         <div class="bg-white p-4 rounded-2xl shadow-2xl border border-slate-200 text-center animate-bounce-up">
-            <p class="font-bold text-slate-800 mb-2">ピンをドラッグして位置を調整</p>
+            <p class="font-bold text-slate-800 mb-2">赤色のピンをドラッグして調整</p>
             <button onclick="finishLocationAdjust()" class="w-full bg-brand-600 text-white font-bold py-3 rounded-xl shadow-lg">
-                位置を決定して戻る
+                位置を決定して編集に戻る
             </button>
         </div>
     </div>
 
-    <!-- Event Detail Sheet (Mobile) -->
-    <div id="event-sheet" class="lg:hidden sheet-closed absolute bottom-0 left-0 w-full z-[2000] bg-white rounded-t-3xl shadow-2xl pb-safe-bottom max-h-[85vh] overflow-y-auto">
-        <div class="sticky top-0 bg-white z-10 pt-3 pb-2 flex justify-center items-center relative">
+    <!-- Event Detail Sheet -->
+    <div id="event-sheet" class="sheet-closed absolute bottom-0 left-0 w-full z-[2000] bg-white rounded-t-3xl shadow-2xl pb-safe-bottom max-h-[90vh] overflow-y-auto lg:w-[400px] lg:left-4 lg:bottom-4 lg:rounded-3xl lg:max-h-[85vh] lg:pb-0 lg:transform-none lg:hidden">
+        <div class="sticky top-0 bg-white z-10 pt-3 pb-2 flex justify-center" onclick="closeSheet()">
             <div class="w-12 h-1.5 bg-slate-200 rounded-full"></div>
-            <button onclick="closeSheet()" class="absolute right-4 top-3 p-2 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full w-8 h-8 flex items-center justify-center">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
         </div>
-        <div id="sheet-content" class="px-5 pb-20"></div>
+        <div id="sheet-content" class="px-5 pb-20 lg:pb-5"></div>
     </div>
 
     <!-- Event Detail Panel (PC) -->
@@ -172,11 +167,15 @@
                 <!-- Date & Time -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-2">日時 <span class="text-red-500">*</span></label>
+                    
+                    <!-- Start -->
                     <div class="flex gap-2 mb-2 items-center">
                         <span class="text-xs font-bold text-slate-400 w-8">開始</span>
                         <input type="date" id="event-start-date" class="flex-1 border-slate-200 rounded-lg text-sm p-2.5 bg-slate-50" required>
                         <input type="time" id="event-start-time" class="w-24 border-slate-200 rounded-lg text-sm p-2.5 bg-slate-50" required>
                     </div>
+
+                    <!-- End -->
                     <div class="flex gap-2 items-center">
                         <span class="text-xs font-bold text-slate-400 w-8">終了</span>
                         <input type="date" id="event-end-date" class="flex-1 border-slate-200 rounded-lg text-sm p-2.5 bg-slate-50" required>
@@ -336,6 +335,16 @@
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
 
         const presetTags = ["交流会", "勉強会", "スポーツ", "音楽", "アート", "グルメ", "アウトドア", "ビジネス", "初心者歓迎", "オンライン"];
+        
+        // Red Marker Icon for creating/editing
+        const redIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             initMap();
@@ -406,7 +415,6 @@
 
         function handleMarkerClick(targetEvent) {
             const zoom = map.getZoom();
-            // 投影してピクセル距離で重なり判定
             const targetLatLng = L.latLng(targetEvent.lat, targetEvent.lng);
             const targetPoint = map.project(targetLatLng, zoom);
             
@@ -415,7 +423,7 @@
                 const evtLatLng = L.latLng(evt.lat, evt.lng);
                 const evtPoint = map.project(evtLatLng, zoom);
                 const dist = targetPoint.distanceTo(evtPoint);
-                return dist < 30; // 30px以内を「重なっている」とみなす
+                return dist < 30; 
             });
             
             if (nearbyEvents.length > 1) {
@@ -462,7 +470,7 @@
             document.getElementById('event-location-name').value = displayName;
 
             if (tempMarker) map.removeLayer(tempMarker);
-            tempMarker = L.marker(selectedCoords, { draggable: true }).addTo(map);
+            tempMarker = L.marker(selectedCoords, { draggable: true, icon: redIcon }).addTo(map);
             
             tempMarker.on('dragend', function(e) {
                 selectedCoords = e.target.getLatLng();
@@ -550,7 +558,7 @@
                 }
                 
                 if (tempMarker) map.removeLayer(tempMarker);
-                tempMarker = L.marker(selectedCoords, { draggable: true }).addTo(map);
+                tempMarker = L.marker(selectedCoords, { draggable: true, icon: redIcon }).addTo(map);
                 tempMarker.on('dragend', function(e) { selectedCoords = e.target.getLatLng(); });
                 map.flyTo(selectedCoords, 15);
 
@@ -634,7 +642,7 @@
                 organizerId: currentUser.uid,
                 organizerName: myProfile ? (myProfile.name || myProfile.userId) : '主催者',
                 isParticipantsPublic: document.getElementById('event-public-participants').checked,
-                createdAt: serverTimestamp(), // editing should ideally not update createdAt but let's keep simple
+                createdAt: serverTimestamp(),
                 participantCount: 0
             };
 
@@ -681,14 +689,12 @@
             events.forEach(data => {
                 if (data.lat && data.lng) {
                     const marker = L.marker([data.lat, data.lng]).addTo(map);
-                    // ★重要: 重なり判定ロジックを通す
                     marker.on('click', () => handleMarkerClick(data));
                     markers.push(marker);
                 }
             });
         }
 
-        // --- List Sheet for Overlapping Events ---
         window.showEventListSheet = (events) => {
             const isPC = window.innerWidth >= 1024;
             const container = isPC ? document.getElementById('panel-content-pc') : document.getElementById('sheet-content');
@@ -898,12 +904,12 @@
             }
         };
         window.applyFilters = () => {
-            const keyword = document.getElementById('map-search').value.toLowerCase();
+            const keyword = document.getElementById('pc-map-search').value.toLowerCase();
             renderMarkers(allEvents); // Reset
             toggleFilters();
         };
         window.resetFilters = () => {
-            document.getElementById('map-search').value = "";
+            document.getElementById('pc-map-search').value = "";
             renderMarkers(allEvents);
             toggleFilters();
         };
