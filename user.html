@@ -55,10 +55,8 @@
             </div>
             <div class="flex items-center gap-3">
                 <a href="search.html" class="hidden lg:flex p-2 text-slate-400 hover:text-brand-600 transition-colors" title="ユーザー検索"><i class="fa-solid fa-magnifying-glass text-lg"></i></a>
-                
-                <!-- PC用 UPGRADEボタン (スマホでは非表示) -->
-                <a href="upgrade.html" class="hidden lg:inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"><i class="fa-solid fa-arrow-up mr-1"></i> UPGRADE</a>
-                
+                <!-- PC用 UPGRADEボタン -->
+                <a href="upgrade.html" class="hidden sm:inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"><i class="fa-solid fa-arrow-up mr-1"></i> UPGRADE</a>
                 <a href="notifications.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors relative" title="通知">
                     <i class="fa-regular fa-bell text-xl"></i>
                     <span id="nav-badge" class="hidden absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
@@ -342,14 +340,13 @@
         function enableSelfMode() {
             const headerActions = document.getElementById('header-actions');
             if(headerActions) {
-                // スマホ向けに見やすいボタン配置
                 headerActions.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <a href="upgrade.html" class="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-sm hover:shadow-md hover:scale-105 transition-all" title="プランをアップグレード">
-                        <i class="fa-solid fa-crown text-sm"></i>
-                    </a>
+                <div class="flex flex-col items-end gap-1">
                     <a href="profile.html" class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-xs font-bold rounded-full text-slate-700 bg-white hover:bg-slate-50 transition-all active:scale-95">
                         プロフィール編集
+                    </a>
+                    <a href="upgrade.html" class="text-[10px] font-medium text-slate-400 hover:text-brand-600 transition-colors mr-1">
+                        プランを変更
                     </a>
                 </div>`;
             }
