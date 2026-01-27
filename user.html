@@ -24,7 +24,7 @@
             .profile-sidebar::-webkit-scrollbar { display: none; }
         }
         .cover-gradient { background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); }
-        .glass-header { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .shimmer {
             background: #f6f7f8;
             background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
@@ -55,8 +55,12 @@
             </div>
             <div class="flex items-center gap-3">
                 <a href="search.html" class="hidden lg:flex p-2 text-slate-400 hover:text-brand-600 transition-colors" title="ユーザー検索"><i class="fa-solid fa-magnifying-glass text-lg"></i></a>
-                <!-- PC用 UPGRADEボタン -->
-                <a href="upgrade.html" class="hidden sm:inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"><i class="fa-solid fa-arrow-up mr-1"></i> UPGRADE</a>
+                
+                <!-- PC用 UPGRADEボタン (ヘッダー用) -->
+                <a href="upgrade.html" class="hidden lg:inline-flex items-center px-4 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-crown mr-1"></i> UPGRADE
+                </a>
+                
                 <a href="notifications.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors relative" title="通知">
                     <i class="fa-regular fa-bell text-xl"></i>
                     <span id="nav-badge" class="hidden absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
@@ -119,7 +123,7 @@
                                 <div id="header-actions" class="mb-1"></div>
                             </div>
 
-                            <div class="mb-4">
+                            <div class="mb-2">
                                 <h1 class="text-2xl font-bold text-slate-900 leading-tight"><span id="profile-name" class="shimmer block w-32 h-8 rounded mb-1"></span></h1>
                                 <div class="flex flex-wrap items-center gap-2 mt-1">
                                     <p class="text-sm text-slate-500 font-medium" id="profile-id">@...</p>
@@ -128,9 +132,27 @@
                                     <span id="admin-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-100"><i class="fa-solid fa-crown mr-1"></i>管理者閲覧中</span>
                                 </div>
                             </div>
-                            
-                            <!-- Bio Section (ID added) -->
-                            <div class="mb-6" id="section-bio"><p id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p></div>
+
+                            <!-- ★★★ ここにアップグレードCTAを挿入 (JS制御) ★★★ -->
+                            <div id="upgrade-cta-container" class="hidden mb-6">
+                                <a href="upgrade.html" class="block w-full bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 group">
+                                    <div class="px-4 py-3 flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="bg-white/20 rounded-full p-2 group-hover:scale-110 transition-transform">
+                                                <i class="fa-solid fa-crown text-xl text-white"></i>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-xs font-medium text-white/90">機能制限を解除</p>
+                                                <p class="text-base font-black tracking-wide">プランをアップグレード</p>
+                                            </div>
+                                        </div>
+                                        <i class="fa-solid fa-chevron-right text-white/80"></i>
+                                    </div>
+                                </a>
+                            </div>
+                            <!-- ★★★★★★★★★★★★★★★★★★★★★★★★★ -->
+
+                            <div class="mb-6"><p id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p></div>
 
                             <div class="flex items-center gap-6 py-4 border-t border-slate-100">
                                 <div class="text-center cursor-pointer hover:opacity-75 transition-opacity">
@@ -181,7 +203,7 @@
             <div class="flex-1 min-w-0">
                 <div class="space-y-6">
                     
-                    <!-- Message Section (ID added) -->
+                    <!-- Message Section -->
                     <div id="section-message" class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
                         <div class="flex items-center justify-between mb-4"><h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">想い・メッセージ</h2><i id="message-lock-icon" class="fa-solid fa-lock text-slate-300 hidden"></i></div>
                         <div id="message-container" class="hidden">
@@ -190,7 +212,7 @@
                         <div id="message-mask" class="hidden py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center"><div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white mb-3 shadow-sm"><i class="fa-solid fa-lock text-slate-400"></i></div><p class="text-sm font-bold text-slate-500">相互フォローで想いを読む</p></div>
                     </div>
 
-                    <!-- Matching Section (ID added) -->
+                    <!-- Matching Section -->
                     <div id="section-matching" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-blue-200 transition-colors">
                             <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
@@ -204,19 +226,19 @@
                         </div>
                     </div>
 
-                    <!-- Tags Section (ID added) -->
+                    <!-- Tags Section -->
                     <div id="section-tags" class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
                         <h2 class="text-lg font-bold text-slate-900 mb-4">スキル・趣味</h2>
                         <div id="tags-container" class="flex flex-wrap gap-2"><span class="text-sm text-slate-400 italic">未設定</span></div>
                     </div>
 
-                    <!-- Goals Section (ID added) -->
+                    <!-- Goals Section -->
                     <div id="section-goals" class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
                         <h2 class="text-lg font-bold text-slate-900 mb-4">目標・ビジョン</h2>
                         <div id="profile-goals" class="text-slate-700 text-sm leading-7 whitespace-pre-wrap">未設定</div>
                     </div>
 
-                    <!-- Career Section (ID added) -->
+                    <!-- Career Section -->
                     <div id="section-career" class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
                         <div class="flex items-center justify-between mb-6"><h2 class="text-lg font-bold text-slate-900">経歴</h2><i id="career-lock-icon" class="fa-solid fa-lock text-slate-300"></i></div>
                         <div id="career-container" class="space-y-8 mt-2 relative"><div class="absolute left-[7px] top-2 bottom-2 w-0.5 bg-slate-100"></div></div>
@@ -259,7 +281,7 @@
         let targetUid = null;
         let isFollowing = false;
         let isMutual = false;
-        let myRank = 'walker'; // 自分のランク
+        let myRank = 'walker'; 
 
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
         const urlParams = new URLSearchParams(window.location.search);
@@ -290,7 +312,7 @@
                     isSelf = true;
                     targetUid = 'test_admin_uid';
                     updateDashboardUI(getAdminMockData());
-                    enableSelfMode();
+                    enableSelfMode(myRank);
                 }
                 return;
             }
@@ -299,7 +321,6 @@
                 currentUser = user;
                 checkUnreadNotifications(user.uid);
                 
-                // 自分の情報を取得 (ランク含む)
                 const myProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                 const myProfileSnap = await getDoc(myProfileRef);
                 if (myProfileSnap.exists()) {
@@ -314,7 +335,7 @@
                 if (!targetUid || targetUid === user.uid) {
                     isSelf = true;
                     targetUid = user.uid;
-                    enableSelfMode();
+                    enableSelfMode(myRank); // Pass rank to control CTA visibility
                     if (myProfileSnap.exists()) updateDashboardUI(myProfileSnap.data());
                     else updateDashboardUI({ userId: user.uid, name: '（未設定）' });
                 } else {
@@ -337,21 +358,25 @@
             } catch (e) { console.error(e); }
         }
 
-        function enableSelfMode() {
+        function enableSelfMode(currentRank) {
+            // Header Actions: "編集" ボタンのみシンプルに表示
             const headerActions = document.getElementById('header-actions');
             if(headerActions) {
                 headerActions.innerHTML = `
-                <div class="flex flex-col items-end gap-1">
-                    <a href="profile.html" class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-xs font-bold rounded-full text-slate-700 bg-white hover:bg-slate-50 transition-all active:scale-95">
-                        プロフィール編集
-                    </a>
-                    <a href="upgrade.html" class="text-[10px] font-medium text-slate-400 hover:text-brand-600 transition-colors mr-1">
-                        プランを変更
-                    </a>
-                </div>`;
+                <a href="profile.html" class="inline-flex items-center justify-center px-6 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-700 bg-white hover:bg-slate-50 transition-all active:scale-95">
+                    プロフィール編集
+                </a>`;
             }
+            
             document.getElementById('completion-bar-container').classList.remove('hidden');
             document.getElementById('debug-rank-switcher').classList.remove('hidden'); 
+            
+            // ★ WALKER会員なら、目立つアップグレードバナーを表示
+            if (currentRank === 'walker') {
+                document.getElementById('upgrade-cta-container').classList.remove('hidden');
+            } else {
+                document.getElementById('upgrade-cta-container').classList.add('hidden');
+            }
             
             isMutual = true; 
             toggleRestrictedContent(true);
@@ -381,8 +406,6 @@
                     dataToUse = publicSnap.data();
                 }
                 
-                // 自分がWALKERなら詳細データ(Private)は取れない（制限のため）
-                // ただし管理者は取れる
                 if (isAdmin || (isMutual && myRank !== 'walker')) {
                     try {
                         const privateRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
@@ -435,8 +458,6 @@
                     if (isMutual && !isSelf) badge.classList.remove('hidden');
                     else badge.classList.add('hidden');
                 }
-
-                // 表示制限判定の呼び出し
             } catch (e) { console.error("Check follow err:", e); }
         }
 
@@ -559,18 +580,13 @@
                 }
             }
 
-            // ★ 制限ロジック (更新版): 
-            // 1. 相手がWALKERなら隠す
-            // 2. 自分がWALKERなら隠す
-            // 特権(自分、管理者)は除く
+            // Restriction Logic
             const isTargetWalker = rank === 'walker';
             const isViewerWalker = myRank === 'walker';
             const isViewerPrivileged = isSelf || isAdmin;
             
-            // どちらか一方がWALKERなら制限適用（特権なしの場合）
             const applyWalkerRestriction = (isTargetWalker || isViewerWalker) && !isViewerPrivileged;
 
-            // 1. 公開情報の強制非表示
             const hideIfWalker = (id) => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -586,33 +602,26 @@
             hideIfWalker('section-goals');
             hideIfWalker('section-message'); 
 
-            // 2. 詳細情報の制御 (Mutual or Self)
-            // 制限対象なら、相互であっても隠す
             const showRestricted = (isMutual || isViewerPrivileged) && !applyWalkerRestriction;
             toggleRestrictedContent(showRestricted);
 
-            // 制限時のマスク文言変更
             if (applyWalkerRestriction) {
                 let maskMsg = '';
                 if (isViewerWalker) {
                     maskMsg = '<span class="text-brand-600 font-bold cursor-pointer underline" onclick="location.href=\'upgrade.html\'">BUILDERにアップグレード</span>して詳細を表示';
                 } else {
-                    // 自分が有料で相手が無料の場合
                     maskMsg = 'このユーザーはWALKER会員のため情報は制限されています';
                 }
-                
                 document.querySelector('#message-mask p').innerHTML = maskMsg;
                 document.querySelector('#career-mask p').innerHTML = maskMsg;
                 document.querySelector('#personal-mask p').innerHTML = '<i class="fa-solid fa-lock mr-2"></i>' + maskMsg;
 
                 if (!isViewerPrivileged) {
-                    // セクションを表示に戻してマスクを見せる
                     document.getElementById('section-message').classList.remove('hidden');
                     document.getElementById('message-mask').classList.remove('hidden');
                     document.getElementById('personal-mask').classList.remove('hidden');
                 }
             } else if (!isMutual && !isViewerPrivileged) {
-                // 制限はないが相互でない場合（通常の相互待ち）
                 const normalMsg = '相互フォローで詳細を表示';
                 document.querySelector('#message-mask p').textContent = normalMsg;
                 document.querySelector('#career-mask p').textContent = normalMsg;
@@ -657,7 +666,6 @@
                     }
                 }
                 
-                // SNS
                 const snsContainer = document.getElementById('profile-sns-links');
                 if (snsContainer) {
                     snsContainer.innerHTML = '';
@@ -666,7 +674,6 @@
                     if (data.snsX) snsContainer.innerHTML += `<a href="${data.snsX.startsWith('http') ? data.snsX : 'https://twitter.com/'+data.snsX}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"><i class="fa-brands fa-x-twitter"></i></a>`;
                 }
 
-                // Message Text
                 const messageEl = document.getElementById('profile-message');
                 if (messageEl) {
                     messageEl.innerHTML = data.message ? formatText(data.message) : 'まだメッセージがありません。';
@@ -675,7 +682,6 @@
                 }
             }
 
-            // Public Data Filling (Only if NOT walker restriction)
             if (!applyWalkerRestriction) {
                 const updateList = (id, items) => {
                     const el = document.getElementById(id);
