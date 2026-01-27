@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>プロフィール | BRAIN BRIDGE</title>
+    <title>マイページ | BRAIN BRIDGE</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -46,17 +46,16 @@
     <nav class="glass-header border-b border-slate-200 fixed w-full z-50 top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <a href="javascript:history.back()" class="lg:hidden text-slate-500 hover:text-slate-900 transition-colors">
-                    <i class="fa-solid fa-arrow-left text-xl"></i>
-                </a>
+                <!-- 矢印削除済み -->
                 <a href="user.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                    <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fa-solid fa-layer-group"></i></span>
-                    BRAIN BRIDGE
+                    <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fa-solid fa-user"></i></span>
+                    <span id="header-title">マイページ</span>
                 </a>
             </div>
             <div class="flex items-center gap-3">
                 <!-- PC Navigation Links -->
                 <div class="hidden lg:flex items-center gap-6 mr-4">
+                    <!-- リンク先を home.html に修正 -->
                     <a href="home.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-house"></i> ホーム</a>
                     <a href="events.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-map-location-dot"></i> イベント</a>
                     <a href="search.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-magnifying-glass"></i> さがす</a>
@@ -82,6 +81,7 @@
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-50 safe-area-pb">
         <div class="flex justify-around items-center h-16">
+            <!-- リンク先を home.html に修正 -->
             <a href="home.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">ホーム</span>
@@ -144,7 +144,7 @@
                                 </div>
                             </div>
 
-                            <!-- Upgrade CTA (Displayed if Walker) -->
+                            <!-- Upgrade CTA -->
                             <div id="upgrade-cta-container" class="hidden mb-6">
                                 <a href="upgrade.html" class="block w-full bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 group">
                                     <div class="px-3 py-2.5 flex items-center justify-between">
@@ -350,6 +350,10 @@
                     else updateDashboardUI({ userId: user.uid, name: '（未設定）' });
                 } else {
                     isSelf = false;
+                    // 他人のプロフィール表示時は、まず「自分」であることをヘッダータイトルにするわけにはいかないので
+                    // ヘッダータイトルを「プロフィール」等にするロジックを入れるのも良いが
+                    // 今回は固定の「マイページ」のままになっている（指示通り）
+                    // データロード
                     await checkFollowStatus(user.uid, targetUid); 
                     await loadPublicProfile(targetUid);
                 }
@@ -418,6 +422,8 @@
                     dataToUse = publicSnap.data();
                 }
                 
+                // 自分がWALKERなら詳細データ(Private)は取れない（制限のため）
+                // ただし管理者は取れる
                 if (isAdmin || (isMutual && myRank !== 'walker')) {
                     try {
                         const privateRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
@@ -470,6 +476,10 @@
                     if (isMutual && !isSelf) badge.classList.remove('hidden');
                     else badge.classList.add('hidden');
                 }
+
+                // 表示制限判定の呼び出し (UI更新へ)
+                // ステータス変更に伴う再描画などは updateDashboardUI や toggleRestrictedContent で行う
+
             } catch (e) { console.error("Check follow err:", e); }
         }
 
@@ -551,6 +561,13 @@
         }
 
         function updateDashboardUI(data) {
+            // Navbar Title (PC/Mobile)
+            if(!isSelf) {
+               setElText('header-title', data.name || 'プロフィール');
+            } else {
+               setElText('header-title', 'マイページ');
+            }
+
             setElText('nav-name', data.name || 'User');
             if (data.userId) setElText('nav-id', '@' + data.userId);
             document.querySelectorAll('.shimmer').forEach(el => el.classList.remove('shimmer', 'w-32', 'h-8'));
@@ -691,6 +708,47 @@
                     messageEl.innerHTML = data.message ? formatText(data.message) : 'まだメッセージがありません。';
                     if (!data.message) messageEl.classList.add('text-slate-400');
                     else messageEl.classList.remove('text-slate-400');
+                }
+            }
+
+            // Public Data Filling (Only if NOT walker restriction)
+            // この処理は重要。制限されていないならデータを表示する
+            if (!applyWalkerRestriction) {
+                const updateList = (id, items) => {
+                    const el = document.getElementById(id);
+                    if(!el) return;
+                    el.innerHTML = '';
+                    if (items && items.length > 0) {
+                        items.forEach(item => {
+                            el.innerHTML += `<li class="flex items-start gap-2 text-[15px] text-slate-700"><i class="fa-solid fa-check text-brand-500 mt-1 flex-shrink-0"></i><span class="font-medium">${item}</span></li>`;
+                        });
+                    } else {
+                        el.innerHTML = '<li class="text-slate-400 text-xs italic">未設定</li>';
+                    }
+                };
+                updateList('list-can-offer', data.canOffer);
+                updateList('list-looking-for', data.lookingFor);
+
+                const goalsEl = document.getElementById('profile-goals');
+                if (goalsEl) {
+                    goalsEl.innerHTML = data.goals ? formatText(data.goals) : '未設定';
+                    if (!data.goals) goalsEl.classList.add('text-slate-400');
+                }
+
+                const tagsContainer = document.getElementById('tags-container');
+                if (tagsContainer) {
+                    tagsContainer.innerHTML = '';
+                    const allTags = [...(data.hobbies || []), ...(data.skills || [])];
+                    if (allTags.length > 0) {
+                        allTags.forEach(tag => {
+                            const span = document.createElement('span');
+                            span.className = 'inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold bg-slate-100 text-slate-600 border border-slate-200';
+                            span.textContent = tag;
+                            tagsContainer.appendChild(span);
+                        });
+                    } else {
+                        tagsContainer.innerHTML = '<span class="text-xs text-slate-400 italic">タグ未設定</span>';
+                    }
                 }
             }
 
