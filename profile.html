@@ -236,7 +236,7 @@
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        // ▼▼▼▼ Firebase Config ▼▼▼▼
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
             authDomain: "brainbridge-4b8ac.firebaseapp.com",
@@ -245,7 +245,6 @@
             messagingSenderId: "803209683213",
             appId: "1:803209683213:web:b62d13784fa2bbbb9f5044"
         };
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -255,14 +254,13 @@
 
         let currentUser = null;
         let currentUserData = {};
-        
-        // ★重要: 編集対象のUID
         let targetUid = null;
         let isAdmin = false;
 
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
 
-        // Data Definitions
+        // Master Data
+        const prefectures = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県","海外","その他"];
         const hobbyCategories = {
             "🏃 スポーツ・運動系": ["ランニング", "ウォーキング", "筋トレ", "ヨガ", "ピラティス", "ダンス", "バスケットボール", "サッカー", "フットサル", "野球", "テニス", "バドミントン", "卓球", "ゴルフ", "ボルダリング", "登山", "サーフィン", "スノーボード", "スキー", "サイクリング", "水泳", "格闘技", "武道"],
             "🎵 音楽・エンタメ": ["カラオケ", "楽器演奏（ギター）", "楽器演奏（ピアノ）", "作曲", "歌", "ライブ鑑賞", "フェス", "DJ", "映画鑑賞", "アニメ鑑賞", "漫画", "ゲーム", "ボードゲーム"],
@@ -280,7 +278,6 @@
             "💼 ビジネス": ["起業", "経営", "マーケティング", "会計", "人事", "英語"],
             "🧘 その他": ["料理指導", "整理収納", "健康管理"]
         };
-        const prefectures = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県","海外","その他"];
 
         document.addEventListener('DOMContentLoaded', () => {
             initUI();
@@ -290,17 +287,15 @@
             if (isAdminMock) {
                 currentUser = { uid: 'test_admin_uid' };
                 isAdmin = true;
-                currentUserData = { userId: 'admin', membershipRank: 'guardian' };
-                targetUid = 'test_admin_uid'; // Mock
-                document.getElementById('admin-label').classList.remove('hidden');
-                populateForm(currentUserData);
+                targetUid = 'test_admin_uid';
+                populateForm({userId:'admin', name:'管理者'});
                 return;
             }
 
-            if (user && !user.isAnonymous) {
+            if (user) {
                 currentUser = user;
                 
-                // 1. 管理者チェック (自分のプロフィールを確認)
+                // 1. 管理者チェック
                 try {
                     const myProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     const myProfileSnap = await getDoc(myProfileRef);
@@ -308,26 +303,30 @@
                         isAdmin = true;
                         document.getElementById('admin-label').classList.remove('hidden');
                     }
+                    // 管理者UIDと一致する場合も管理者とする
+                    if (user.uid === "Zm7FWRopJKVfyzbp8KXXokMFjNC3") {
+                        isAdmin = true;
+                        document.getElementById('admin-label').classList.remove('hidden');
+                    }
                 } catch(e) { console.error("Admin Check Error", e); }
 
-                // 2. 編集対象の決定
+                // 2. ターゲット決定
                 const urlParams = new URLSearchParams(window.location.search);
                 const paramUid = urlParams.get('uid');
-
+                
                 if (paramUid && paramUid !== user.uid) {
                     if (isAdmin) {
                         targetUid = paramUid;
                         showNotification('管理者権限で他ユーザーを編集します', 'info');
                     } else {
-                        alert('権限がありません');
-                        window.location.href = 'user.html';
+                        alert("権限がありません");
+                        window.location.href = "user.html";
                         return;
                     }
                 } else {
                     targetUid = user.uid;
                 }
 
-                // 3. データ読み込み
                 await loadUserProfile(targetUid);
             } else {
                 window.location.href = 'login.html';
@@ -351,19 +350,10 @@
             for (const [category, items] of Object.entries(categoriesData)) {
                 const details = document.createElement('details');
                 details.className = 'group border border-gray-200 rounded-lg bg-white overflow-hidden';
-                details.innerHTML = `
-                    <summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50 bg-gray-50 transition-colors select-none">
-                        <span class="font-bold text-gray-700 text-sm">${category}</span>
-                        <span class="accordion-arrow text-gray-400"><i class="fa-solid fa-chevron-down"></i></span>
-                    </summary>
-                    <div class="p-4 border-t border-gray-100 flex flex-wrap gap-2"></div>`;
-                const contentDiv = details.querySelector('div');
+                details.innerHTML = `<summary class="p-3 cursor-pointer hover:bg-gray-50 font-bold text-sm text-gray-700 flex justify-between">${category} <span class="accordion-arrow">▼</span></summary><div class="p-3 flex flex-wrap gap-2"></div>`;
+                const div = details.querySelector('div');
                 items.forEach(item => {
-                    contentDiv.innerHTML += `
-                        <label class="cursor-pointer">
-                            <input type="checkbox" name="${inputName}" value="${item}" class="tag-checkbox hidden">
-                            <div class="px-3 py-1.5 rounded-full border border-gray-300 text-sm text-gray-600 hover:bg-gray-100 transition-colors select-none">${item}</div>
-                        </label>`;
+                    div.innerHTML += `<label class="cursor-pointer"><input type="checkbox" name="${inputName}" value="${item}" class="tag-checkbox hidden"><div class="px-3 py-1 rounded-full border border-gray-300 text-xs hover:bg-gray-100">${item}</div></label>`;
                 });
                 container.appendChild(details);
             }
@@ -377,7 +367,6 @@
                 if (docSnap.exists()) {
                     currentUserData = docSnap.data();
                 } else {
-                    // 新規の場合やデータがない場合
                     currentUserData = { userId: uid };
                 }
                 populateForm(currentUserData);
@@ -490,11 +479,9 @@
             data.updatedAt = new Date().toISOString();
 
             // --- データの引き継ぎ ---
-            // 既存データ（ランク等）を維持しつつ、フォームデータを上書き
             const finalData = { ...currentUserData, ...data };
             
-            // ★重要修正: userId が undefined になるのを防ぐ
-            // 既存データにIDがなければ、現在の編集対象ID(targetUid)をセット
+            // ★重要: userId が undefined になるのを防ぐ
             if (!finalData.userId) {
                 finalData.userId = targetUid;
             }
@@ -522,6 +509,7 @@
                 
                 const isPaidMember = (finalData.membershipRank === 'builder' || finalData.membershipRank === 'guardian');
                 const isPublicSetting = (finalData.profilePublic === 'true');
+                // 管理者が編集した場合は強制的に公開可能
                 const canPublish = isPaidMember || isAdmin;
 
                 if (isPublicSetting && canPublish) {
