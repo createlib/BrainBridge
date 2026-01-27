@@ -25,10 +25,11 @@
     </script>
     <style>
         body { background-color: #f8fafc; overflow: hidden; }
-        .glass-header { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); }
+        .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
         
-        #map { height: 100vh; width: 100%; z-index: 0; }
+        /* Map Container: ヘッダー(64px)の分を下げる */
+        #map { height: calc(100vh - 64px); width: 100%; z-index: 0; margin-top: 64px; }
 
         /* Detail Sheet */
         #event-sheet { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -42,19 +43,59 @@
         .search-result-item:hover { background-color: #f1f5f9; }
     </style>
 </head>
-<body class="text-slate-800 antialiased h-screen w-screen relative">
+<body class="text-slate-800 antialiased h-screen w-screen relative flex flex-col">
 
-    <!-- Header (Search & Filter) -->
-    <div class="absolute top-0 w-full z-[1000] px-4 pt-4 pb-2 bg-gradient-to-b from-white/80 to-transparent pointer-events-none">
-        <div class="flex gap-2 pointer-events-auto max-w-2xl mx-auto">
-            <div class="relative flex-1 shadow-lg rounded-full">
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                <input type="text" id="map-search" placeholder="イベントを検索..." 
-                    class="w-full bg-white border-none rounded-full py-3 pl-11 pr-4 text-sm focus:ring-2 focus:ring-brand-500 shadow-sm">
+    <!-- Navbar (PC & Mobile Common) -->
+    <nav class="glass-header border-b border-slate-200 fixed w-full z-[1500] top-0 h-16">
+        <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fa-solid fa-map-location-dot"></i></span>
+                    Events
+                </a>
             </div>
-            <button onclick="toggleFilters()" class="w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-600 hover:text-brand-600 transition-colors relative">
-                <i class="fa-solid fa-sliders"></i>
-            </button>
+
+            <!-- PC Search Bar -->
+            <div class="hidden lg:flex flex-1 max-w-md mx-8 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="pc-map-search" placeholder="イベントを検索..." 
+                    class="w-full bg-slate-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500 transition-all">
+            </div>
+
+            <!-- PC Actions -->
+            <div class="hidden lg:flex items-center gap-6">
+                <a href="index.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm">
+                    <i class="fa-solid fa-house"></i> ホーム
+                </a>
+                <a href="events.html" class="text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm">
+                    <i class="fa-solid fa-map-location-dot"></i> イベント
+                </a>
+                <a href="search.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm">
+                    <i class="fa-solid fa-magnifying-glass"></i> さがす
+                </a>
+                <a href="user.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm">
+                    <i class="fa-solid fa-user"></i> マイページ
+                </a>
+                <button onclick="toggleFilters()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative" title="フィルター">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Actions (Simple) -->
+            <div class="lg:hidden flex items-center gap-3">
+                 <button onclick="toggleFilters()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Floating Search Bar (Only visible on mobile) -->
+    <div class="lg:hidden absolute top-20 w-full z-[1000] px-4 pointer-events-none">
+        <div class="relative flex-1 shadow-lg rounded-full pointer-events-auto">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="mobile-map-search" placeholder="イベントを検索..." 
+                class="w-full bg-white border-none rounded-full py-3 pl-11 pr-4 text-sm focus:ring-2 focus:ring-brand-500 shadow-sm">
         </div>
     </div>
 
@@ -62,7 +103,8 @@
     <div id="map"></div>
 
     <!-- Create Button (FAB) -->
-    <button id="create-event-fab" onclick="openCreateModal()" class="hidden absolute bottom-24 right-5 z-[900] w-14 h-14 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-slate-800 hover:scale-105 transition-all">
+    <!-- z-indexを2000に上げ、bottom位置を調整 -->
+    <button id="create-event-fab" onclick="openCreateModal()" class="hidden absolute bottom-24 right-5 z-[2000] w-14 h-14 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-slate-800 hover:scale-105 transition-all">
         <i class="fa-solid fa-plus text-xl"></i>
     </button>
 
@@ -84,7 +126,6 @@
             </div>
             
             <div class="p-5 overflow-y-auto flex-1 space-y-6">
-                
                 <!-- Image Upload -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-2">サムネイル画像</label>
@@ -105,27 +146,30 @@
                 </div>
 
                 <!-- Location Search -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1">開催場所 <span class="text-red-500">*</span></label>
-                    <div class="flex gap-2">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <label class="block text-xs font-bold text-slate-700 mb-2">開催場所の設定 <span class="text-red-500">*</span></label>
+                    
+                    <div class="flex gap-2 mb-2">
                         <div class="relative flex-1">
-                            <i class="fa-solid fa-map-pin absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" id="location-search-input" placeholder="住所、建物名、駅名など" class="w-full border-slate-200 rounded-lg text-sm pl-10 p-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="location-search-input" placeholder="住所や建物名で検索 (例: 名古屋駅)" class="w-full border-slate-200 rounded-lg text-sm pl-10 p-2.5 bg-white focus:ring-2 focus:ring-brand-500">
                         </div>
-                        <button onclick="searchLocation()" class="bg-slate-800 text-white px-4 rounded-lg text-sm font-bold whitespace-nowrap hover:bg-slate-700">
+                        <button onclick="searchLocation()" class="bg-slate-800 text-white px-3 rounded-lg text-sm font-bold whitespace-nowrap hover:bg-slate-700">
                             検索
                         </button>
                     </div>
                     
-                    <!-- Search Results -->
-                    <div id="location-results" class="hidden mt-2 border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto shadow-sm"></div>
+                    <div id="location-results" class="hidden mb-3 border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto shadow-sm bg-white"></div>
                     
-                    <!-- Selected Location Display -->
-                    <div id="selected-location-display" class="hidden mt-2 p-3 bg-brand-50 border border-brand-100 rounded-lg flex items-center gap-2">
-                        <i class="fa-solid fa-check-circle text-brand-600"></i>
-                        <span id="selected-location-name" class="text-sm font-bold text-brand-800 truncate"></span>
+                    <div class="flex items-start gap-2 text-xs text-slate-500 mb-4">
+                        <i class="fa-solid fa-map-pin mt-0.5 text-brand-600"></i>
+                        <span>検索で大まかな位置を決め、地図上のピンをドラッグして微調整してください。</span>
                     </div>
-                    <p class="text-[10px] text-slate-400 mt-1">※検索して選択すると地図上にピンが立ちます</p>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">表示する場所名 (ビル名・階数など)</label>
+                        <input type="text" id="event-location-name" placeholder="例: ミッドランドスクエア 42階" class="w-full border-slate-200 rounded-lg text-sm p-2.5 bg-white focus:ring-2 focus:ring-brand-500">
+                    </div>
                 </div>
 
                 <!-- Date & Time -->
@@ -146,13 +190,10 @@
                     </div>
                 </div>
 
-                <!-- Tags (Selection) -->
+                <!-- Tags -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-2">タグを選択</label>
-                    <div class="flex flex-wrap gap-2" id="tag-selection-area">
-                        <!-- JS injected buttons -->
-                    </div>
-                    <!-- Custom Tag Input -->
+                    <div class="flex flex-wrap gap-2" id="tag-selection-area"></div>
                     <input type="text" id="custom-tags" placeholder="その他のタグ (カンマ区切り)" class="mt-2 w-full border-slate-200 rounded-lg text-sm p-2 bg-slate-50">
                 </div>
 
@@ -162,7 +203,7 @@
                     <textarea id="event-desc" rows="4" class="w-full border-slate-200 rounded-lg text-sm p-3 bg-slate-50" placeholder="イベントの魅力や詳細を書きましょう"></textarea>
                 </div>
 
-                <!-- Participant Settings -->
+                <!-- Settings -->
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
                     <label class="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" id="event-public-participants" class="w-5 h-5 text-brand-600 rounded focus:ring-brand-500 border-gray-300" checked>
@@ -172,7 +213,6 @@
                         </div>
                     </label>
                 </div>
-
             </div>
 
             <div class="p-4 border-t border-slate-100 bg-white pb-safe-bottom sm:pb-4 flex-shrink-0">
@@ -208,12 +248,13 @@
     </div>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 z-[1900] safe-area-pb">
+    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 z-[1900] safe-area-pb lg:hidden">
         <div class="flex justify-around items-center h-16">
             <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">ホーム</span>
             </a>
+            <!-- Events Active -->
             <a href="events.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
                 <i class="fa-solid fa-map-location-dot text-xl mb-1"></i>
                 <span class="text-[10px] font-bold">イベント</span>
@@ -262,20 +303,32 @@
         let allEvents = [];
         let currentUser = null;
         let myProfile = null;
+        
+        let isCreating = false;
+        let tempMarker = null; 
         let selectedCoords = null;
-        let selectedAddress = "";
+        
         let selectedTags = new Set();
         let isJoining = false;
 
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
 
-        // Preset Tags
         const presetTags = ["交流会", "勉強会", "スポーツ", "音楽", "アート", "グルメ", "アウトドア", "ビジネス", "初心者歓迎", "オンライン"];
 
-        // Init
         document.addEventListener('DOMContentLoaded', () => {
             initMap();
             renderTagButtons();
+            
+            // Search Input Sync
+            const pcSearch = document.getElementById('pc-map-search');
+            // const mobileSearch = document.getElementById('mobile-map-search'); // モバイル用はヘッダー内
+            const handleSearch = (e) => {
+                const val = e.target.value.toLowerCase();
+                const filtered = allEvents.filter(evt => evt.title.toLowerCase().includes(val));
+                renderMarkers(filtered);
+            };
+            if(pcSearch) pcSearch.addEventListener('input', handleSearch);
+            // if(mobileSearch) mobileSearch.addEventListener('input', handleSearch);
         });
 
         onAuthStateChanged(auth, async (user) => {
@@ -305,11 +358,11 @@
             }
         });
 
-        // --- Map & Location Search ---
         function initMap() {
             map = L.map('map', { zoomControl: false }).setView([35.6895, 139.6917], 13);
+            // OpenStreetMap (Standard)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap'
+                attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
         }
 
@@ -344,20 +397,21 @@
 
         function selectLocation(place) {
             selectedCoords = { lat: parseFloat(place.lat), lng: parseFloat(place.lon) };
-            selectedAddress = place.display_name;
+            const displayName = place.display_name.split(',')[0];
             
-            // UI更新
             document.getElementById('location-results').classList.add('hidden');
-            document.getElementById('selected-location-name').textContent = selectedAddress.split(',')[0]; // 短縮表示
-            document.getElementById('selected-location-display').classList.remove('hidden');
-            document.getElementById('event-location-name').value = selectedAddress.split(',')[0]; // 場所名にも自動入力
+            document.getElementById('event-location-name').value = displayName;
 
-            // マップ移動
+            if (tempMarker) map.removeLayer(tempMarker);
+            tempMarker = L.marker(selectedCoords, { draggable: true }).addTo(map);
+            
+            tempMarker.on('dragend', function(e) {
+                selectedCoords = e.target.getLatLng();
+            });
+
             map.flyTo(selectedCoords, 15);
-            // 仮マーカー表示はモーダルが開いているので見えないが、座標はセット完了
         }
 
-        // --- Event Creation ---
         function renderTagButtons() {
             const container = document.getElementById('tag-selection-area');
             container.innerHTML = '';
@@ -383,6 +437,12 @@
             document.getElementById('event-date').value = new Date().toISOString().split('T')[0];
             selectedTags.clear();
             renderTagButtons();
+            
+            if (tempMarker) map.removeLayer(tempMarker);
+            selectedCoords = null;
+            document.getElementById('location-search-input').value = "";
+            document.getElementById('event-location-name').value = "";
+            document.getElementById('location-results').classList.add('hidden');
         };
 
         window.closeCreateModal = () => {
@@ -397,7 +457,6 @@
             if (!title || !date) return alert('タイトルと日付は必須です');
             if (!selectedCoords) return alert('開催場所を検索して設定してください');
 
-            // Image Upload
             let thumbnailUrl = '';
             const file = document.getElementById('event-image').files[0];
             if (file) {
@@ -411,7 +470,6 @@
                 }
             }
 
-            // Tags
             const customTags = document.getElementById('custom-tags').value.split(',').map(s=>s.trim()).filter(s=>s);
             const finalTags = [...Array.from(selectedTags), ...customTags];
 
@@ -420,7 +478,7 @@
                 date: date,
                 startTime: document.getElementById('event-start').value,
                 endTime: document.getElementById('event-end').value,
-                locationName: document.getElementById('event-location-name').value || selectedAddress,
+                locationName: document.getElementById('event-location-name').value, 
                 description: document.getElementById('event-desc').value,
                 tags: finalTags,
                 thumbnailUrl: thumbnailUrl,
@@ -444,7 +502,6 @@
             }
         };
 
-        // --- Event Loading & Display ---
         async function loadEvents() {
             const today = new Date().toISOString().split('T')[0];
             const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
@@ -474,18 +531,15 @@
             const sheet = document.getElementById('event-sheet');
             const content = document.getElementById('sheet-content');
             
-            // Check participation status
             let isJoined = false;
             let participantsHtml = '<div class="text-xs text-slate-400">読み込み中...</div>';
             
             if (currentUser) {
-                // Check if I joined
                 try {
                     const partDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', evt.id, 'participants', currentUser.uid));
                     isJoined = partDoc.exists();
                 } catch(e){}
                 
-                // Load participants if public or organizer
                 const isOrganizer = currentUser.uid === evt.organizerId;
                 if (evt.isParticipantsPublic || isOrganizer) {
                     try {
@@ -496,14 +550,10 @@
                             participantsHtml = '<div class="text-xs text-slate-400">まだ参加者はいません</div>';
                         } else {
                             participantsHtml = '<div class="flex -space-x-2 overflow-hidden py-1">';
-                            const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
-                            
-                            // 簡易的に先頭数名のアバターを表示 (本番ではページング等考慮)
                             let count = 0;
                             for (const pDoc of partsSnap.docs) {
                                 if (count > 5) break;
                                 const uid = pDoc.id;
-                                // ユーザー情報の取得（キャッシュ推奨だが今回は都度）
                                 const uDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
                                 const uData = uDoc.data() || {};
                                 const avatar = uData.photoURL || 'https://via.placeholder.com/32';
@@ -528,7 +578,6 @@
             const thumb = evt.thumbnailUrl || 'https://via.placeholder.com/400x200?text=No+Image';
             const tags = evt.tags ? evt.tags.map(t => `<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">#${t}</span>`).join('') : '';
 
-            // Join Button State
             const btnText = isJoined ? 'キャンセルする' : 'イベントに参加する';
             const btnClass = isJoined 
                 ? 'bg-slate-200 text-slate-600 hover:bg-slate-300' 
@@ -597,10 +646,8 @@
                     });
                     alert('イベントに参加しました！');
                 }
-                // Reload sheet
                 const evt = allEvents.find(e => e.id === eventId);
                 if (evt) showEventSheet(evt);
-
             } catch (e) {
                 console.error(e);
                 alert('エラーが発生しました');
@@ -616,7 +663,7 @@
             setTimeout(() => sheet.classList.add('hidden'), 300);
         };
 
-        // Image Preview Handler (Create)
+        // Image Preview Handler
         document.getElementById('event-image').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -645,9 +692,7 @@
         };
         window.applyFilters = () => {
             const keyword = document.getElementById('map-search').value.toLowerCase();
-            const dateFilter = document.getElementById('filter-date').value;
-            // TODO: Implement complex filter logic if needed
-            renderMarkers(allEvents); // Reset for now
+            renderMarkers(allEvents); // Reset
             toggleFilters();
         };
         window.resetFilters = () => {
