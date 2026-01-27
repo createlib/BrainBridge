@@ -52,13 +52,8 @@
             .card-grid { grid-template-columns: repeat(5, 1fr); gap: 1.5rem; }
         }
         
+        /* Bottom Nav Safe Area */
         .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
-
-        /* Filter Accordion Styles */
-        details > summary { list-style: none; }
-        details > summary::-webkit-details-marker { display: none; }
-        .accordion-arrow { transition: transform 0.2s ease; }
-        details[open] .accordion-arrow { transform: rotate(180deg); }
         
         /* Custom Checkbox */
         .filter-checkbox:checked + div {
@@ -66,6 +61,11 @@
             border-color: #6366f1;
             color: #4f46e5;
         }
+        
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        .accordion-arrow { transition: transform 0.2s ease; }
+        details[open] .accordion-arrow { transform: rotate(180deg); }
     </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col pb-safe-bottom lg:pb-0">
@@ -74,56 +74,53 @@
     <nav class="glass-header border-b border-slate-200 fixed w-full z-50 top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <a href="index.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                    <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fa-solid fa-magnifying-glass"></i></span>
-                    Search
+                <a href="user.html" class="text-slate-500 hover:text-slate-900 transition-colors">
+                    <i class="fa-solid fa-arrow-left text-xl"></i>
                 </a>
+                <span class="font-bold text-lg">探す</span>
             </div>
             
             <!-- Search Bar (Desktop Only) -->
-            <div class="hidden lg:flex flex-1 max-w-md mx-8 relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                <input type="text" id="desktop-search" placeholder="キーワードで検索..." 
-                    class="w-full bg-slate-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500 transition-all">
+            <div class="hidden lg:block flex-1 max-w-md mx-8">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="desktop-search" placeholder="キーワードで検索 (名前, ID, 職業...)" 
+                        class="w-full bg-slate-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500 transition-all">
+                </div>
             </div>
 
-            <!-- PC Navigation -->
-            <div class="hidden lg:flex items-center gap-6">
-                <a href="home.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-house"></i> ホーム</a>
-                <a href="events.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-map-location-dot"></i> イベント</a>
-                <a href="search.html" class="text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-magnifying-glass"></i> さがす</a>
-                <a href="user.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-user"></i> マイページ</a>
-                
-                <button onclick="toggleFilters()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative" title="フィルター">
+            <!-- Header Actions -->
+            <div class="flex items-center gap-3">
+                <!-- Filter Button (Desktop Only) -->
+                <!-- スマホでは検索バー横に配置するためここでは隠す (hidden lg:flex) -->
+                <button onclick="toggleFilters()" class="hidden lg:flex p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative" title="フィルター">
                     <i class="fa-solid fa-sliders"></i>
                     <span id="filter-badge-desktop" class="hidden absolute top-1 right-1 w-2 h-2 bg-brand-500 rounded-full"></span>
                 </button>
-
+                
+                <!-- Notification Bell -->
                 <a href="notifications.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors">
                     <i class="fa-regular fa-bell text-xl"></i>
                 </a>
-            </div>
 
-            <!-- Mobile Only Actions -->
-            <div class="lg:hidden flex items-center gap-3">
-                <button onclick="toggleFilters()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">
-                    <i class="fa-solid fa-sliders"></i>
-                </button>
-                <a href="notifications.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors">
-                    <i class="fa-regular fa-bell text-xl"></i>
+                <!-- User Icon (PC only) -->
+                <a href="user.html" class="hidden lg:flex p-2 text-slate-400 hover:text-brand-600 transition-colors">
+                    <i class="fa-solid fa-user text-xl"></i>
                 </a>
             </div>
         </div>
     </nav>
 
     <!-- Search Bar & Filter (Mobile Only) -->
-    <div class="sm:hidden fixed top-16 w-full bg-white/95 backdrop-blur-sm z-40 px-4 py-3 border-b border-slate-100 shadow-sm">
+    <!-- Navbarの下に固定表示 -->
+    <div class="lg:hidden fixed top-16 w-full bg-white/95 backdrop-blur-sm z-40 px-4 py-3 border-b border-slate-100 shadow-sm">
         <div class="flex gap-3">
             <div class="relative flex-1">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
                 <input type="text" id="mobile-search" placeholder="キーワードで検索" 
                     class="w-full bg-slate-100 border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500 transition-all">
             </div>
+            <!-- Mobile Filter Button -->
             <button onclick="toggleFilters()" class="flex-shrink-0 w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors relative">
                 <i class="fa-solid fa-sliders"></i>
                 <span id="filter-badge-mobile" class="hidden absolute top-2 right-2 w-2 h-2 bg-brand-500 rounded-full border border-white"></span>
@@ -133,7 +130,7 @@
 
     <!-- Filter Panel -->
     <div id="filter-panel" class="fixed top-0 left-0 w-full h-full bg-black/50 z-[60] hidden opacity-0 transition-opacity duration-300">
-        <div class="absolute right-0 top-0 h-full w-80 sm:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col" id="filter-content">
+        <div class="absolute right-0 top-0 h-full w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col" id="filter-content">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-white z-10">
                 <h3 class="font-bold text-lg flex items-center gap-2">
                     <i class="fa-solid fa-filter text-brand-600"></i> 絞り込み
@@ -144,7 +141,7 @@
             </div>
             
             <div class="flex-1 overflow-y-auto p-5 space-y-6">
-                <!-- (フィルター内容は変更なし) -->
+                <!-- Sort -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-2">並び順</label>
                     <select id="filter-sort" class="w-full border-slate-200 rounded-lg text-sm p-2.5 bg-slate-50 focus:border-brand-500 focus:ring-brand-500">
@@ -228,7 +225,7 @@
     </div>
 
     <!-- Main Content -->
-    <main class="flex-1 max-w-7xl mx-auto w-full pt-32 sm:pt-24 px-3 pb-20">
+    <main class="flex-1 max-w-7xl mx-auto w-full pt-32 lg:pt-24 px-3 pb-20">
         <div id="loading-indicator" class="flex flex-col items-center justify-center py-20">
             <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand-500 mb-3"></i>
             <p class="text-slate-400 text-sm">ユーザーを読み込み中...</p>
@@ -242,10 +239,10 @@
         </div>
     </main>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation (Mobile Only) -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-40 safe-area-pb">
         <div class="flex justify-around items-center h-16">
-            <a href="home.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+            <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">ホーム</span>
             </a>
@@ -321,7 +318,6 @@
             if (mInput) mInput.addEventListener('input', (e) => filterUsers(e.target.value));
         });
 
-        // 権限チェックと読み込み
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -329,29 +325,21 @@
                     fetchUsers();
                     return;
                 }
-
-                // Check Rank
+                
                 try {
                     const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     const profileSnap = await getDoc(profileRef);
                     
                     if (profileSnap.exists()) {
                         const rank = profileSnap.data().membershipRank || 'walker';
-                        // ★ WALKERチェック
                         if (rank === 'walker') {
                             alert('検索機能を利用するにはメンバーシップのアップグレードが必要です。');
                             window.location.href = 'upgrade.html';
                             return;
                         }
                     }
-                    // OKなら検索実行
                     fetchUsers();
-                    
-                } catch (e) {
-                    console.error("Auth check error", e);
-                    // エラー時は続行させない方が安全だが、今回は続行
-                    fetchUsers();
-                }
+                } catch (e) { console.error(e); fetchUsers(); }
 
             } else {
                 window.location.href = 'login.html';
@@ -403,7 +391,6 @@
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     data.authUid = doc.id; 
-                    // isHiddenフラグがある場合は除外 (WALKER会員など)
                     if (data.userId && data.name && !data.isHidden) {
                         allUsers.push(data);
                     }
@@ -414,7 +401,6 @@
                 
                 document.getElementById('loading-indicator').classList.add('hidden');
                 renderGrid(filteredUsers);
-
             } catch (error) {
                 console.error("Fetch users error:", error);
                 document.getElementById('loading-indicator').innerHTML = '<p class="text-red-500">読み込みに失敗しました</p>';
@@ -457,6 +443,7 @@
                 const matchJob = !job || (user.jobTitle && user.jobTitle.toLowerCase().includes(job));
                 const matchOffer = !canOffer || (user.canOffer && user.canOffer.some(item => item.toLowerCase().includes(canOffer)));
                 const matchLooking = !lookingFor || (user.lookingFor && user.lookingFor.some(item => item.toLowerCase().includes(lookingFor)));
+                
                 const matchSkills = selectedSkills.length === 0 || (user.skills && selectedSkills.some(tag => user.skills.includes(tag)));
                 const matchHobbies = selectedHobbies.length === 0 || (user.hobbies && selectedHobbies.some(tag => user.hobbies.includes(tag)));
 
@@ -466,9 +453,8 @@
             const sortType = document.getElementById('filter-sort').value;
             if (sortType === 'newest') {
                 filteredUsers.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
-            } else {
-                 // random sort applied at init
             }
+
             renderGrid(filteredUsers);
         };
 
@@ -477,16 +463,11 @@
             const content = document.getElementById('filter-content');
             if (panel.classList.contains('hidden')) {
                 panel.classList.remove('hidden');
-                setTimeout(() => {
-                    panel.classList.remove('opacity-0');
-                    content.classList.remove('translate-x-full');
-                }, 10);
+                setTimeout(() => { panel.classList.remove('opacity-0'); content.classList.remove('translate-x-full'); }, 10);
             } else {
                 panel.classList.add('opacity-0');
                 content.classList.add('translate-x-full');
-                setTimeout(() => {
-                    panel.classList.add('hidden');
-                }, 300);
+                setTimeout(() => panel.classList.add('hidden'), 300);
             }
         };
 
@@ -505,7 +486,6 @@
             document.getElementById('desktop-search').value = "";
             document.getElementById('mobile-search').value = "";
             document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
-            
             shuffleArray(allUsers);
             filterUsers("");
             toggleFilters();
