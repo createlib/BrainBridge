@@ -34,35 +34,49 @@
 </head>
 <body class="text-slate-800 antialiased h-screen w-screen relative flex flex-col">
 
-    <!-- Navbar -->
+    <!-- Navbar (PC & Mobile Common) -->
     <nav class="glass-header border-b border-slate-200 fixed w-full z-[1500] top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <a href="home.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <a href="index.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                     <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fa-solid fa-map-location-dot"></i></span>
                     Events
                 </a>
             </div>
-            <!-- PC Nav -->
+
+            <!-- PC Search Bar (Added) -->
+            <div class="hidden lg:flex flex-1 max-w-md mx-8 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="pc-map-search" placeholder="イベントを検索..." 
+                    class="w-full bg-slate-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500 transition-all">
+            </div>
+
+            <!-- PC Actions -->
             <div class="hidden lg:flex items-center gap-6">
-                <a href="home.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-house"></i> ホーム</a>
+                <a href="index.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-house"></i> ホーム</a>
                 <a href="events.html" class="text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-map-location-dot"></i> イベント</a>
                 <a href="search.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-magnifying-glass"></i> さがす</a>
                 <a href="user.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-user"></i> マイページ</a>
-                <button onclick="toggleFilters()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative"><i class="fa-solid fa-sliders"></i></button>
+                <button onclick="toggleFilters()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative" title="フィルター">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
             </div>
-            <!-- Mobile Actions -->
+
+            <!-- Mobile Actions (Simple) -->
             <div class="lg:hidden flex items-center gap-3">
-                 <button onclick="toggleFilters()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative"><i class="fa-solid fa-sliders"></i></button>
+                 <button onclick="toggleFilters()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <!-- Mobile Floating Search Bar -->
+    <!-- Mobile Floating Search Bar (Only visible on mobile) -->
     <div class="lg:hidden absolute top-20 w-full z-[1000] px-4 pointer-events-none">
         <div class="relative flex-1 shadow-lg rounded-full pointer-events-auto">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="mobile-map-search" placeholder="イベントを検索..." class="w-full bg-white border-none rounded-full py-3 pl-11 pr-4 text-sm focus:ring-2 focus:ring-brand-500 shadow-sm">
+            <input type="text" id="mobile-map-search" placeholder="イベントを検索..." 
+                class="w-full bg-white border-none rounded-full py-3 pl-11 pr-4 text-sm focus:ring-2 focus:ring-brand-500 shadow-sm">
         </div>
     </div>
 
@@ -70,8 +84,7 @@
     <div id="map"></div>
 
     <!-- Create Button (FAB) -->
-    <!-- bottom-32 to avoid overlap with bottom nav on mobile -->
-    <button id="create-event-fab" onclick="openCreateModal()" class="hidden absolute bottom-32 lg:bottom-10 right-5 z-[2000] w-14 h-14 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-slate-800 hover:scale-105 transition-all">
+    <button id="create-event-fab" onclick="openCreateModal()" class="hidden absolute bottom-24 lg:bottom-10 right-5 z-[2000] w-14 h-14 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-slate-800 hover:scale-105 transition-all">
         <i class="fa-solid fa-plus text-xl"></i>
     </button>
 
@@ -108,7 +121,10 @@
                     <div class="relative w-full h-40 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-100 cursor-pointer overflow-hidden group">
                         <input type="file" id="event-image" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
                         <img id="image-preview" class="absolute inset-0 w-full h-full object-cover hidden">
-                        <div class="group-hover:scale-110 transition-transform flex flex-col items-center"><i class="fa-solid fa-image text-2xl mb-1"></i><span class="text-xs">画像をアップロード</span></div>
+                        <div class="group-hover:scale-110 transition-transform flex flex-col items-center">
+                            <i class="fa-solid fa-image text-2xl mb-1"></i>
+                            <span class="text-xs">画像をアップロード</span>
+                        </div>
                     </div>
                 </div>
 
@@ -121,13 +137,17 @@
                 <!-- Location Search -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <label class="block text-xs font-bold text-slate-700 mb-2">開催場所の設定 <span class="text-red-500">*</span></label>
+                    
                     <div class="flex gap-2 mb-2">
                         <div class="relative flex-1">
                             <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
                             <input type="text" id="location-search-input" placeholder="住所や建物名で検索" class="w-full border-slate-200 rounded-lg text-sm pl-10 p-2.5 bg-white focus:ring-2 focus:ring-brand-500">
                         </div>
-                        <button onclick="searchLocation()" class="bg-slate-800 text-white px-3 rounded-lg text-sm font-bold whitespace-nowrap hover:bg-slate-700">検索</button>
+                        <button onclick="searchLocation()" class="bg-slate-800 text-white px-3 rounded-lg text-sm font-bold whitespace-nowrap hover:bg-slate-700">
+                            検索
+                        </button>
                     </div>
+                    
                     <div id="location-results" class="hidden mb-3 border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto shadow-sm bg-white"></div>
                     
                     <!-- Adjust Button -->
@@ -219,10 +239,11 @@
     <!-- Bottom Navigation (Mobile Only) -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-[1900] safe-area-pb">
         <div class="flex justify-around items-center h-16">
-            <a href="home.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+            <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">ホーム</span>
             </a>
+            <!-- Events Active -->
             <a href="events.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
                 <i class="fa-solid fa-map-location-dot text-xl mb-1"></i>
                 <span class="text-[10px] font-bold">イベント</span>
@@ -246,10 +267,10 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, query, where, orderBy, serverTimestamp, setDoc, deleteDoc, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, query, where, orderBy, serverTimestamp, setDoc, deleteDoc, getCountFromServer } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
@@ -287,6 +308,7 @@
             initMap();
             renderTagButtons();
             
+            // Search Input Sync
             const pcSearch = document.getElementById('pc-map-search');
             const mobileSearch = document.getElementById('mobile-map-search');
             const handleSearch = (e) => {
@@ -327,6 +349,7 @@
 
         function initMap() {
             map = L.map('map', { zoomControl: false }).setView([35.6895, 139.6917], 13);
+            // OpenStreetMap (Standard)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
@@ -375,8 +398,7 @@
                 selectedCoords = e.target.getLatLng();
             });
 
-            // Map focus
-            map.setView(selectedCoords, 15);
+            map.flyTo(selectedCoords, 15);
         }
 
         // --- Location Adjust Mode ---
@@ -402,6 +424,8 @@
             container.innerHTML = '';
             presetTags.forEach(tag => {
                 const btn = document.createElement('button');
+                // Added type="button" to prevent form submission
+                btn.type = "button";
                 btn.className = 'tag-btn px-3 py-1.5 rounded-full border border-slate-200 text-xs font-bold text-slate-500 bg-white transition-all hover:border-brand-300';
                 btn.textContent = tag;
                 btn.onclick = () => {
