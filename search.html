@@ -414,21 +414,16 @@
                     const data = doc.data();
                     data.authUid = doc.id; 
                     
-                    // ★ 公開条件チェック (profilePublicが'false'なら非公開とみなす)
-                    const isHiddenBySystem = data.isHidden === true;
-                    const isPrivateByUser = data.profilePublic === 'false';
-                    
-                    let isVisible = true;
-                    if (!isAdmin) {
-                        if (isHiddenBySystem || isPrivateByUser) {
-                            isVisible = false;
-                        }
+                    // ★フィルタリング条件の修正
+                    // 管理者以外は、isHidden=true のユーザーを表示しない
+                    if (!isAdmin && data.isHidden) {
+                        return; // スキップ
                     }
-
-                    if (data.userId && isVisible) {
-                        if (!data.name) data.name = "名称未設定";
-                        // 管理者用フラグ
-                        data._isMasked = (isHiddenBySystem || isPrivateByUser);
+                    
+                    // 管理者なら isHidden=true でも表示する（薄くする処理は renderGrid で行う）
+                    if (data.userId && data.name) {
+                        // 管理者用にマスクフラグを付与
+                        data._isMasked = data.isHidden;
                         allUsers.push(data);
                     }
                 });
