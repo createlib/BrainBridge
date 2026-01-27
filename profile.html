@@ -30,8 +30,9 @@
                 </span>
             </h1>
             <div class="flex space-x-3">
-                <button onclick="history.back()" class="text-gray-600 hover:text-gray-900 text-sm font-medium py-2">キャンセル</button>
-                <button onclick="saveProfile()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold shadow-sm transition-colors">
+                <button type="button" onclick="history.back()" class="text-gray-600 hover:text-gray-900 text-sm font-medium py-2">キャンセル</button>
+                <!-- フォーム送信ボタンとして機能させるため form属性を指定 -->
+                <button type="submit" form="profile-form" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold shadow-sm transition-colors">
                     保存する
                 </button>
             </div>
@@ -45,9 +46,9 @@
             <span class="block sm:inline" id="error-text"></span>
         </div>
 
-        <form id="profile-form" class="space-y-8" onsubmit="event.preventDefault();">
+        <form id="profile-form" class="space-y-8" onsubmit="saveProfile(event)">
             
-            <!-- 0. 公開設定 -->
+            <!-- 0. 公開設定・職業 -->
             <div class="bg-white shadow rounded-lg p-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">基本設定</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -78,13 +79,15 @@
                     <div class="flex-1">
                         <label class="block text-sm font-medium text-gray-700">プロフィールアイコン</label>
                         <input type="file" id="icon-upload" accept="image/*" class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <p class="mt-1 text-xs text-gray-500">推奨: 正方形の画像 (JPG, PNG)</p>
+                        <p id="upload-status" class="text-xs text-red-500 hidden mt-1"></p>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 gap-6">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">氏名（表示用）</label>
+                            <label class="block text-sm font-medium text-gray-700">氏名（表示用） <span class="text-red-500">*</span></label>
                             <input type="text" name="name" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
                         </div>
                         <div>
@@ -231,10 +234,10 @@
     </main>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
         // Firebase Config
         const firebaseConfig = {
@@ -261,6 +264,8 @@
 
         // Master Data
         const prefectures = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県","海外","その他"];
+        
+        // カテゴリデータの再定義
         const hobbyCategories = {
             "🏃 スポーツ・運動系": ["ランニング", "ウォーキング", "筋トレ", "ヨガ", "ピラティス", "ダンス", "バスケットボール", "サッカー", "フットサル", "野球", "テニス", "バドミントン", "卓球", "ゴルフ", "ボルダリング", "登山", "サーフィン", "スノーボード", "スキー", "サイクリング", "水泳", "格闘技", "武道"],
             "🎵 音楽・エンタメ": ["カラオケ", "楽器演奏（ギター）", "楽器演奏（ピアノ）", "作曲", "歌", "ライブ鑑賞", "フェス", "DJ", "映画鑑賞", "アニメ鑑賞", "漫画", "ゲーム", "ボードゲーム"],
@@ -295,22 +300,20 @@
             if (user) {
                 currentUser = user;
                 
-                // 1. 管理者チェック
                 try {
                     const myProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     const myProfileSnap = await getDoc(myProfileRef);
+                    // 本人確認
                     if (myProfileSnap.exists() && myProfileSnap.data().userId === 'admin') {
                         isAdmin = true;
                         document.getElementById('admin-label').classList.remove('hidden');
                     }
-                    // 管理者UIDと一致する場合も管理者とする
-                    if (user.uid === "Zm7FWRopJKVfyzbp8KXXokMFjNC3") {
+                    if (user.uid === "Zm7FWRopJKVfyzbp8KXXokMFjNC3") { // UID直書き判定も入れておく
                         isAdmin = true;
                         document.getElementById('admin-label').classList.remove('hidden');
                     }
                 } catch(e) { console.error("Admin Check Error", e); }
 
-                // 2. ターゲット決定
                 const urlParams = new URLSearchParams(window.location.search);
                 const paramUid = urlParams.get('uid');
                 
@@ -361,7 +364,6 @@
 
         async function loadUserProfile(uid) {
             try {
-                // 正しいパス: /profile/data
                 const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
@@ -439,7 +441,11 @@
             }
         });
 
-        window.saveProfile = async () => {
+        // window.saveProfileの定義
+        window.saveProfile = async (event) => {
+            // submitイベントの場合デフォルト動作をキャンセル
+            if(event) event.preventDefault();
+
             if (!currentUser) return;
             showNotification('保存中...', 'info');
             document.getElementById('error-banner').classList.add('hidden');
@@ -475,21 +481,15 @@
             }
             data.photoURL = photoURL;
             
-            data.profileScore = 80; 
+            data.profileScore = 80; // 簡易計算
             data.updatedAt = new Date().toISOString();
 
-            // --- データの引き継ぎ ---
             const finalData = { ...currentUserData, ...data };
-            
-            // ★重要: userId が undefined になるのを防ぐ
             if (!finalData.userId) {
                 finalData.userId = targetUid;
             }
 
-            // ランクはフォームにないので既存を維持 (なければwalker)
             finalData.membershipRank = currentUserData.membershipRank || 'walker';
-            
-            // 公開設定 (文字列 "true" / "false")
             finalData.profilePublic = data.profilePublic;
 
             if (currentUser.uid === 'test_admin_uid') {
@@ -499,31 +499,27 @@
             }
 
             try {
-                // 1. Private Data (マスター)
+                // 1. Private Data
                 const privateDocRef = doc(db, 'artifacts', appId, 'users', targetUid, 'profile', 'data');
                 await setDoc(privateDocRef, finalData);
                 console.log("Master data saved.");
 
-                // 2. Public Data (検索用)
+                // 2. Public Data
                 const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', targetUid);
                 
                 const isPaidMember = (finalData.membershipRank === 'builder' || finalData.membershipRank === 'guardian');
                 const isPublicSetting = (finalData.profilePublic === 'true');
-                // 管理者が編集した場合は強制的に公開可能
                 const canPublish = isPaidMember || isAdmin;
 
                 if (isPublicSetting && canPublish) {
                     const publicData = {
                         ...finalData,
                         updatedAt: new Date().toISOString(),
-                        isHidden: false // 明示的に表示
+                        isHidden: false
                     };
                     await setDoc(publicDocRef, publicData);
                     console.log("Public data updated.");
                 } else {
-                    // 非公開条件 (WALKER または 設定OFF)
-                    // IDログイン維持のため、最小限のデータで上書きし、isHidden=trueにする
-                    // ★修正: undefined回避のため email がなければ null をセット
                     const minimalData = {
                         userId: finalData.userId,
                         email: finalData.email || null, 
@@ -546,6 +542,7 @@
                 let errorMsg = '保存に失敗しました';
                 if (e.code === 'permission-denied') errorMsg += ': 権限がありません。';
                 else if (e.message.includes('undefined')) errorMsg += ': 必須データ(UserIDなど)が不足しています。';
+                else errorMsg += `: ${e.message}`;
                 showError(errorMsg);
             }
         };
