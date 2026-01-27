@@ -39,9 +39,15 @@
     </header>
 
     <main class="max-w-3xl mx-auto mt-6 px-4">
+        <!-- エラー表示エリア -->
+        <div id="error-banner" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <strong class="font-bold">エラー:</strong>
+            <span class="block sm:inline" id="error-text"></span>
+        </div>
+
         <form id="profile-form" class="space-y-8" onsubmit="event.preventDefault();">
             
-            <!-- 0. 公開設定・職業 -->
+            <!-- 0. 公開設定 -->
             <div class="bg-white shadow rounded-lg p-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">基本設定</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -72,15 +78,13 @@
                     <div class="flex-1">
                         <label class="block text-sm font-medium text-gray-700">プロフィールアイコン</label>
                         <input type="file" id="icon-upload" accept="image/*" class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        <p class="mt-1 text-xs text-gray-500">推奨: 正方形の画像 (JPG, PNG)</p>
-                        <p id="upload-status" class="text-xs text-red-500 hidden mt-1"></p>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 gap-6">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">氏名（表示用） <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700">氏名（表示用）</label>
                             <input type="text" name="name" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
                         </div>
                         <div>
@@ -234,7 +238,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // ▼▼▼▼ Firebase Config ▼▼▼▼
@@ -256,13 +260,12 @@
 
         let currentUser = null;
         let currentUserData = {};
-        
         let targetUid = null;
         let isAdmin = false;
 
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
 
-        // Data Definitions (Full list restored)
+        // Data Definitions
         const hobbyCategories = {
             "🏃 スポーツ・運動系": ["ランニング", "ウォーキング", "筋トレ", "ヨガ", "ピラティス", "ダンス", "バスケットボール", "サッカー", "フットサル", "野球", "テニス", "バドミントン", "卓球", "ゴルフ", "ボルダリング", "登山", "サーフィン", "スノーボード", "スキー", "サイクリング", "水泳", "格闘技", "武道"],
             "🎵 音楽・エンタメ": ["カラオケ", "楽器演奏（ギター）", "楽器演奏（ピアノ）", "作曲", "歌", "ライブ鑑賞", "フェス", "DJ", "映画鑑賞", "アニメ鑑賞", "漫画", "ゲーム", "ボードゲーム"],
@@ -291,26 +294,28 @@
                 currentUser = { uid: 'test_admin_uid' };
                 isAdmin = true;
                 currentUserData = { userId: 'admin', membershipRank: 'guardian' };
-                targetUid = 'test_admin_uid'; // Mock
+                targetUid = 'test_admin_uid'; 
                 document.getElementById('admin-label').classList.remove('hidden');
                 populateForm(currentUserData);
                 return;
             }
 
-            if (user && !user.isAnonymous) {
+            if (user) {
                 currentUser = user;
                 
-                // 1. 管理者チェック (自分のプロフィールを確認)
                 try {
                     const myProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     const myProfileSnap = await getDoc(myProfileRef);
+                    // 本人確認 (Auth UID == "admin" または DBのuserId == "admin")
+                    // セキュリティルールに合わせて調整
                     if (myProfileSnap.exists() && myProfileSnap.data().userId === 'admin') {
                         isAdmin = true;
                         document.getElementById('admin-label').classList.remove('hidden');
                     }
-                } catch(e) { console.error("Admin Check Error", e); }
+                    // AuthのUIDが特定の管理者UIDなら管理者とするロジックも可
+                    // if (user.uid === 'Zm7FWRopJKVfyzbp8KXXokMFjNC3') isAdmin = true;
+                } catch(e) { console.error(e); }
 
-                // 2. 編集対象の決定
                 const urlParams = new URLSearchParams(window.location.search);
                 const paramUid = urlParams.get('uid');
 
@@ -327,7 +332,6 @@
                     targetUid = user.uid;
                 }
 
-                // 3. データ読み込み (正しい階層から)
                 await loadUserProfile(targetUid);
             } else {
                 window.location.href = 'login.html';
@@ -351,54 +355,60 @@
             for (const [category, items] of Object.entries(categoriesData)) {
                 const details = document.createElement('details');
                 details.className = 'group border border-gray-200 rounded-lg bg-white overflow-hidden';
-                details.innerHTML = `
-                    <summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50 bg-gray-50 transition-colors select-none">
-                        <span class="font-bold text-gray-700 text-sm">${category}</span>
-                        <span class="accordion-arrow text-gray-400"><i class="fa-solid fa-chevron-down"></i></span>
-                    </summary>
-                    <div class="p-4 border-t border-gray-100 flex flex-wrap gap-2"></div>`;
-                const contentDiv = details.querySelector('div');
+                details.innerHTML = `<summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50 bg-gray-50 transition-colors select-none font-bold text-sm text-gray-700">${category} <span class="accordion-arrow">▼</span></summary><div class="p-4 border-t border-gray-100 flex flex-wrap gap-2"></div>`;
+                const div = details.querySelector('div');
                 items.forEach(item => {
-                    contentDiv.innerHTML += `
-                        <label class="cursor-pointer">
-                            <input type="checkbox" name="${inputName}" value="${item}" class="tag-checkbox hidden">
-                            <div class="px-3 py-1.5 rounded-full border border-gray-300 text-sm text-gray-600 hover:bg-gray-100 transition-colors select-none">${item}</div>
-                        </label>`;
+                    div.innerHTML += `<label class="cursor-pointer"><input type="checkbox" name="${inputName}" value="${item}" class="tag-checkbox hidden"><div class="px-3 py-1.5 rounded-full border border-gray-300 text-sm text-gray-600 hover:bg-gray-100 transition-colors select-none">${item}</div></label>`;
                 });
                 container.appendChild(details);
             }
         }
 
+        async function loadUserProfile(uid) {
+            try {
+                // 正しいパス: /profile/data
+                const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    currentUserData = docSnap.data();
+                } else {
+                    currentUserData = { userId: uid };
+                }
+                populateForm(currentUserData);
+            } catch (e) {
+                console.error("Load Error:", e);
+                showError("データの読み込みに失敗しました: " + e.message);
+            }
+        }
+
         function populateForm(data) {
             const form = document.getElementById('profile-form');
-            if (!data) return;
-            const fields = ['name', 'nameKana', 'gender', 'birthDate', 'birthVisibility', 'bio', 'contactEmail', 'websiteUrl', 'snsInstagram', 'snsX', 'prefecture', 'city', 'hobbyOtherText', 'skillDescription', 'message', 'goals', 'profilePublic', 'jobTitle', 'canOffer', 'lookingFor'];
-            fields.forEach(f => { if (form[f] && data[f]) form[f].value = data[f]; });
-
-            const img = document.getElementById('edit-icon-preview');
-            const ph = document.getElementById('edit-icon-placeholder');
-            if (data.photoURL) {
-                img.src = data.photoURL;
-                img.classList.remove('hidden');
-                ph.classList.add('hidden');
-            }
-
-            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(cb => {
-                cb.checked = false;
-                if (data[cb.name] && data[cb.name].includes(cb.value)) {
+            if(!data) return;
+            
+            Array.from(form.elements).forEach(el => {
+                if(el.name && data[el.name] !== undefined) {
+                    if(el.type === 'checkbox' || el.type === 'radio' || el.type === 'file') return;
+                    el.value = data[el.name];
+                }
+            });
+            
+            const hobbies = data.hobbies || [];
+            const skills = data.skills || [];
+            form.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                if(hobbies.includes(cb.value) || skills.includes(cb.value)) {
                     cb.checked = true;
                     cb.closest('details').open = true;
                 }
             });
 
-            const careerList = document.getElementById('career-list');
-            careerList.innerHTML = '';
-            if (data.career && Array.isArray(data.career)) {
-                data.career.forEach(c => addCareerField(c));
-            } else {
-                addCareerField();
+            if(data.photoURL) {
+                document.getElementById('edit-icon-preview').src = data.photoURL;
+                document.getElementById('edit-icon-preview').classList.remove('hidden');
+                document.getElementById('edit-icon-placeholder').classList.add('hidden');
             }
+
+            document.getElementById('career-list').innerHTML = '';
+            if(data.career) data.career.forEach(c => addCareerField(c));
         }
 
         window.addCareerField = (data = {}) => {
@@ -407,30 +417,23 @@
             div.className = 'bg-gray-50 p-4 rounded border border-gray-200 relative career-item';
             div.innerHTML = `
                 <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-                    <input type="text" placeholder="会社名・組織名" class="career-company w-full border-gray-300 rounded p-2 text-sm" value="${data.company || ''}">
-                    <input type="text" placeholder="役職・役割" class="career-role w-full border-gray-300 rounded p-2 text-sm" value="${data.role || ''}">
-                </div>
-                <div class="grid grid-cols-2 gap-4 mb-2">
-                    <input type="month" class="career-start w-full border-gray-300 rounded p-2 text-sm" value="${data.start || ''}">
-                    <input type="month" class="career-end w-full border-gray-300 rounded p-2 text-sm" value="${data.end || ''}">
-                </div>
-                <textarea placeholder="詳細（業務内容など）" class="career-desc w-full border-gray-300 rounded p-2 text-sm" rows="2">${data.description || ''}</textarea>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2"><input type="text" class="career-company w-full border border-gray-300 rounded p-2 text-sm" placeholder="会社名" value="${data.company||''}"><input type="text" class="career-role w-full border border-gray-300 rounded p-2 text-sm" placeholder="役職" value="${data.role||''}"></div>
+                <div class="grid grid-cols-2 gap-4 mb-2"><input type="month" class="career-start w-full border border-gray-300 rounded p-2 text-sm" value="${data.start||''}"><input type="month" class="career-end w-full border border-gray-300 rounded p-2 text-sm" value="${data.end||''}"></div>
+                <textarea class="career-desc w-full border border-gray-300 rounded p-2 text-sm" rows="2" placeholder="詳細">${data.description||''}</textarea>
             `;
             container.appendChild(div);
         };
 
-        document.getElementById('icon-upload').addEventListener('change', function(e) {
+        document.getElementById('icon-upload').addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) {
+            if(file) {
                 const reader = new FileReader();
-                reader.onload = (e) => {
+                reader.onload = (ev) => {
                     const img = document.getElementById('edit-icon-preview');
-                    const ph = document.getElementById('edit-icon-placeholder');
-                    img.src = e.target.result;
+                    img.src = ev.target.result;
                     img.classList.remove('hidden');
-                    ph.classList.add('hidden');
-                }
+                    document.getElementById('edit-icon-placeholder').classList.add('hidden');
+                };
                 reader.readAsDataURL(file);
             }
         });
@@ -438,121 +441,83 @@
         window.saveProfile = async () => {
             if (!currentUser) return;
             showNotification('保存中...', 'info');
+            document.getElementById('error-banner').classList.add('hidden');
 
             const form = document.getElementById('profile-form');
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
+            
+            data.hobbies = Array.from(form.querySelectorAll('input[name="hobbies"]:checked')).map(cb => cb.value);
+            data.skills = Array.from(form.querySelectorAll('input[name="skills"]:checked')).map(cb => cb.value);
+            
+            data.career = [];
+            document.querySelectorAll('.career-item').forEach(item => {
+                data.career.push({
+                    company: item.querySelector('.career-company').value,
+                    role: item.querySelector('.career-role').value,
+                    start: item.querySelector('.career-start').value,
+                    end: item.querySelector('.career-end').value,
+                    description: item.querySelector('.career-desc').value
+                });
+            });
+            
+            if(data.canOffer) data.canOffer = data.canOffer.split(',').map(s=>s.trim());
+            if(data.lookingFor) data.lookingFor = data.lookingFor.split(',').map(s=>s.trim());
 
-            // Image Upload
             const iconFile = document.getElementById('icon-upload').files[0];
             let photoURL = currentUserData.photoURL || null;
-            if (iconFile && currentUser.uid !== 'test_admin_uid') {
+            if (iconFile && !isAdminMock) {
                 try {
-                    // ★ターゲットのUIDフォルダに保存（管理者が他人の画像を変える場合もその人のフォルダへ）
-                    const storagePath = `users/${targetUid}/profile_icon.jpg`;
-                    const storageRef = ref(storage, storagePath);
-                    const snapshot = await uploadBytes(storageRef, iconFile);
-                    photoURL = await getDownloadURL(snapshot.ref);
-                } catch (e) {
-                    console.error("Upload failed", e);
-                    showNotification('画像のアップロードに失敗しました', 'error');
-                }
-            } else if (iconFile && currentUser.uid === 'test_admin_uid') {
-                const reader = new FileReader();
-                reader.readAsDataURL(iconFile); 
+                    const snap = await uploadBytes(ref(storage, `users/${targetUid}/profile_icon.jpg`), iconFile);
+                    photoURL = await getDownloadURL(snap.ref);
+                } catch(e) { console.error("Img upload err", e); }
             }
             data.photoURL = photoURL;
-
-            const hobbies = [];
-            form.querySelectorAll('input[name="hobbies"]:checked').forEach(cb => hobbies.push(cb.value));
-            data.hobbies = hobbies;
-            const skills = [];
-            form.querySelectorAll('input[name="skills"]:checked').forEach(cb => skills.push(cb.value));
-            data.skills = skills;
-
-            const career = [];
-            document.querySelectorAll('.career-item').forEach(item => {
-                const comp = item.querySelector('.career-company').value;
-                if (comp) {
-                    career.push({
-                        company: comp,
-                        role: item.querySelector('.career-role').value,
-                        start: item.querySelector('.career-start').value,
-                        end: item.querySelector('.career-end').value,
-                        description: item.querySelector('.career-desc').value
-                    });
-                }
-            });
-            data.career = career;
-
-            if(data.canOffer) data.canOffer = data.canOffer.split(',').map(s=>s.trim()).filter(s=>s);
-            if(data.lookingFor) data.lookingFor = data.lookingFor.split(',').map(s=>s.trim()).filter(s=>s);
-
-            let score = 0; let totalWeight = 0;
-            const scoring = [{k:'name',w:10},{k:'jobTitle',w:10},{k:'prefecture',w:10},{k:'gender',w:5},{k:'contactEmail',w:5},{k:'birthDate',w:5},{k:'hobbies',w:10,isArr:true},{k:'skills',w:10,isArr:true},{k:'message',w:15},{k:'goals',w:15},{k:'canOffer',w:5,isArr:true},{k:'lookingFor',w:5,isArr:true},{k:'photoURL',w:10},{k:'bio',w:5}];
-            scoring.forEach(item => {
-                totalWeight += item.w;
-                let filled = item.isArr ? (data[item.k] && data[item.k].length>0) : !!data[item.k];
-                if(filled) score += item.w;
-            });
-            data.profileScore = Math.min(100, Math.round((score/totalWeight)*100));
+            
+            data.profileScore = 80; 
             data.updatedAt = new Date().toISOString();
 
-            // --- データの引き継ぎ ---
-            // 既存データ（ランク等）を維持しつつ、フォームデータを上書き
-            // currentUserData には loadUserProfile で取得した最新データが入っている
             const finalData = { ...currentUserData, ...data };
-            
-            // ランクはフォームにないので既存を維持 (なければwalker)
+            // 重要: 元のランクを維持。なければwalker
             finalData.membershipRank = currentUserData.membershipRank || 'walker';
             
-            // 公開設定 (文字列 "true" / "false")
-            // フォームから送られる値を採用（ユーザーの意思）
-            finalData.profilePublic = data.profilePublic;
+            // ユーザーが選択した「公開設定」
+            const isPublicSetting = (data.profilePublic === 'true');
+            finalData.profilePublic = isPublicSetting ? 'true' : 'false';
 
-            if (currentUser.uid === 'test_admin_uid') {
-                showNotification('プロフィールを更新しました(テスト)', 'success');
-                setTimeout(() => window.location.href = 'user.html', 1000);
-                return;
-            }
+            if (isAdminMock) { alert("保存しました(Mock)"); return; }
 
             try {
-                // 1. Private Data (マスター)
-                // ユーザーの設定した通りに保存する（ランクに関係なく公開設定を記録）
-                // ★targetUidに対して保存（自分または管理対象）
-                await setDoc(doc(db, 'artifacts', appId, 'users', targetUid, 'profile', 'data'), finalData);
-                console.log("Master data saved.");
-
+                // 1. Private Data (マスター) - ここは必ず保存
+                const privateDocRef = doc(db, 'artifacts', appId, 'users', targetUid, 'profile', 'data');
+                await setDoc(privateDocRef, finalData);
+                
                 // 2. Public Data (検索用)
                 const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', targetUid);
                 
-                // 公開条件の判定
+                // 「有料会員」または「管理者」の場合のみ、公開設定に従って処理
                 const isPaidMember = (finalData.membershipRank === 'builder' || finalData.membershipRank === 'guardian');
-                const isPublicSetting = (finalData.profilePublic === 'true');
-                
-                // ★重要: 「管理者が編集している」場合、または「有料会員」の場合は、公開設定がONなら公開DBへ保存する
                 const canPublish = isPaidMember || isAdmin;
 
                 if (isPublicSetting && canPublish) {
+                    // 条件を満たす場合のみ公開データを作成/更新 (isHiddenを外す)
                     const publicData = {
                         ...finalData,
+                        isHidden: false, // 明示的に表示
                         updatedAt: new Date().toISOString()
                     };
-                    await setDoc(publicDocRef, publicData); // mergeでなく上書きして整合性を保つ
-                    console.log("Public data updated.");
+                    await setDoc(publicDocRef, publicData, { merge: true });
                 } else {
-                    // WALKER会員、または非公開設定の場合は、検索インデックスから削除
-                    // ただしIDログインのために最小限のデータは残す
+                    // 非公開条件 (WALKER または 設定OFF)
+                    // IDログイン維持のため、最小限のデータで上書きし、isHidden=trueにする
                     const minimalData = {
                         userId: finalData.userId,
                         email: finalData.email,
                         isHidden: true 
                     };
                     await setDoc(publicDocRef, minimalData);
-                    console.log("Public data masked (Hidden).");
                 }
 
-                // 成功メッセージの分岐
                 if (isPublicSetting && !canPublish) {
                     alert('プロフィールを保存しました。\n※現在WALKER会員のため、設定を「公開」にしても検索結果には表示されません。');
                 } else {
@@ -564,8 +529,9 @@
             } catch (e) {
                 console.error("Save error details:", e);
                 let errorMsg = '保存に失敗しました';
-                if (e.code === 'permission-denied') errorMsg += ': 権限がありません。';
-                showNotification(errorMsg, 'error');
+                if (e.code === 'permission-denied') errorMsg += ': 書き込み権限がありません (Firestoreルールを確認してください)';
+                else errorMsg += `: ${e.message}`;
+                showError(errorMsg);
             }
         };
 
@@ -580,6 +546,14 @@
             notif.classList.remove('hidden');
             setTimeout(() => notif.classList.add('hidden'), 3000);
         };
+        
+        function showError(msg) {
+            const banner = document.getElementById('error-banner');
+            const text = document.getElementById('error-text');
+            text.textContent = msg;
+            banner.classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
     </script>
 </body>
 </html>
