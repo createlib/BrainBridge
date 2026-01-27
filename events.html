@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>イベント | BRAIN BRIDGE</title>
     
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Leaflet CSS (Map) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <script>
@@ -28,7 +30,7 @@
         
         #map { height: calc(100vh - 64px); width: 100%; z-index: 0; margin-top: 64px; }
 
-        /* Mobile Sheet */
+        /* Detail Sheet */
         #event-sheet { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .sheet-open { transform: translateY(0%) !important; }
         .sheet-closed { transform: translateY(100%); }
@@ -38,18 +40,22 @@
         .panel-open { transform: translateX(0%) !important; }
         .panel-closed { transform: translateX(100%); }
 
+        /* Tag Selection */
         .tag-btn.selected { 
             background-color: #4f46e5 !important; 
             color: white !important; 
             border-color: #4f46e5 !important; 
         }
-        
+
         .search-result-item:hover { background-color: #f1f5f9; }
+        
+        /* List Item Hover */
+        .event-list-item:active { background-color: #f8fafc; }
     </style>
 </head>
 <body class="text-slate-800 antialiased h-screen w-screen relative flex flex-col">
 
-    <!-- Navbar -->
+    <!-- Navbar (PC & Mobile Common) -->
     <nav class="glass-header border-b border-slate-200 fixed w-full z-[1500] top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
@@ -127,7 +133,7 @@
     <!-- Event Detail Panel (PC) -->
     <div id="event-panel-pc" class="hidden lg:block panel-closed fixed top-16 right-0 h-[calc(100vh-64px)] w-[400px] z-[1400] bg-white border-l border-slate-200 overflow-y-auto">
         <div class="p-4 flex justify-between items-center border-b border-slate-100 sticky top-0 bg-white/95 backdrop-blur z-10">
-            <h3 class="font-bold text-slate-700">イベント詳細</h3>
+            <h3 class="font-bold text-slate-700" id="pc-panel-title">イベント詳細</h3>
             <button onclick="closePanel()" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
@@ -144,7 +150,7 @@
             </div>
             
             <div class="p-5 overflow-y-auto flex-1 space-y-6">
-                <!-- Image -->
+                <!-- Image Upload -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-2">サムネイル画像</label>
                     <div class="relative w-full h-40 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-100 cursor-pointer overflow-hidden group">
@@ -178,9 +184,10 @@
                     </div>
                 </div>
 
-                <!-- Location -->
+                <!-- Location Search -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <label class="block text-xs font-bold text-slate-700 mb-2">開催場所の設定 <span class="text-red-500">*</span></label>
+                    
                     <div class="flex gap-2 mb-2">
                         <div class="relative flex-1">
                             <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
@@ -189,9 +196,11 @@
                         <button onclick="searchLocation()" class="bg-slate-800 text-white px-3 rounded-lg text-sm font-bold whitespace-nowrap hover:bg-slate-700">検索</button>
                     </div>
                     <div id="location-results" class="hidden mb-3 border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto shadow-sm bg-white"></div>
+                    
                     <button onclick="startLocationAdjust()" class="w-full py-2 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors mb-4 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-map-location-dot"></i> 地図を見ながら位置を微調整する
                     </button>
+
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1">表示する場所名</label>
                         <input type="text" id="event-location-name" placeholder="例: ミッドランドスクエア 42階" class="w-full border-slate-200 rounded-lg text-sm p-2.5 bg-white focus:ring-2 focus:ring-brand-500">
@@ -238,7 +247,7 @@
                 <h3 class="font-bold text-lg">フィルター</h3>
                 <button onclick="toggleFilters()" class="p-2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <div class="p-6 flex-1 space-y-6">
+            <div class="p-6 flex-1 space-y-6 overflow-y-auto">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">期間</label>
                     <select id="filter-date" class="w-full border-slate-200 rounded-lg text-sm p-2.5 bg-slate-50">
@@ -248,9 +257,14 @@
                         <option value="month">1ヶ月以内</option>
                     </select>
                 </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">タグで絞り込み</label>
+                    <div id="filter-tag-container" class="flex flex-wrap gap-2"></div>
+                </div>
             </div>
             <div class="p-4 border-t border-slate-100 bg-slate-50 pb-safe-bottom">
                 <button onclick="applyFilters()" class="w-full bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 shadow-md">適用する</button>
+                <button onclick="resetFilters()" class="w-full mt-3 text-sm text-slate-500">リセット</button>
             </div>
         </div>
     </div>
@@ -286,8 +300,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, query, where, orderBy, serverTimestamp, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, query, where, orderBy, serverTimestamp, setDoc, deleteDoc, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
         const firebaseConfig = {
@@ -317,8 +331,6 @@
         
         let selectedTags = new Set();
         let isJoining = false;
-
-        // 編集用フラグ
         let editingEventId = null;
 
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
@@ -328,6 +340,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             initMap();
             renderTagButtons();
+            renderFilterTags();
             
             const pcSearch = document.getElementById('pc-map-search');
             const mobileSearch = document.getElementById('mobile-map-search');
@@ -391,6 +404,27 @@
             }
         }
 
+        function handleMarkerClick(targetEvent) {
+            const zoom = map.getZoom();
+            // 投影してピクセル距離で重なり判定
+            const targetLatLng = L.latLng(targetEvent.lat, targetEvent.lng);
+            const targetPoint = map.project(targetLatLng, zoom);
+            
+            const nearbyEvents = allEvents.filter(evt => {
+                if (!evt.lat || !evt.lng) return false;
+                const evtLatLng = L.latLng(evt.lat, evt.lng);
+                const evtPoint = map.project(evtLatLng, zoom);
+                const dist = targetPoint.distanceTo(evtPoint);
+                return dist < 30; // 30px以内を「重なっている」とみなす
+            });
+            
+            if (nearbyEvents.length > 1) {
+                showEventListSheet(nearbyEvents);
+            } else {
+                showEventSheet(targetEvent);
+            }
+        }
+
         window.searchLocation = async () => {
             const query = document.getElementById('location-search-input').value;
             if (!query) return;
@@ -429,7 +463,11 @@
 
             if (tempMarker) map.removeLayer(tempMarker);
             tempMarker = L.marker(selectedCoords, { draggable: true }).addTo(map);
-            tempMarker.on('dragend', function(e) { selectedCoords = e.target.getLatLng(); });
+            
+            tempMarker.on('dragend', function(e) {
+                selectedCoords = e.target.getLatLng();
+            });
+
             map.flyTo(selectedCoords, 15);
         }
 
@@ -453,8 +491,8 @@
                 btn.type = "button";
                 btn.className = 'tag-btn px-3 py-1.5 rounded-full border border-slate-200 text-xs font-bold text-slate-500 bg-white transition-all hover:border-brand-300';
                 btn.textContent = tag;
-                if (selectedTags.has(tag)) btn.classList.add('selected');
-                
+                if(selectedTags.has(tag)) btn.classList.add('selected');
+
                 btn.onclick = () => {
                     if (selectedTags.has(tag)) {
                         selectedTags.delete(tag);
@@ -467,13 +505,25 @@
                 container.appendChild(btn);
             });
         }
+        
+        function renderFilterTags() {
+            const container = document.getElementById('filter-tag-container');
+            container.innerHTML = '';
+            presetTags.forEach(tag => {
+                const label = document.createElement('label');
+                label.className = 'cursor-pointer';
+                label.innerHTML = `
+                    <input type="checkbox" name="filter-tag" value="${tag}" class="filter-tag-checkbox hidden">
+                    <div class="px-2 py-1 rounded border border-slate-200 text-xs text-slate-600 hover:bg-slate-100 transition-colors select-none">${tag}</div>
+                `;
+                container.appendChild(label);
+            });
+        }
 
-        // 編集モード対応
         window.openCreateModal = (eventData = null) => {
             document.getElementById('create-modal').classList.remove('hidden');
             
             if (eventData) {
-                // Edit Mode
                 editingEventId = eventData.id;
                 document.getElementById('modal-title').textContent = 'イベントを編集';
                 document.getElementById('submit-btn').innerHTML = '<i class="fa-solid fa-pen"></i> イベントを更新';
@@ -487,13 +537,11 @@
                 document.getElementById('event-desc').value = eventData.description;
                 document.getElementById('event-public-participants').checked = eventData.isParticipantsPublic;
                 
-                // Tags
                 selectedTags = new Set(eventData.tags);
                 const custom = eventData.tags.filter(t => !presetTags.includes(t));
                 document.getElementById('custom-tags').value = custom.join(', ');
-                renderTagButtons(); // Reflect selection
+                renderTagButtons();
                 
-                // Location
                 selectedCoords = { lat: eventData.lat, lng: eventData.lng };
                 if (eventData.thumbnailUrl) {
                     const img = document.getElementById('image-preview');
@@ -501,19 +549,16 @@
                     img.classList.remove('hidden');
                 }
                 
-                // Pin logic
                 if (tempMarker) map.removeLayer(tempMarker);
                 tempMarker = L.marker(selectedCoords, { draggable: true }).addTo(map);
                 tempMarker.on('dragend', function(e) { selectedCoords = e.target.getLatLng(); });
                 map.flyTo(selectedCoords, 15);
 
             } else {
-                // Create Mode
                 editingEventId = null;
                 document.getElementById('modal-title').textContent = 'イベントを作成';
                 document.getElementById('submit-btn').innerHTML = '<i class="fa-solid fa-paper-plane"></i> イベントを作成';
                 
-                // Reset form
                 const todayStr = new Date().toISOString().split('T')[0];
                 document.getElementById('event-start-date').value = todayStr;
                 document.getElementById('event-end-date').value = todayStr;
@@ -551,10 +596,9 @@
             if (!selectedCoords) return alert('開催場所を検索して設定してください');
 
             let thumbnailUrl = '';
-            // If editing, keep old thumbnail if not changed
             if (editingEventId) {
                 const oldEvent = allEvents.find(e => e.id === editingEventId);
-                thumbnailUrl = oldEvent.thumbnailUrl;
+                if(oldEvent) thumbnailUrl = oldEvent.thumbnailUrl;
             }
 
             const file = document.getElementById('event-image').files[0];
@@ -590,26 +634,23 @@
                 organizerId: currentUser.uid,
                 organizerName: myProfile ? (myProfile.name || myProfile.userId) : '主催者',
                 isParticipantsPublic: document.getElementById('event-public-participants').checked,
-                createdAt: serverTimestamp(), // Update time logic differs but keeping simple
+                createdAt: serverTimestamp(), // editing should ideally not update createdAt but let's keep simple
+                participantCount: 0
             };
 
             try {
                 if (editingEventId) {
-                    // Update
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'events', editingEventId), eventData, { merge: true });
                     alert('イベントを更新しました！');
                 } else {
-                    // Create
-                    eventData.participantCount = 0;
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'events'), eventData);
                     alert('イベントを作成しました！');
                 }
-                
                 closeCreateModal();
                 loadEvents();
             } catch (e) {
                 console.error(e);
-                alert('処理に失敗しました (Firestoreルールを確認してください)');
+                alert('処理に失敗しました。Firestoreルールを確認してください。');
             }
         };
 
@@ -640,21 +681,58 @@
             events.forEach(data => {
                 if (data.lat && data.lng) {
                     const marker = L.marker([data.lat, data.lng]).addTo(map);
-                    marker.on('click', () => showEventSheet(data));
+                    // ★重要: 重なり判定ロジックを通す
+                    marker.on('click', () => handleMarkerClick(data));
                     markers.push(marker);
                 }
             });
         }
 
-        window.showEventSheet = async (evt) => {
-            // Decide View (PC or Mobile)
+        // --- List Sheet for Overlapping Events ---
+        window.showEventListSheet = (events) => {
             const isPC = window.innerWidth >= 1024;
             const container = isPC ? document.getElementById('panel-content-pc') : document.getElementById('sheet-content');
             const wrapper = isPC ? document.getElementById('event-panel-pc') : document.getElementById('event-sheet');
             
-            // Close other
-            if (isPC) document.getElementById('event-sheet').classList.add('hidden');
-            else document.getElementById('event-panel-pc').classList.add('hidden');
+            if (isPC) {
+                document.getElementById('event-sheet').classList.add('hidden');
+                document.getElementById('pc-panel-title').textContent = `${events.length}件のイベント`;
+            } else {
+                document.getElementById('event-panel-pc').classList.add('hidden');
+            }
+
+            let html = '<div class="space-y-3">';
+            events.forEach(evt => {
+                const thumb = evt.thumbnailUrl || 'https://via.placeholder.com/60';
+                html += `
+                <div class="event-list-item flex gap-3 p-3 bg-white border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors" onclick='showEventSheet(${JSON.stringify(evt).replace(/'/g, "&apos;")})'>
+                    <img src="${thumb}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-sm text-slate-900 truncate">${evt.title}</h4>
+                        <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-calendar mr-1"></i>${evt.startDate}</p>
+                        <p class="text-xs text-brand-600 mt-1 truncate"><i class="fa-solid fa-location-dot mr-1"></i>${evt.locationName}</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-300 self-center"></i>
+                </div>`;
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
+            wrapper.classList.remove('hidden', 'sheet-closed', 'panel-closed');
+            wrapper.classList.add(isPC ? 'panel-open' : 'sheet-open');
+        };
+
+        window.showEventSheet = async (evt) => {
+            const isPC = window.innerWidth >= 1024;
+            const container = isPC ? document.getElementById('panel-content-pc') : document.getElementById('sheet-content');
+            const wrapper = isPC ? document.getElementById('event-panel-pc') : document.getElementById('event-sheet');
+            
+            if (isPC) {
+                document.getElementById('event-sheet').classList.add('hidden');
+                document.getElementById('pc-panel-title').textContent = 'イベント詳細';
+            } else {
+                document.getElementById('event-panel-pc').classList.add('hidden');
+            }
 
             let isJoined = false;
             let participantsHtml = '<div class="text-xs text-slate-400">読み込み中...</div>';
@@ -703,7 +781,6 @@
                 ? `${evt.startDate} ${evt.startTime} 〜 ${evt.endTime}`
                 : `${evt.startDate} ${evt.startTime} 〜 ${evt.endDate} ${evt.endTime}`;
 
-            // Actions for Organizer
             let actionBtns = '';
             if (currentUser && currentUser.uid === evt.organizerId) {
                 actionBtns = `
@@ -744,7 +821,6 @@
             isJoining = true;
 
             const partRef = doc(db, 'artifacts', appId, 'public', 'data', 'events', eventId, 'participants', currentUser.uid);
-            // My Joined List (For Home Display)
             const myJoinRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'participating_events', eventId);
 
             try {
@@ -762,7 +838,7 @@
                 if (evt) showEventSheet(evt);
             } catch (e) {
                 console.error(e);
-                alert('エラーが発生しました');
+                alert('エラーが発生しました (Firestoreルールを確認してください)');
             } finally {
                 isJoining = false;
             }
@@ -796,6 +872,19 @@
             setTimeout(() => panel.classList.add('hidden'), 300);
         };
 
+        document.getElementById('event-image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.getElementById('image-preview');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
         window.toggleFilters = () => {
             const panel = document.getElementById('filter-panel');
             const content = document.getElementById('filter-content');
@@ -809,12 +898,12 @@
             }
         };
         window.applyFilters = () => {
-            const keyword = document.getElementById('pc-map-search').value.toLowerCase();
-            renderMarkers(allEvents.filter(evt => evt.title.toLowerCase().includes(keyword)));
+            const keyword = document.getElementById('map-search').value.toLowerCase();
+            renderMarkers(allEvents); // Reset
             toggleFilters();
         };
         window.resetFilters = () => {
-            document.getElementById('pc-map-search').value = "";
+            document.getElementById('map-search').value = "";
             renderMarkers(allEvents);
             toggleFilters();
         };
