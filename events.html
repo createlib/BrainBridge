@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>イベント | BRAIN BRIDGE</title>
+    
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Leaflet CSS (Map) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
     <script>
         tailwind.config = {
             theme: {
@@ -24,27 +27,37 @@
         body { background-color: #f8fafc; overflow: hidden; }
         .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+        
         #map { height: calc(100vh - 64px); width: 100%; z-index: 0; margin-top: 64px; }
+
+        /* Detail Sheet */
         #event-sheet { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .sheet-open { transform: translateY(0%) !important; }
         .sheet-closed { transform: translateY(100%); }
-        .tag-btn.selected { @apply bg-brand-600 text-white border-brand-600; }
+
+        /* Tag Selection - !important added to ensure override */
+        .tag-btn.selected { 
+            background-color: #4f46e5 !important; 
+            color: white !important; 
+            border-color: #4f46e5 !important; 
+        }
+        
         .search-result-item:hover { background-color: #f1f5f9; }
     </style>
 </head>
 <body class="text-slate-800 antialiased h-screen w-screen relative flex flex-col">
 
-    <!-- Navbar (PC & Mobile Common) -->
+    <!-- Navbar -->
     <nav class="glass-header border-b border-slate-200 fixed w-full z-[1500] top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <a href="index.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <a href="home.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                     <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fa-solid fa-map-location-dot"></i></span>
-                    Events
+                    イベント
                 </a>
             </div>
 
-            <!-- PC Search Bar (Added) -->
+            <!-- PC Search Bar -->
             <div class="hidden lg:flex flex-1 max-w-md mx-8 relative">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
                 <input type="text" id="pc-map-search" placeholder="イベントを検索..." 
@@ -53,7 +66,7 @@
 
             <!-- PC Actions -->
             <div class="hidden lg:flex items-center gap-6">
-                <a href="index.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-house"></i> ホーム</a>
+                <a href="home.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-house"></i> ホーム</a>
                 <a href="events.html" class="text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-map-location-dot"></i> イベント</a>
                 <a href="search.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-magnifying-glass"></i> さがす</a>
                 <a href="user.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-user"></i> マイページ</a>
@@ -62,7 +75,7 @@
                 </button>
             </div>
 
-            <!-- Mobile Actions (Simple) -->
+            <!-- Mobile Actions -->
             <div class="lg:hidden flex items-center gap-3">
                  <button onclick="toggleFilters()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">
                     <i class="fa-solid fa-sliders"></i>
@@ -71,7 +84,7 @@
         </div>
     </nav>
 
-    <!-- Mobile Floating Search Bar (Only visible on mobile) -->
+    <!-- Mobile Floating Search Bar -->
     <div class="lg:hidden absolute top-20 w-full z-[1000] px-4 pointer-events-none">
         <div class="relative flex-1 shadow-lg rounded-full pointer-events-auto">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
@@ -84,11 +97,11 @@
     <div id="map"></div>
 
     <!-- Create Button (FAB) -->
-    <button id="create-event-fab" onclick="openCreateModal()" class="hidden absolute bottom-24 lg:bottom-10 right-5 z-[2000] w-14 h-14 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-slate-800 hover:scale-105 transition-all">
+    <button id="create-event-fab" onclick="openCreateModal()" class="hidden absolute bottom-32 lg:bottom-10 right-5 z-[2000] w-14 h-14 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-slate-800 hover:scale-105 transition-all">
         <i class="fa-solid fa-plus text-xl"></i>
     </button>
 
-    <!-- Location Adjustment Mode UI (Hidden by default) -->
+    <!-- Location Adjustment Mode UI -->
     <div id="adjust-location-ui" class="hidden absolute bottom-24 lg:bottom-10 left-1/2 transform -translate-x-1/2 z-[3100] w-full max-w-sm px-4">
         <div class="bg-white p-4 rounded-2xl shadow-2xl border border-slate-200 text-center animate-bounce-up">
             <p class="font-bold text-slate-800 mb-2">ピンをドラッグして位置を調整</p>
@@ -109,6 +122,7 @@
     <!-- Create Modal -->
     <div id="create-modal" class="hidden fixed inset-0 z-[3000] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center">
         <div class="bg-white w-full sm:w-[600px] h-[95vh] sm:h-[90vh] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col">
+            
             <div class="p-4 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
                 <h3 class="font-bold text-lg">イベントを作成</h3>
                 <button onclick="closeCreateModal()" class="p-2 text-slate-400 hover:text-slate-600 rounded-full"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -134,6 +148,25 @@
                     <input type="text" id="event-title" class="w-full border-slate-200 rounded-lg text-sm p-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500" placeholder="例: 週末朝活コーヒー会" required>
                 </div>
 
+                <!-- Date & Time (Google Calendar Style) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2">日時 <span class="text-red-500">*</span></label>
+                    
+                    <!-- Start -->
+                    <div class="flex gap-2 mb-2 items-center">
+                        <span class="text-xs font-bold text-slate-400 w-8">開始</span>
+                        <input type="date" id="event-start-date" class="flex-1 border-slate-200 rounded-lg text-sm p-2.5 bg-slate-50" required>
+                        <input type="time" id="event-start-time" class="w-24 border-slate-200 rounded-lg text-sm p-2.5 bg-slate-50" required>
+                    </div>
+
+                    <!-- End -->
+                    <div class="flex gap-2 items-center">
+                        <span class="text-xs font-bold text-slate-400 w-8">終了</span>
+                        <input type="date" id="event-end-date" class="flex-1 border-slate-200 rounded-lg text-sm p-2.5 bg-slate-50" required>
+                        <input type="time" id="event-end-time" class="w-24 border-slate-200 rounded-lg text-sm p-2.5 bg-slate-50" required>
+                    </div>
+                </div>
+
                 <!-- Location Search -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <label class="block text-xs font-bold text-slate-700 mb-2">開催場所の設定 <span class="text-red-500">*</span></label>
@@ -143,43 +176,22 @@
                             <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
                             <input type="text" id="location-search-input" placeholder="住所や建物名で検索" class="w-full border-slate-200 rounded-lg text-sm pl-10 p-2.5 bg-white focus:ring-2 focus:ring-brand-500">
                         </div>
-                        <button onclick="searchLocation()" class="bg-slate-800 text-white px-3 rounded-lg text-sm font-bold whitespace-nowrap hover:bg-slate-700">
-                            検索
-                        </button>
+                        <button onclick="searchLocation()" class="bg-slate-800 text-white px-3 rounded-lg text-sm font-bold whitespace-nowrap hover:bg-slate-700">検索</button>
                     </div>
                     
                     <div id="location-results" class="hidden mb-3 border border-slate-200 rounded-lg overflow-hidden max-h-40 overflow-y-auto shadow-sm bg-white"></div>
                     
-                    <!-- Adjust Button -->
                     <button onclick="startLocationAdjust()" class="w-full py-2 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors mb-4 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-map-location-dot"></i> 地図を見ながら位置を微調整する
                     </button>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1">表示する場所名 (ビル名・階数など)</label>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">表示する場所名</label>
                         <input type="text" id="event-location-name" placeholder="例: ミッドランドスクエア 42階" class="w-full border-slate-200 rounded-lg text-sm p-2.5 bg-white focus:ring-2 focus:ring-brand-500">
                     </div>
                 </div>
 
-                <!-- Date & Time -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1">日付 <span class="text-red-500">*</span></label>
-                        <input type="date" id="event-date" class="w-full border-slate-200 rounded-lg text-sm p-3 bg-slate-50" required>
-                    </div>
-                    <div class="flex gap-2">
-                        <div class="flex-1">
-                            <label class="block text-xs font-bold text-slate-500 mb-1">開始</label>
-                            <input type="time" id="event-start" class="w-full border-slate-200 rounded-lg text-sm p-3 bg-slate-50">
-                        </div>
-                        <div class="flex-1">
-                            <label class="block text-xs font-bold text-slate-500 mb-1">終了</label>
-                            <input type="time" id="event-end" class="w-full border-slate-200 rounded-lg text-sm p-3 bg-slate-50">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tags -->
+                <!-- Tags (Selection) -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-2">タグを選択</label>
                     <div class="flex flex-wrap gap-2" id="tag-selection-area"></div>
@@ -236,14 +248,13 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation (Mobile Only) -->
-    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-[1900] safe-area-pb">
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 z-[1900] safe-area-pb lg:hidden">
         <div class="flex justify-around items-center h-16">
-            <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+            <a href="home.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">ホーム</span>
             </a>
-            <!-- Events Active -->
             <a href="events.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
                 <i class="fa-solid fa-map-location-dot text-xl mb-1"></i>
                 <span class="text-[10px] font-bold">イベント</span>
@@ -267,10 +278,10 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, query, where, orderBy, serverTimestamp, setDoc, deleteDoc, getCountFromServer } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, query, where, orderBy, serverTimestamp, setDoc, deleteDoc, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
@@ -308,7 +319,6 @@
             initMap();
             renderTagButtons();
             
-            // Search Input Sync
             const pcSearch = document.getElementById('pc-map-search');
             const mobileSearch = document.getElementById('mobile-map-search');
             const handleSearch = (e) => {
@@ -318,6 +328,13 @@
             };
             if(pcSearch) pcSearch.addEventListener('input', handleSearch);
             if(mobileSearch) mobileSearch.addEventListener('input', handleSearch);
+
+            // Date Input Auto-Sync Logic (End date defaults to Start date)
+            const startDateInput = document.getElementById('event-start-date');
+            const endDateInput = document.getElementById('event-end-date');
+            startDateInput.addEventListener('change', () => {
+                if (!endDateInput.value) endDateInput.value = startDateInput.value;
+            });
         });
 
         onAuthStateChanged(auth, async (user) => {
@@ -349,7 +366,6 @@
 
         function initMap() {
             map = L.map('map', { zoomControl: false }).setView([35.6895, 139.6917], 13);
-            // OpenStreetMap (Standard)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
@@ -401,22 +417,16 @@
             map.flyTo(selectedCoords, 15);
         }
 
-        // --- Location Adjust Mode ---
         window.startLocationAdjust = () => {
             if (!selectedCoords) return alert('先に場所を検索するか、地図をタップしてください');
-            
-            // Hide Modal, Show Adjust UI
             document.getElementById('create-modal').classList.add('hidden');
             document.getElementById('adjust-location-ui').classList.remove('hidden');
-            
-            // Ensure map size is correct
             map.invalidateSize();
         };
 
         window.finishLocationAdjust = () => {
             document.getElementById('adjust-location-ui').classList.add('hidden');
             document.getElementById('create-modal').classList.remove('hidden');
-            // Marker is already updated via dragend event
         };
 
         function renderTagButtons() {
@@ -424,8 +434,7 @@
             container.innerHTML = '';
             presetTags.forEach(tag => {
                 const btn = document.createElement('button');
-                // Added type="button" to prevent form submission
-                btn.type = "button";
+                btn.type = "button"; // Prevent form submission
                 btn.className = 'tag-btn px-3 py-1.5 rounded-full border border-slate-200 text-xs font-bold text-slate-500 bg-white transition-all hover:border-brand-300';
                 btn.textContent = tag;
                 btn.onclick = () => {
@@ -443,7 +452,11 @@
 
         window.openCreateModal = () => {
             document.getElementById('create-modal').classList.remove('hidden');
-            document.getElementById('event-date').value = new Date().toISOString().split('T')[0];
+            // 日付初期値
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('event-start-date').value = todayStr;
+            document.getElementById('event-end-date').value = todayStr;
+            
             selectedTags.clear();
             renderTagButtons();
             
@@ -461,9 +474,12 @@
         window.submitEvent = async () => {
             if (!currentUser) return;
             const title = document.getElementById('event-title').value;
-            const date = document.getElementById('event-date').value;
+            const startDate = document.getElementById('event-start-date').value;
+            const startTime = document.getElementById('event-start-time').value;
+            const endDate = document.getElementById('event-end-date').value;
+            const endTime = document.getElementById('event-end-time').value;
             
-            if (!title || !date) return alert('タイトルと日付は必須です');
+            if (!title || !startDate || !startTime || !endDate || !endTime) return alert('タイトルと日時は必須です');
             if (!selectedCoords) return alert('開催場所を検索して設定してください');
 
             let thumbnailUrl = '';
@@ -482,11 +498,20 @@
             const customTags = document.getElementById('custom-tags').value.split(',').map(s=>s.trim()).filter(s=>s);
             const finalTags = [...Array.from(selectedTags), ...customTags];
 
+            // タイムスタンプ作成（ソートや終了判定用）
+            const endDateTimeStr = `${endDate}T${endTime}`;
+            const endTimestamp = new Date(endDateTimeStr).toISOString();
+
             const eventData = {
                 title: title,
-                date: date,
-                startTime: document.getElementById('event-start').value,
-                endTime: document.getElementById('event-end').value,
+                // 日付管理用フィールド
+                startDate: startDate,
+                startTime: startTime,
+                endDate: endDate,
+                endTime: endTime,
+                // 検索用（終了日時）
+                endTimestamp: endTimestamp, 
+                
                 locationName: document.getElementById('event-location-name').value, 
                 description: document.getElementById('event-desc').value,
                 tags: finalTags,
@@ -512,9 +537,15 @@
         };
 
         async function loadEvents() {
-            const today = new Date().toISOString().split('T')[0];
+            // 現在時刻
+            const now = new Date().toISOString();
             const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
-            const q = query(eventsRef, where('date', '>=', today), orderBy('date', 'asc'));
+            
+            // 終了していないイベントを表示（endTimestamp >= now）
+            // ※複合クエリのインデックスが必要になる可能性がありますが、まずは日付でフィルタ
+            // 簡易的に全件取得してJSでフィルタする方法をとる（インデックスエラー回避のため）
+            // データ量が増えたらインデックスを作成して where('endTimestamp', '>=', now) に切り替えるべき
+            const q = query(eventsRef, orderBy('createdAt', 'desc')); 
             
             try {
                 const snapshot = await getDocs(q);
@@ -525,6 +556,12 @@
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     data.id = doc.id;
+                    
+                    // 終了判定 (JS側)
+                    if (data.endTimestamp && data.endTimestamp < now) {
+                        return; // 終了済みは表示しない
+                    }
+
                     allEvents.push(data);
                     
                     if (data.lat && data.lng) {
@@ -592,12 +629,14 @@
                 ? 'bg-slate-200 text-slate-600 hover:bg-slate-300' 
                 : 'bg-brand-600 text-white hover:bg-brand-700 shadow-brand-500/30 shadow-lg';
 
+            // 日時表示のフォーマット (例: 12/24 10:00 〜 12/25 18:00)
+            const dateStr = (evt.startDate === evt.endDate) 
+                ? `${evt.startDate} ${evt.startTime} 〜 ${evt.endTime}`
+                : `${evt.startDate} ${evt.startTime} 〜 ${evt.endDate} ${evt.endTime}`;
+
             content.innerHTML = `
                 <div class="relative h-48 w-full rounded-2xl overflow-hidden mb-4 shadow-sm group">
                     <img src="${thumb}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                    <div class="absolute top-2 right-2 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-slate-800 shadow-sm">
-                        ${evt.date}
-                    </div>
                 </div>
                 
                 <h2 class="text-xl font-bold text-slate-900 leading-tight mb-2">${evt.title}</h2>
@@ -606,7 +645,7 @@
                 <div class="space-y-3 text-sm text-slate-600 bg-slate-50 p-4 rounded-xl mb-4 border border-slate-100">
                     <div class="flex items-center gap-3">
                         <i class="fa-regular fa-clock w-5 text-center text-slate-400"></i>
-                        <span>${evt.startTime || '--:--'} 〜 ${evt.endTime || '--:--'}</span>
+                        <span>${dateStr}</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-location-dot w-5 text-center text-slate-400"></i>
