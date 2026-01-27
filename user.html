@@ -35,7 +35,6 @@
         @keyframes placeholderShimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
         .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
 
-        /* バッジスタイル */
         .badge-walker { background-color: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
         .badge-builder { background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%); color: #334155; border: 1px solid #94a3b8; }
         .badge-guardian { background: linear-gradient(135deg, #fef9c3 0%, #fde047 100%); color: #854d0e; border: 1px solid #facc15; }
@@ -55,14 +54,12 @@
                 </a>
             </div>
             <div class="flex items-center gap-3">
-                <!-- 検索ボタンは WALKER には使えないが、リンク自体は置いておき search.html 側で弾く -->
                 <a href="search.html" class="hidden lg:flex p-2 text-slate-400 hover:text-brand-600 transition-colors" title="ユーザー検索"><i class="fa-solid fa-magnifying-glass text-lg"></i></a>
-                
-                <!-- UPGRADE Button -->
-                <a href="upgrade.html" class="hidden sm:inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
-                    <i class="fa-solid fa-arrow-up mr-1"></i> UPGRADE
+                <a href="upgrade.html" class="hidden sm:inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"><i class="fa-solid fa-arrow-up mr-1"></i> UPGRADE</a>
+                <a href="notifications.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors relative" title="通知">
+                    <i class="fa-regular fa-bell text-xl"></i>
+                    <span id="nav-badge" class="hidden absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                 </a>
-
                 <button onclick="location.reload()" class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="更新"><i class="fa-solid fa-rotate-right"></i></button>
                 <div class="h-6 w-px bg-slate-200 mx-1 hidden lg:block"></div>
                 <button onclick="handleLogout()" class="text-sm font-bold text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2"><span class="hidden sm:inline">ログアウト</span><i class="fa-solid fa-right-from-bracket text-lg"></i></button>
@@ -70,7 +67,7 @@
         </div>
     </nav>
 
-    <!-- Bottom Nav -->
+    <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-50 safe-area-pb">
         <div class="flex justify-around items-center h-16">
             <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
@@ -92,6 +89,17 @@
         </div>
     </nav>
 
+    <!-- Error Container -->
+    <div id="error-container" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-red-100 text-center max-w-sm mx-4">
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl"><i class="fa-solid fa-user-slash"></i></div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">ユーザーが見つかりません</h3>
+            <p class="text-slate-500 text-sm mb-6">IDが間違っているか、データが取得できませんでした。</p>
+            <a href="user.html" class="inline-block w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-colors">自分のページに戻る</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
     <div class="max-w-7xl mx-auto pt-16 px-0 sm:px-6 lg:px-8">
         <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:py-8">
             
@@ -114,21 +122,14 @@
                                 <h1 class="text-2xl font-bold text-slate-900 leading-tight"><span id="profile-name" class="shimmer block w-32 h-8 rounded mb-1"></span></h1>
                                 <div class="flex flex-wrap items-center gap-2 mt-1">
                                     <p class="text-sm text-slate-500 font-medium" id="profile-id">@...</p>
-                                    
-                                    <!-- Rank Badge -->
-                                    <span id="rank-badge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border badge-walker">
-                                        <i class="fa-solid fa-person-walking mr-1"></i>WALKER
-                                    </span>
-
-                                    <span id="mutual-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100">
-                                        <i class="fa-solid fa-handshake mr-1"></i>相互フォロー
-                                    </span>
-                                    <span id="admin-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-100">
-                                        <i class="fa-solid fa-crown mr-1"></i>管理者閲覧中
-                                    </span>
+                                    <span id="rank-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border"></span>
+                                    <span id="mutual-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100"><i class="fa-solid fa-handshake mr-1"></i>相互フォロー</span>
+                                    <span id="admin-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-100"><i class="fa-solid fa-crown mr-1"></i>管理者閲覧中</span>
                                 </div>
                             </div>
-                            <div class="mb-6"><p id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p></div>
+                            
+                            <!-- Bio Section (ID added) -->
+                            <div class="mb-6" id="section-bio"><p id="profile-bio" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p></div>
 
                             <div class="flex items-center gap-6 py-4 border-t border-slate-100">
                                 <div class="text-center cursor-pointer hover:opacity-75 transition-opacity">
@@ -144,6 +145,7 @@
                             <div class="py-4 border-t border-slate-100 space-y-3">
                                 <div class="flex items-center gap-3 text-sm text-slate-600"><div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fa-solid fa-briefcase"></i></div><span id="profile-job" class="font-medium">-</span></div>
                                 <div class="flex items-center gap-3 text-sm text-slate-600"><div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fa-solid fa-location-dot"></i></div><span id="profile-location" class="font-medium">-</span></div>
+                                
                                 <div class="mutual-only hidden space-y-3">
                                     <div class="flex items-center gap-3 text-sm text-slate-600"><div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fa-solid fa-venus-mars"></i></div><span id="data-gender" class="font-medium">-</span></div>
                                     <div class="flex items-center gap-3 text-sm text-slate-600"><div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fa-solid fa-cake-candles"></i></div><span id="data-birth" class="font-medium">-</span></div>
@@ -156,7 +158,7 @@
                                 <div class="w-full bg-slate-200 rounded-full h-2"><div id="score-bar" class="bg-brand-500 h-2 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div></div>
                             </div>
 
-                            <!-- Debug: Rank Switcher (Self Only) -->
+                            <!-- Debug: Rank Switcher -->
                             <div id="debug-rank-switcher" class="hidden mt-6 pt-6 border-t border-dashed border-gray-200">
                                 <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wide">【デバッグ用】ランク変更 (DB保存)</p>
                                 <div class="flex gap-2">
@@ -165,7 +167,6 @@
                                     <button onclick="changeRank('guardian')" class="flex-1 py-1.5 text-[10px] font-bold bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 border border-yellow-300">GUARDIAN</button>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -173,7 +174,9 @@
 
             <div class="flex-1 min-w-0">
                 <div class="space-y-6">
-                    <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
+                    
+                    <!-- Message Section (ID added) -->
+                    <div id="section-message" class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
                         <div class="flex items-center justify-between mb-4"><h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">想い・メッセージ</h2><i id="message-lock-icon" class="fa-solid fa-lock text-slate-300 hidden"></i></div>
                         <div id="message-container" class="hidden">
                             <div class="relative"><i class="fa-solid fa-quote-left text-brand-100 text-4xl absolute -top-2 -left-2 z-0"></i><div id="profile-message" class="relative z-10 text-[15px] leading-8 text-slate-700 whitespace-pre-wrap font-medium pl-4"></div></div>
@@ -181,7 +184,8 @@
                         <div id="message-mask" class="hidden py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center"><div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white mb-3 shadow-sm"><i class="fa-solid fa-lock text-slate-400"></i></div><p class="text-sm font-bold text-slate-500">相互フォローで想いを読む</p></div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Matching Section (ID added) -->
+                    <div id="section-matching" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-blue-200 transition-colors">
                             <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                             <h3 class="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wide relative z-10">提供できること</h3>
@@ -194,17 +198,20 @@
                         </div>
                     </div>
 
-                    <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
+                    <!-- Tags Section (ID added) -->
+                    <div id="section-tags" class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
                         <h2 class="text-lg font-bold text-slate-900 mb-4">スキル・趣味</h2>
                         <div id="tags-container" class="flex flex-wrap gap-2"><span class="text-sm text-slate-400 italic">未設定</span></div>
                     </div>
 
-                    <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
+                    <!-- Goals Section (ID added) -->
+                    <div id="section-goals" class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6">
                         <h2 class="text-lg font-bold text-slate-900 mb-4">目標・ビジョン</h2>
                         <div id="profile-goals" class="text-slate-700 text-sm leading-7 whitespace-pre-wrap">未設定</div>
                     </div>
 
-                    <div class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
+                    <!-- Career Section (ID added) -->
+                    <div id="section-career" class="bg-white sm:rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
                         <div class="flex items-center justify-between mb-6"><h2 class="text-lg font-bold text-slate-900">経歴</h2><i id="career-lock-icon" class="fa-solid fa-lock text-slate-300"></i></div>
                         <div id="career-container" class="space-y-8 mt-2 relative"><div class="absolute left-[7px] top-2 bottom-2 w-0.5 bg-slate-100"></div></div>
                         <div id="career-mask" class="hidden py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center"><p class="text-sm font-bold text-slate-500">相互フォローで経歴を表示</p></div>
@@ -251,7 +258,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         targetUid = urlParams.get('uid');
 
-        // Helper
+        // Helper: Format Text
         function formatText(text) {
             if (!text) return '';
             let safeText = text.replace(/[&<>"']/g, function(m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]; });
@@ -282,11 +289,13 @@
 
             if (user && !user.isAnonymous) {
                 currentUser = user;
+                checkUnreadNotifications(user.uid);
                 
                 const myProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                 const myProfileSnap = await getDoc(myProfileRef);
                 if (myProfileSnap.exists() && myProfileSnap.data().userId === 'admin') {
                     isAdmin = true;
+                    document.getElementById('admin-badge').classList.remove('hidden');
                 }
 
                 if (!targetUid || targetUid === user.uid) {
@@ -306,6 +315,15 @@
             }
         });
 
+        async function checkUnreadNotifications(uid) {
+            try {
+                const notifRef = collection(db, 'artifacts', appId, 'users', uid, 'notifications');
+                const q = query(notifRef, where('isRead', '==', false));
+                const snap = await getCountFromServer(q);
+                if (snap.data().count > 0) document.getElementById('nav-badge').classList.remove('hidden');
+            } catch (e) { console.error(e); }
+        }
+
         function enableSelfMode() {
             const headerActions = document.getElementById('header-actions');
             if(headerActions) {
@@ -319,11 +337,8 @@
                     </a>
                 </div>`;
             }
-            const compBar = document.getElementById('completion-bar-container');
-            if(compBar) compBar.classList.remove('hidden');
-            
-            // Show Debug Rank Switcher (Self Only)
-            document.getElementById('debug-rank-switcher').classList.remove('hidden');
+            document.getElementById('completion-bar-container').classList.remove('hidden');
+            document.getElementById('debug-rank-switcher').classList.remove('hidden'); // Enable rank changer
             
             isMutual = true; 
             toggleRestrictedContent(true);
@@ -405,8 +420,11 @@
                     if (isMutual && !isSelf) badge.classList.remove('hidden');
                     else badge.classList.add('hidden');
                 }
-
-                toggleRestrictedContent(isMutual || isAdmin); 
+                
+                // 制限ロジック呼び出し（ここでWALKERチェックなどを行う）
+                // ただしデータがまだロードされていない可能性があるので、updateDashboardUI内で再度呼ぶが、
+                // ここではステータス変更に伴う切り替えを行う
+                // 注: データ(rank)がまだ手元にないため、正確な制限はupdateDashboardUIで行うのが安全
 
             } catch (e) { console.error("Check follow err:", e); }
         }
@@ -473,10 +491,15 @@
 
         function toggleRestrictedContent(show) {
             const masks = ['message-mask', 'career-mask'];
+            // WALKER制限のために、Bioなども制御対象にする必要があるが、
+            // それは updateDashboardUI 内の WALKER判定ロジックで行う。
+            // ここでは「相互フォロー制限」のコンテンツを制御する。
+            
             document.querySelectorAll('.mutual-only').forEach(el => {
                 if(show) el.classList.remove('hidden');
                 else el.classList.add('hidden');
             });
+
             if (show) {
                 document.getElementById('message-container')?.classList.remove('hidden');
                 document.getElementById('message-lock-icon')?.classList.add('hidden');
@@ -503,21 +526,6 @@
             setElText('profile-location', data.prefecture || '未設定');
             setElHtml('profile-bio', formatText(data.bio || ''));
             
-            // Rank Badge Logic
-            const rank = data.membershipRank || 'walker';
-            const badgeEl = document.getElementById('rank-badge');
-            badgeEl.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border';
-            if (rank === 'guardian') {
-                badgeEl.classList.add('badge-guardian');
-                badgeEl.innerHTML = '<i class="fa-solid fa-shield-halved mr-1"></i>GUARDIAN';
-            } else if (rank === 'builder') {
-                badgeEl.classList.add('badge-builder');
-                badgeEl.innerHTML = '<i class="fa-solid fa-hammer mr-1"></i>BUILDER';
-            } else {
-                badgeEl.classList.add('badge-walker');
-                badgeEl.innerHTML = '<i class="fa-solid fa-person-walking mr-1"></i>WALKER';
-            }
-
             const iconImg = document.getElementById('header-icon-img');
             const iconPh = document.getElementById('header-icon-placeholder');
             if (iconImg && iconPh) {
@@ -531,62 +539,55 @@
                 }
             }
 
-            const messageEl = document.getElementById('profile-message');
-            if (messageEl) {
-                messageEl.innerHTML = data.message ? formatText(data.message) : 'まだメッセージがありません。';
-                if (!data.message) messageEl.classList.add('text-slate-400');
-                else messageEl.classList.remove('text-slate-400');
-            }
-
-            const snsContainer = document.getElementById('profile-sns-links');
-            if (snsContainer) {
-                snsContainer.innerHTML = '';
-                const showSns = isMutual || isSelf || isAdmin;
-                if (showSns) {
-                    if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"><i class="fa-solid fa-globe"></i></a>`;
-                    if (data.snsInstagram) snsContainer.innerHTML += `<a href="${data.snsInstagram.startsWith('http') ? data.snsInstagram : 'https://instagram.com/'+data.snsInstagram}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-pink-50 hover:text-pink-500 transition-colors"><i class="fa-brands fa-instagram"></i></a>`;
-                    if (data.snsX) snsContainer.innerHTML += `<a href="${data.snsX.startsWith('http') ? data.snsX : 'https://twitter.com/'+data.snsX}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"><i class="fa-brands fa-x-twitter"></i></a>`;
+            // Rank Badge
+            const rank = data.membershipRank || 'walker';
+            const badgeEl = document.getElementById('rank-badge');
+            if (badgeEl) {
+                badgeEl.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border';
+                badgeEl.classList.remove('hidden');
+                if (rank === 'guardian') {
+                    badgeEl.classList.add('badge-guardian');
+                    badgeEl.innerHTML = '<i class="fa-solid fa-shield-halved mr-1"></i>GUARDIAN';
+                } else if (rank === 'builder') {
+                    badgeEl.classList.add('badge-builder');
+                    badgeEl.innerHTML = '<i class="fa-solid fa-hammer mr-1"></i>BUILDER';
+                } else {
+                    badgeEl.classList.add('badge-walker');
+                    badgeEl.innerHTML = '<i class="fa-solid fa-person-walking mr-1"></i>WALKER';
                 }
             }
 
-            const updateList = (id, items) => {
+            // ==========================================
+            // ★ WALKER 制限ロジック (Strict Restriction)
+            // ==========================================
+            const isTargetWalker = rank === 'walker';
+            const isViewerPrivileged = isSelf || isAdmin;
+            const applyWalkerRestriction = isTargetWalker && !isViewerPrivileged;
+
+            // 1. 公開情報の強制非表示 (Bio, Tags, Goals, Matching)
+            const hideIfWalker = (id) => {
                 const el = document.getElementById(id);
-                if(!el) return;
-                el.innerHTML = '';
-                if (items && items.length > 0) {
-                    items.forEach(item => {
-                        el.innerHTML += `<li class="flex items-start gap-2 text-[15px] text-slate-700"><i class="fa-solid fa-check text-brand-500 mt-1 flex-shrink-0"></i><span class="font-medium">${item}</span></li>`;
-                    });
-                } else {
-                    el.innerHTML = '<li class="text-slate-400 text-xs italic">未設定</li>';
+                if (el) {
+                    if (applyWalkerRestriction) el.classList.add('hidden');
+                    else el.classList.remove('hidden');
                 }
             };
-            updateList('list-can-offer', data.canOffer);
-            updateList('list-looking-for', data.lookingFor);
+            
+            // Bio Container (parent of p)
+            if (applyWalkerRestriction) document.getElementById('profile-bio').parentElement.classList.add('hidden');
+            else document.getElementById('profile-bio').parentElement.classList.remove('hidden');
 
-            const goalsEl = document.getElementById('profile-goals');
-            if (goalsEl) {
-                goalsEl.innerHTML = data.goals ? formatText(data.goals) : '未設定';
-                if (!data.goals) goalsEl.classList.add('text-slate-400');
-            }
+            hideIfWalker('section-tags');
+            hideIfWalker('section-matching');
+            hideIfWalker('section-goals');
+            hideIfWalker('section-message'); // メッセージセクションごと消す
 
-            const tagsContainer = document.getElementById('tags-container');
-            if (tagsContainer) {
-                tagsContainer.innerHTML = '';
-                const allTags = [...(data.hobbies || []), ...(data.skills || [])];
-                if (allTags.length > 0) {
-                    allTags.forEach(tag => {
-                        const span = document.createElement('span');
-                        span.className = 'inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold bg-slate-100 text-slate-600 border border-slate-200';
-                        span.textContent = tag;
-                        tagsContainer.appendChild(span);
-                    });
-                } else {
-                    tagsContainer.innerHTML = '<span class="text-xs text-slate-400 italic">タグ未設定</span>';
-                }
-            }
-
-            const showRestricted = isMutual || isSelf || isAdmin;
+            // 2. 詳細情報の制御 (Mutual or Self)
+            // WALKERの場合は、相互フォローであっても詳細(Career, SNS, Kana, Email)を隠す。
+            // ただし Gender, Birth は表示する。
+            
+            // まず通常の相互制御を実行
+            const showRestricted = (isMutual || isSelf || isAdmin);
             toggleRestrictedContent(showRestricted);
 
             if (showRestricted) {
@@ -604,26 +605,107 @@
                 }
                 setElText('data-birth', birthDisplay);
 
-                const careerContainer = document.getElementById('career-container');
-                if (careerContainer) {
-                    careerContainer.innerHTML = '';
-                    if (data.career && data.career.length > 0) {
-                        data.career.forEach(c => {
-                            const formattedDesc = formatText(c.description || '');
-                            careerContainer.innerHTML += `
-                                <div class="relative pl-6 pb-2">
-                                    <div class="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-brand-500 ring-4 ring-white z-10 shadow-sm"></div>
-                                    <h4 class="font-bold text-slate-900 text-base">${c.company || '会社名不明'}</h4>
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">${c.role || 'Role'}</span>
-                                        <span class="text-xs text-slate-400 font-medium">${c.start || '?'} 〜 ${c.end || '現在'}</span>
+                // WALKERなら強制非表示にする項目 (SNS, Career Container)
+                if (applyWalkerRestriction) {
+                    // SNS
+                    const snsContainer = document.getElementById('profile-sns-links');
+                    if (snsContainer) snsContainer.innerHTML = '';
+                    
+                    // Career
+                    const careerContainer = document.getElementById('section-career');
+                    if (careerContainer) careerContainer.classList.add('hidden');
+
+                    // Kana, Email (DOM操作で消す)
+                    // 注: これらは mutual-only クラス内の要素の一部だが、IDがないため
+                    // ここでは個別IDがない要素は mutual-only の制御に任せているが、
+                    // WALKERの場合は mutual-only 内の Kana/Email も消したいならIDが必要。
+                    // 今回のHTML構造では data-gender, data-birth はID付きで独立しているが
+                    // Kana, Email はまだ実装されていない（前のバージョンで削除したかも？）
+                    // 現在のHTMLには data-gender, data-birth 以外はSNSしかない。
+                    // したがってSNSを消せばOK。
+                    
+                } else {
+                    // 通常の有料会員(BUILDER/GUARDIAN)または自分/管理者
+                    
+                    // SNS
+                    const snsContainer = document.getElementById('profile-sns-links');
+                    if (snsContainer) {
+                        snsContainer.innerHTML = '';
+                        if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"><i class="fa-solid fa-globe"></i></a>`;
+                        if (data.snsInstagram) snsContainer.innerHTML += `<a href="${data.snsInstagram.startsWith('http') ? data.snsInstagram : 'https://instagram.com/'+data.snsInstagram}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-pink-50 hover:text-pink-500 transition-colors"><i class="fa-brands fa-instagram"></i></a>`;
+                        if (data.snsX) snsContainer.innerHTML += `<a href="${data.snsX.startsWith('http') ? data.snsX : 'https://twitter.com/'+data.snsX}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"><i class="fa-brands fa-x-twitter"></i></a>`;
+                    }
+
+                    // Message Text
+                    const messageEl = document.getElementById('profile-message');
+                    if (messageEl) {
+                        messageEl.innerHTML = data.message ? formatText(data.message) : 'まだメッセージがありません。';
+                        if (!data.message) messageEl.classList.add('text-slate-400');
+                        else messageEl.classList.remove('text-slate-400');
+                    }
+
+                    // Career Content
+                    const careerContainer = document.getElementById('career-container');
+                    if (careerContainer) {
+                        careerContainer.innerHTML = '';
+                        if (data.career && data.career.length > 0) {
+                            data.career.forEach(c => {
+                                const formattedDesc = formatText(c.description || '');
+                                careerContainer.innerHTML += `
+                                    <div class="relative pl-6 pb-2">
+                                        <div class="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-brand-500 ring-4 ring-white z-10 shadow-sm"></div>
+                                        <h4 class="font-bold text-slate-900 text-base">${c.company || '会社名不明'}</h4>
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">${c.role || 'Role'}</span>
+                                            <span class="text-xs text-slate-400 font-medium">${c.start || '?'} 〜 ${c.end || '現在'}</span>
+                                        </div>
+                                        <div class="text-sm text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl">${formattedDesc}</div>
                                     </div>
-                                    <div class="text-sm text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl">${formattedDesc}</div>
-                                </div>
-                            `;
+                                `;
+                            });
+                        } else {
+                            careerContainer.innerHTML = '<div class="text-slate-400 text-sm italic">経歴情報はありません</div>';
+                        }
+                    }
+                }
+            }
+
+            // Public Data Filling (Only if NOT walker restriction)
+            if (!applyWalkerRestriction) {
+                const updateList = (id, items) => {
+                    const el = document.getElementById(id);
+                    if(!el) return;
+                    el.innerHTML = '';
+                    if (items && items.length > 0) {
+                        items.forEach(item => {
+                            el.innerHTML += `<li class="flex items-start gap-2 text-[15px] text-slate-700"><i class="fa-solid fa-check text-brand-500 mt-1 flex-shrink-0"></i><span class="font-medium">${item}</span></li>`;
                         });
                     } else {
-                        careerContainer.innerHTML = '<div class="text-slate-400 text-sm italic">経歴情報はありません</div>';
+                        el.innerHTML = '<li class="text-slate-400 text-xs italic">未設定</li>';
+                    }
+                };
+                updateList('list-can-offer', data.canOffer);
+                updateList('list-looking-for', data.lookingFor);
+
+                const goalsEl = document.getElementById('profile-goals');
+                if (goalsEl) {
+                    goalsEl.innerHTML = data.goals ? formatText(data.goals) : '未設定';
+                    if (!data.goals) goalsEl.classList.add('text-slate-400');
+                }
+
+                const tagsContainer = document.getElementById('tags-container');
+                if (tagsContainer) {
+                    tagsContainer.innerHTML = '';
+                    const allTags = [...(data.hobbies || []), ...(data.skills || [])];
+                    if (allTags.length > 0) {
+                        allTags.forEach(tag => {
+                            const span = document.createElement('span');
+                            span.className = 'inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold bg-slate-100 text-slate-600 border border-slate-200';
+                            span.textContent = tag;
+                            tagsContainer.appendChild(span);
+                        });
+                    } else {
+                        tagsContainer.innerHTML = '<span class="text-xs text-slate-400 italic">タグ未設定</span>';
                     }
                 }
             }
