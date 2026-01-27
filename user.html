@@ -151,6 +151,11 @@
                                     <div class="flex items-center gap-3 text-sm text-slate-600"><div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fa-solid fa-cake-candles"></i></div><span id="data-birth" class="font-medium">-</span></div>
                                 </div>
                                 <div id="profile-sns-links" class="flex gap-3 pt-2"></div>
+                                
+                                <!-- Personal Mask Overlay -->
+                                <div id="personal-mask" class="hidden mt-2 p-3 bg-gray-50 rounded border border-gray-100 text-center">
+                                    <p class="text-xs text-gray-500 font-medium"><i class="fa-solid fa-lock mr-1"></i>詳細は相互フォローで公開</p>
+                                </div>
                             </div>
 
                             <div id="completion-bar-container" class="hidden my-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
@@ -253,12 +258,13 @@
         let targetUid = null;
         let isFollowing = false;
         let isMutual = false;
+        let myRank = 'walker'; // 自分のランク
 
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
         const urlParams = new URLSearchParams(window.location.search);
         targetUid = urlParams.get('uid');
 
-        // Helper: Format Text
+        // Helper
         function formatText(text) {
             if (!text) return '';
             let safeText = text.replace(/[&<>"']/g, function(m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]; });
@@ -275,6 +281,7 @@
             if (isAdminMock) {
                 currentUser = { uid: 'test_admin_uid', displayName: '管理者' };
                 isAdmin = true;
+                myRank = 'guardian'; 
                 if (targetUid && targetUid !== 'test_admin_uid') {
                     isSelf = false;
                     setupViewForOtherUser();
@@ -291,11 +298,16 @@
                 currentUser = user;
                 checkUnreadNotifications(user.uid);
                 
+                // 自分の情報を取得 (ランク含む)
                 const myProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                 const myProfileSnap = await getDoc(myProfileRef);
-                if (myProfileSnap.exists() && myProfileSnap.data().userId === 'admin') {
-                    isAdmin = true;
-                    document.getElementById('admin-badge').classList.remove('hidden');
+                if (myProfileSnap.exists()) {
+                    const myData = myProfileSnap.data();
+                    if (myData.userId === 'admin') isAdmin = true;
+                    if (isAdmin) document.getElementById('admin-badge').classList.remove('hidden');
+                    myRank = myData.membershipRank || 'walker';
+                } else {
+                    myRank = 'walker';
                 }
 
                 if (!targetUid || targetUid === user.uid) {
@@ -338,7 +350,7 @@
                 </div>`;
             }
             document.getElementById('completion-bar-container').classList.remove('hidden');
-            document.getElementById('debug-rank-switcher').classList.remove('hidden'); // Enable rank changer
+            document.getElementById('debug-rank-switcher').classList.remove('hidden'); 
             
             isMutual = true; 
             toggleRestrictedContent(true);
@@ -368,7 +380,9 @@
                     dataToUse = publicSnap.data();
                 }
                 
-                if (isAdmin || isMutual) {
+                // 自分がWALKERなら詳細データ(Private)は取れない（制限のため）
+                // ただし管理者は取れる
+                if (isAdmin || (isMutual && myRank !== 'walker')) {
                     try {
                         const privateRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
                         const privateSnap = await getDoc(privateRef);
@@ -420,11 +434,9 @@
                     if (isMutual && !isSelf) badge.classList.remove('hidden');
                     else badge.classList.add('hidden');
                 }
-                
-                // 制限ロジック呼び出し（ここでWALKERチェックなどを行う）
-                // ただしデータがまだロードされていない可能性があるので、updateDashboardUI内で再度呼ぶが、
-                // ここではステータス変更に伴う切り替えを行う
-                // 注: データ(rank)がまだ手元にないため、正確な制限はupdateDashboardUIで行うのが安全
+
+                // 表示制限判定の呼び出し (UI更新へ)
+                // データロード後に行われるが、ステータス変更時も反映が必要
 
             } catch (e) { console.error("Check follow err:", e); }
         }
@@ -432,20 +444,16 @@
         function renderFollowButton() {
             const container = document.getElementById('header-actions');
             if(!container) return;
-            
             let btnHtml = '';
-            
             if (isFollowing) {
                 btnHtml += `<button onclick="toggleFollow()" class="inline-flex items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-bold rounded-xl text-slate-900 bg-white hover:bg-slate-50 transition-all mr-2">フォロー中</button>`;
             } else {
                 btnHtml += `<button onclick="toggleFollow()" class="inline-flex items-center px-4 py-2 border border-transparent shadow-md text-sm font-bold rounded-xl text-white bg-slate-900 hover:bg-slate-800 transition-all mr-2">フォロー</button>`;
             }
-
             if (isAdmin && !isSelf) {
                 btnHtml += `<a href="profile.html?uid=${targetUid}" class="inline-flex items-center px-3 py-2 border border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-xl text-sm font-bold transition-all"><i class="fa-solid fa-pen-to-square mr-1"></i>編集</a>`;
                 document.getElementById('admin-badge').classList.remove('hidden');
             }
-
             container.innerHTML = btnHtml;
         }
 
@@ -490,16 +498,11 @@
         };
 
         function toggleRestrictedContent(show) {
-            const masks = ['message-mask', 'career-mask'];
-            // WALKER制限のために、Bioなども制御対象にする必要があるが、
-            // それは updateDashboardUI 内の WALKER判定ロジックで行う。
-            // ここでは「相互フォロー制限」のコンテンツを制御する。
-            
+            const masks = ['message-mask', 'career-mask', 'personal-mask'];
             document.querySelectorAll('.mutual-only').forEach(el => {
                 if(show) el.classList.remove('hidden');
                 else el.classList.add('hidden');
             });
-
             if (show) {
                 document.getElementById('message-container')?.classList.remove('hidden');
                 document.getElementById('message-lock-icon')?.classList.add('hidden');
@@ -557,12 +560,14 @@
                 }
             }
 
-            // ==========================================
-            // ★ WALKER 制限ロジック (Strict Restriction)
-            // ==========================================
+            // ★ 制限ロジック: 
+            // 1. 相手がWALKERなら隠す
+            // 2. 自分がWALKERなら隠す (追加)
+            // ただし特権(自分、管理者)を除く
             const isTargetWalker = rank === 'walker';
+            const isViewerWalker = myRank === 'walker';
             const isViewerPrivileged = isSelf || isAdmin;
-            const applyWalkerRestriction = isTargetWalker && !isViewerPrivileged;
+            const applyWalkerRestriction = (isTargetWalker || isViewerWalker) && !isViewerPrivileged;
 
             // 1. 公開情報の強制非表示 (Bio, Tags, Goals, Matching)
             const hideIfWalker = (id) => {
@@ -572,23 +577,38 @@
                     else el.classList.remove('hidden');
                 }
             };
-            
-            // Bio Container (parent of p)
             if (applyWalkerRestriction) document.getElementById('profile-bio').parentElement.classList.add('hidden');
             else document.getElementById('profile-bio').parentElement.classList.remove('hidden');
 
             hideIfWalker('section-tags');
             hideIfWalker('section-matching');
             hideIfWalker('section-goals');
-            hideIfWalker('section-message'); // メッセージセクションごと消す
+            hideIfWalker('section-message'); 
 
             // 2. 詳細情報の制御 (Mutual or Self)
-            // WALKERの場合は、相互フォローであっても詳細(Career, SNS, Kana, Email)を隠す。
-            // ただし Gender, Birth は表示する。
-            
-            // まず通常の相互制御を実行
-            const showRestricted = (isMutual || isSelf || isAdmin);
+            // 相互フォローでも、どちらかがWALKERなら隠す
+            // 表示許可 = (相互 or 特権) AND (制限なし)
+            const showRestricted = (isMutual || isViewerPrivileged) && !applyWalkerRestriction;
             toggleRestrictedContent(showRestricted);
+
+            // 制限時のマスク文言変更
+            if (applyWalkerRestriction) {
+                const maskMsg = isViewerWalker 
+                    ? '<span class="text-brand-600 font-bold cursor-pointer" onclick="location.href=\'upgrade.html\'">BUILDERにアップグレード</span>して詳細を表示'
+                    : 'このユーザーの情報は制限されています';
+                
+                document.querySelector('#message-mask p').innerHTML = maskMsg;
+                document.querySelector('#career-mask p').innerHTML = maskMsg;
+                document.querySelector('#personal-mask p').innerHTML = '<i class="fa-solid fa-lock mr-2"></i>' + maskMsg;
+
+                // 制限がかかっている場合でもマスク自体を表示するために強制表示
+                if (!isViewerPrivileged) {
+                    // セクションを表示に戻してマスクを見せる
+                    document.getElementById('section-message').classList.remove('hidden');
+                    document.getElementById('message-mask').classList.remove('hidden');
+                    document.getElementById('personal-mask').classList.remove('hidden');
+                }
+            }
 
             if (showRestricted) {
                 setElText('data-gender', data.gender);
@@ -605,68 +625,44 @@
                 }
                 setElText('data-birth', birthDisplay);
 
-                // WALKERなら強制非表示にする項目 (SNS, Career Container)
-                if (applyWalkerRestriction) {
-                    // SNS
-                    const snsContainer = document.getElementById('profile-sns-links');
-                    if (snsContainer) snsContainer.innerHTML = '';
-                    
-                    // Career
-                    const careerContainer = document.getElementById('section-career');
-                    if (careerContainer) careerContainer.classList.add('hidden');
-
-                    // Kana, Email (DOM操作で消す)
-                    // 注: これらは mutual-only クラス内の要素の一部だが、IDがないため
-                    // ここでは個別IDがない要素は mutual-only の制御に任せているが、
-                    // WALKERの場合は mutual-only 内の Kana/Email も消したいならIDが必要。
-                    // 今回のHTML構造では data-gender, data-birth はID付きで独立しているが
-                    // Kana, Email はまだ実装されていない（前のバージョンで削除したかも？）
-                    // 現在のHTMLには data-gender, data-birth 以外はSNSしかない。
-                    // したがってSNSを消せばOK。
-                    
-                } else {
-                    // 通常の有料会員(BUILDER/GUARDIAN)または自分/管理者
-                    
-                    // SNS
-                    const snsContainer = document.getElementById('profile-sns-links');
-                    if (snsContainer) {
-                        snsContainer.innerHTML = '';
-                        if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"><i class="fa-solid fa-globe"></i></a>`;
-                        if (data.snsInstagram) snsContainer.innerHTML += `<a href="${data.snsInstagram.startsWith('http') ? data.snsInstagram : 'https://instagram.com/'+data.snsInstagram}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-pink-50 hover:text-pink-500 transition-colors"><i class="fa-brands fa-instagram"></i></a>`;
-                        if (data.snsX) snsContainer.innerHTML += `<a href="${data.snsX.startsWith('http') ? data.snsX : 'https://twitter.com/'+data.snsX}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"><i class="fa-brands fa-x-twitter"></i></a>`;
-                    }
-
-                    // Message Text
-                    const messageEl = document.getElementById('profile-message');
-                    if (messageEl) {
-                        messageEl.innerHTML = data.message ? formatText(data.message) : 'まだメッセージがありません。';
-                        if (!data.message) messageEl.classList.add('text-slate-400');
-                        else messageEl.classList.remove('text-slate-400');
-                    }
-
-                    // Career Content
-                    const careerContainer = document.getElementById('career-container');
-                    if (careerContainer) {
-                        careerContainer.innerHTML = '';
-                        if (data.career && data.career.length > 0) {
-                            data.career.forEach(c => {
-                                const formattedDesc = formatText(c.description || '');
-                                careerContainer.innerHTML += `
-                                    <div class="relative pl-6 pb-2">
-                                        <div class="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-brand-500 ring-4 ring-white z-10 shadow-sm"></div>
-                                        <h4 class="font-bold text-slate-900 text-base">${c.company || '会社名不明'}</h4>
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">${c.role || 'Role'}</span>
-                                            <span class="text-xs text-slate-400 font-medium">${c.start || '?'} 〜 ${c.end || '現在'}</span>
-                                        </div>
-                                        <div class="text-sm text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl">${formattedDesc}</div>
+                const careerContainer = document.getElementById('career-container');
+                if (careerContainer) {
+                    careerContainer.innerHTML = '';
+                    if (data.career && data.career.length > 0) {
+                        data.career.forEach(c => {
+                            const formattedDesc = formatText(c.description || '');
+                            careerContainer.innerHTML += `
+                                <div class="relative pl-6 pb-2">
+                                    <div class="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-brand-500 ring-4 ring-white z-10 shadow-sm"></div>
+                                    <h4 class="font-bold text-slate-900 text-base">${c.company || '会社名不明'}</h4>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">${c.role || 'Role'}</span>
+                                        <span class="text-xs text-slate-400 font-medium">${c.start || '?'} 〜 ${c.end || '現在'}</span>
                                     </div>
-                                `;
-                            });
-                        } else {
-                            careerContainer.innerHTML = '<div class="text-slate-400 text-sm italic">経歴情報はありません</div>';
-                        }
+                                    <div class="text-sm text-slate-600 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl">${formattedDesc}</div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        careerContainer.innerHTML = '<div class="text-slate-400 text-sm italic">経歴情報はありません</div>';
                     }
+                }
+                
+                // SNS
+                const snsContainer = document.getElementById('profile-sns-links');
+                if (snsContainer) {
+                    snsContainer.innerHTML = '';
+                    if (data.websiteUrl) snsContainer.innerHTML += `<a href="${data.websiteUrl}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"><i class="fa-solid fa-globe"></i></a>`;
+                    if (data.snsInstagram) snsContainer.innerHTML += `<a href="${data.snsInstagram.startsWith('http') ? data.snsInstagram : 'https://instagram.com/'+data.snsInstagram}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-pink-50 hover:text-pink-500 transition-colors"><i class="fa-brands fa-instagram"></i></a>`;
+                    if (data.snsX) snsContainer.innerHTML += `<a href="${data.snsX.startsWith('http') ? data.snsX : 'https://twitter.com/'+data.snsX}" target="_blank" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"><i class="fa-brands fa-x-twitter"></i></a>`;
+                }
+
+                // Message Text
+                const messageEl = document.getElementById('profile-message');
+                if (messageEl) {
+                    messageEl.innerHTML = data.message ? formatText(data.message) : 'まだメッセージがありません。';
+                    if (!data.message) messageEl.classList.add('text-slate-400');
+                    else messageEl.classList.remove('text-slate-400');
                 }
             }
 
