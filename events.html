@@ -47,6 +47,13 @@
             border-color: #4f46e5 !important; 
         }
 
+        /* Filter Tag Selection */
+        .filter-tag-checkbox:checked + div {
+            background-color: #eef2ff;
+            border-color: #6366f1;
+            color: #4f46e5;
+        }
+
         .search-result-item:hover { background-color: #f1f5f9; }
         .event-list-item:active { background-color: #f8fafc; }
     </style>
@@ -57,8 +64,7 @@
     <nav class="glass-header border-b border-slate-200 fixed w-full z-[1500] top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <!-- リンク先を events.html に修正 -->
-                <a href="events.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <a href="home.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                     <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fa-solid fa-map-location-dot"></i></span>
                     イベント
                 </a>
@@ -351,13 +357,20 @@
             renderTagButtons();
             renderFilterTags();
             
+            // 検索バーの入力イベント: フィルターパネルを開かずにマーカーだけ更新する
             const pcSearch = document.getElementById('pc-map-search');
             const mobileSearch = document.getElementById('mobile-map-search');
+            
             const handleSearch = (e) => {
-                const val = e.target.value.toLowerCase();
-                const filtered = allEvents.filter(evt => evt.title.toLowerCase().includes(val));
+                const keyword = e.target.value.toLowerCase();
+                // 簡易フィルタリング: キーワードのみ考慮 (詳細は applyFilters で)
+                const filtered = allEvents.filter(evt => 
+                    evt.title.toLowerCase().includes(keyword) || 
+                    (evt.description && evt.description.toLowerCase().includes(keyword))
+                );
                 renderMarkers(filtered);
             };
+            
             if(pcSearch) pcSearch.addEventListener('input', handleSearch);
             if(mobileSearch) mobileSearch.addEventListener('input', handleSearch);
 
@@ -481,13 +494,8 @@
 
         window.startLocationAdjust = () => {
             if (!selectedCoords) return alert('先に場所を検索するか、地図をタップしてください');
-            
-            // モーダルを非表示にする
             document.getElementById('create-modal').classList.add('hidden');
-            
-            // 調整用UIを表示する
             document.getElementById('adjust-location-ui').classList.remove('hidden');
-            
             map.invalidateSize();
         };
 
@@ -843,7 +851,7 @@
                 } else {
                     const ts = serverTimestamp();
                     await setDoc(partRef, { joinedAt: ts, uid: currentUser.uid });
-                    // ユーザー側の書き込みも試みる
+                    // ユーザー側の書き込みも試みる（失敗してもアラートしない）
                     try { await setDoc(myJoinRef, { joinedAt: ts, eventId: eventId }); } catch(e) { console.warn("My list update failed", e); }
                     alert('イベントに参加しました！');
                 }
@@ -851,7 +859,7 @@
                 if (evt) showEventSheet(evt);
             } catch (e) {
                 console.error(e);
-                alert('参加処理に失敗しました。データベースの権限（Firestoreルール）を確認してください。');
+                alert('参加処理に失敗しました。もし参加者リストへの反映がうまくいかない場合は、Firestoreのルールで「participants」コレクションへの書き込み許可を確認してください。');
             } finally {
                 isJoining = false;
             }
@@ -912,7 +920,38 @@
         };
         window.applyFilters = () => {
             const keyword = document.getElementById('pc-map-search').value.toLowerCase();
-            renderMarkers(allEvents); // Reset
+            const dateFilter = document.getElementById('filter-date').value;
+            const selectedTags = Array.from(document.querySelectorAll('input[name="filter-tag"]:checked')).map(cb => cb.value);
+
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+
+            const filtered = allEvents.filter(evt => {
+                const matchKeyword = !keyword || evt.title.toLowerCase().includes(keyword) || evt.description.toLowerCase().includes(keyword);
+                
+                let matchDate = true;
+                const today = new Date().setHours(0,0,0,0);
+                const evtDate = new Date(evt.startDate).getTime();
+                
+                if (dateFilter === 'today') {
+                    matchDate = (evtDate === today);
+                } else if (dateFilter === 'week') {
+                    matchDate = (evtDate <= today + 7 * 86400000);
+                } else if (dateFilter === 'month') {
+                    matchDate = (evtDate <= today + 30 * 86400000);
+                }
+
+                const matchTag = selectedTags.length === 0 || (evt.tags && selectedTags.some(t => evt.tags.includes(t)));
+                return matchKeyword && matchDate && matchTag;
+            });
+
+            filtered.forEach(data => {
+                if (data.lat && data.lng) {
+                    const marker = L.marker([data.lat, data.lng]).addTo(map);
+                    marker.on('click', () => handleMarkerClick(data));
+                    markers.push(marker);
+                }
+            });
             toggleFilters();
         };
         window.resetFilters = () => {
