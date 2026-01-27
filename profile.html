@@ -51,7 +51,7 @@
                             <option value="true">公開する</option>
                             <option value="false">非公開（下書き）</option>
                         </select>
-                        <p class="text-xs text-gray-500 mt-1">※有料会員以外は検索結果に表示されません</p>
+                        <p class="text-xs text-gray-500 mt-1">※WALKER会員は設定に関わらず検索結果には表示されません</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">職業・肩書</label>
@@ -65,11 +65,9 @@
                 <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">① 基本情報</h2>
                 
                 <div class="mb-6 flex flex-col items-center sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                    <div class="relative">
-                        <div class="h-24 w-24 rounded-full border-2 border-gray-200 bg-gray-100 flex items-center justify-center overflow-hidden">
-                            <img id="edit-icon-preview" src="" class="hidden w-full h-full object-cover">
-                            <i id="edit-icon-placeholder" class="fa-solid fa-user text-3xl text-gray-300"></i>
-                        </div>
+                    <div class="relative h-24 w-24 rounded-full border-2 border-gray-200 bg-gray-100 flex items-center justify-center overflow-hidden">
+                        <img id="edit-icon-preview" src="" class="hidden w-full h-full object-cover">
+                        <i id="edit-icon-placeholder" class="fa-solid fa-user text-3xl text-gray-300"></i>
                     </div>
                     <div class="flex-1">
                         <label class="block text-sm font-medium text-gray-700">プロフィールアイコン</label>
@@ -236,7 +234,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // ▼▼▼▼ Firebase Config ▼▼▼▼
@@ -259,13 +257,12 @@
         let currentUser = null;
         let currentUserData = {};
         
-        // ★重要: 編集対象のUID
         let targetUid = null;
         let isAdmin = false;
 
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
 
-        // Data Definitions
+        // Data Definitions (Full list restored)
         const hobbyCategories = {
             "🏃 スポーツ・運動系": ["ランニング", "ウォーキング", "筋トレ", "ヨガ", "ピラティス", "ダンス", "バスケットボール", "サッカー", "フットサル", "野球", "テニス", "バドミントン", "卓球", "ゴルフ", "ボルダリング", "登山", "サーフィン", "スノーボード", "スキー", "サイクリング", "水泳", "格闘技", "武道"],
             "🎵 音楽・エンタメ": ["カラオケ", "楽器演奏（ギター）", "楽器演奏（ピアノ）", "作曲", "歌", "ライブ鑑賞", "フェス", "DJ", "映画鑑賞", "アニメ鑑賞", "漫画", "ゲーム", "ボードゲーム"],
@@ -311,7 +308,7 @@
                         isAdmin = true;
                         document.getElementById('admin-label').classList.remove('hidden');
                     }
-                } catch(e) { console.error(e); }
+                } catch(e) { console.error("Admin Check Error", e); }
 
                 // 2. 編集対象の決定
                 const urlParams = new URLSearchParams(window.location.search);
@@ -338,36 +335,12 @@
         });
 
         function initUI() {
-            renderFormOptions();
             const select = document.getElementById('prefecture-select');
-            select.innerHTML = '<option value="">選択してください</option>';
             prefectures.forEach(p => {
                 const opt = document.createElement('option');
-                opt.value = p;
-                opt.textContent = p;
+                opt.value = p; opt.textContent = p;
                 select.appendChild(opt);
             });
-        }
-
-        async function loadUserProfile(uid) {
-            try {
-                // 正しいパス: /profile/data
-                const docRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    currentUserData = docSnap.data();
-                } else {
-                    // 新規の場合やデータがない場合
-                    currentUserData = { userId: uid };
-                }
-                populateForm(currentUserData);
-            } catch (e) {
-                console.error(e);
-                showNotification('データ読み込みエラー: ' + e.message, 'error');
-            }
-        }
-
-        function renderFormOptions() {
             renderCategorySection('hobbies-container', hobbyCategories, 'hobbies');
             renderCategorySection('skills-container', skillCategories, 'skills');
         }
@@ -475,6 +448,7 @@
             let photoURL = currentUserData.photoURL || null;
             if (iconFile && currentUser.uid !== 'test_admin_uid') {
                 try {
+                    // ★ターゲットのUIDフォルダに保存（管理者が他人の画像を変える場合もその人のフォルダへ）
                     const storagePath = `users/${targetUid}/profile_icon.jpg`;
                     const storageRef = ref(storage, storagePath);
                     const snapshot = await uploadBytes(storageRef, iconFile);
@@ -525,8 +499,15 @@
             data.updatedAt = new Date().toISOString();
 
             // --- データの引き継ぎ ---
+            // 既存データ（ランク等）を維持しつつ、フォームデータを上書き
+            // currentUserData には loadUserProfile で取得した最新データが入っている
             const finalData = { ...currentUserData, ...data };
+            
+            // ランクはフォームにないので既存を維持 (なければwalker)
             finalData.membershipRank = currentUserData.membershipRank || 'walker';
+            
+            // 公開設定 (文字列 "true" / "false")
+            // フォームから送られる値を採用（ユーザーの意思）
             finalData.profilePublic = data.profilePublic;
 
             if (currentUser.uid === 'test_admin_uid') {
@@ -537,14 +518,19 @@
 
             try {
                 // 1. Private Data (マスター)
-                const privateDocRef = doc(db, 'artifacts', appId, 'users', targetUid, 'profile', 'data');
-                await setDoc(privateDocRef, finalData);
-                
+                // ユーザーの設定した通りに保存する（ランクに関係なく公開設定を記録）
+                // ★targetUidに対して保存（自分または管理対象）
+                await setDoc(doc(db, 'artifacts', appId, 'users', targetUid, 'profile', 'data'), finalData);
+                console.log("Master data saved.");
+
                 // 2. Public Data (検索用)
                 const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', targetUid);
                 
+                // 公開条件の判定
                 const isPaidMember = (finalData.membershipRank === 'builder' || finalData.membershipRank === 'guardian');
                 const isPublicSetting = (finalData.profilePublic === 'true');
+                
+                // ★重要: 「管理者が編集している」場合、または「有料会員」の場合は、公開設定がONなら公開DBへ保存する
                 const canPublish = isPaidMember || isAdmin;
 
                 if (isPublicSetting && canPublish) {
@@ -552,17 +538,21 @@
                         ...finalData,
                         updatedAt: new Date().toISOString()
                     };
-                    await setDoc(publicDocRef, publicData, { merge: true });
+                    await setDoc(publicDocRef, publicData); // mergeでなく上書きして整合性を保つ
+                    console.log("Public data updated.");
                 } else {
-                    // WALKER会員または非公開設定なら、最小データのみ残して隠す
+                    // WALKER会員、または非公開設定の場合は、検索インデックスから削除
+                    // ただしIDログインのために最小限のデータは残す
                     const minimalData = {
                         userId: finalData.userId,
                         email: finalData.email,
                         isHidden: true 
                     };
                     await setDoc(publicDocRef, minimalData);
+                    console.log("Public data masked (Hidden).");
                 }
 
+                // 成功メッセージの分岐
                 if (isPublicSetting && !canPublish) {
                     alert('プロフィールを保存しました。\n※現在WALKER会員のため、設定を「公開」にしても検索結果には表示されません。');
                 } else {
