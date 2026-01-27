@@ -35,7 +35,7 @@
     <style>
         body { background-color: #f8fafc; }
         .glass-header {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
@@ -74,10 +74,13 @@
     <nav class="glass-header border-b border-slate-200 fixed w-full z-50 top-0 h-16">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <a href="user.html" class="text-slate-500 hover:text-slate-900 transition-colors">
-                    <i class="fa-solid fa-arrow-left text-xl"></i>
+                <!-- 矢印を削除し、マイページと同じスタイルでアイコン＋タイトルを表示 -->
+                <a href="search.html" class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <span class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <span>ユーザー検索</span>
                 </a>
-                <span class="font-bold text-lg">探す</span>
             </div>
             
             <!-- Search Bar (Desktop Only) -->
@@ -91,28 +94,36 @@
 
             <!-- Header Actions -->
             <div class="flex items-center gap-3">
+                <!-- PC Navigation Links (Updated link to home.html) -->
+                <div class="hidden lg:flex items-center gap-6 mr-4">
+                    <a href="home.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-house"></i> ホーム</a>
+                    <a href="events.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-map-location-dot"></i> イベント</a>
+                    <a href="search.html" class="text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-magnifying-glass"></i> さがす</a>
+                    <a href="user.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-user"></i> マイページ</a>
+                </div>
+
                 <!-- Filter Button (Desktop Only) -->
-                <!-- スマホでは検索バー横に配置するためここでは隠す (hidden lg:flex) -->
                 <button onclick="toggleFilters()" class="hidden lg:flex p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative" title="フィルター">
                     <i class="fa-solid fa-sliders"></i>
                     <span id="filter-badge-desktop" class="hidden absolute top-1 right-1 w-2 h-2 bg-brand-500 rounded-full"></span>
                 </button>
                 
                 <!-- Notification Bell -->
-                <a href="notifications.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors">
+                <a href="notifications.html" class="p-2 text-slate-400 hover:text-brand-600 transition-colors relative">
                     <i class="fa-regular fa-bell text-xl"></i>
+                    <span id="nav-badge" class="hidden absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                 </a>
 
-                <!-- User Icon (PC only) -->
-                <a href="user.html" class="hidden lg:flex p-2 text-slate-400 hover:text-brand-600 transition-colors">
-                    <i class="fa-solid fa-user text-xl"></i>
-                </a>
+                <!-- Logout (Desktop) -->
+                <button onclick="handleLogout()" class="hidden lg:flex text-sm font-bold text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
+                    <span class="hidden sm:inline">ログアウト</span>
+                    <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                </button>
             </div>
         </div>
     </nav>
 
     <!-- Search Bar & Filter (Mobile Only) -->
-    <!-- Navbarの下に固定表示 -->
     <div class="lg:hidden fixed top-16 w-full bg-white/95 backdrop-blur-sm z-40 px-4 py-3 border-b border-slate-100 shadow-sm">
         <div class="flex gap-3">
             <div class="relative flex-1">
@@ -130,7 +141,7 @@
 
     <!-- Filter Panel -->
     <div id="filter-panel" class="fixed top-0 left-0 w-full h-full bg-black/50 z-[60] hidden opacity-0 transition-opacity duration-300">
-        <div class="absolute right-0 top-0 h-full w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col" id="filter-content">
+        <div class="absolute right-0 top-0 h-full w-80 sm:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col" id="filter-content">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-white z-10">
                 <h3 class="font-bold text-lg flex items-center gap-2">
                     <i class="fa-solid fa-filter text-brand-600"></i> 絞り込み
@@ -226,23 +237,31 @@
 
     <!-- Main Content -->
     <main class="flex-1 max-w-7xl mx-auto w-full pt-32 lg:pt-24 px-3 pb-20">
+        
         <div id="loading-indicator" class="flex flex-col items-center justify-center py-20">
             <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand-500 mb-3"></i>
             <p class="text-slate-400 text-sm">ユーザーを読み込み中...</p>
         </div>
+
         <div id="users-grid" class="card-grid hidden"></div>
+
         <div id="no-results" class="hidden text-center py-20">
-            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-100 mb-4 text-slate-400"><i class="fa-solid fa-users-slash text-3xl"></i></div>
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-100 mb-4 text-slate-400">
+                <i class="fa-solid fa-users-slash text-3xl"></i>
+            </div>
             <h3 class="text-lg font-bold text-slate-900 mb-2">ユーザーが見つかりません</h3>
             <p class="text-slate-500 text-sm">検索条件を変えて試してみてください</p>
-            <button onclick="resetFilters()" class="mt-6 text-brand-600 font-bold text-sm hover:underline">すべてのユーザーを表示</button>
+            <button onclick="resetFilters()" class="mt-6 text-brand-600 font-bold text-sm hover:underline">
+                すべてのユーザーを表示
+            </button>
         </div>
+
     </main>
 
     <!-- Bottom Navigation (Mobile Only) -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-40 safe-area-pb">
         <div class="flex justify-around items-center h-16">
-            <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
+            <a href="home.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-600 transition-colors">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">ホーム</span>
             </a>
@@ -267,9 +286,9 @@
     </nav>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, query, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, doc, getDoc, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
         // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
@@ -321,6 +340,8 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
+                checkUnreadNotifications(user.uid);
+
                 if (localStorage.getItem('isAdminMock') === 'true') {
                     fetchUsers();
                     return;
@@ -332,6 +353,7 @@
                     
                     if (profileSnap.exists()) {
                         const rank = profileSnap.data().membershipRank || 'walker';
+                        // ★ WALKERチェック
                         if (rank === 'walker') {
                             alert('検索機能を利用するにはメンバーシップのアップグレードが必要です。');
                             window.location.href = 'upgrade.html';
@@ -345,6 +367,15 @@
                 window.location.href = 'login.html';
             }
         });
+
+        async function checkUnreadNotifications(uid) {
+            try {
+                const notifRef = collection(db, 'artifacts', appId, 'users', uid, 'notifications');
+                const q = query(notifRef, where('isRead', '==', false));
+                const snap = await getCountFromServer(q);
+                if (snap.data().count > 0) document.getElementById('nav-badge').classList.remove('hidden');
+            } catch (e) { console.error(e); }
+        }
 
         function initFilterOptions() {
             const select = document.getElementById('filter-prefecture');
@@ -401,6 +432,7 @@
                 
                 document.getElementById('loading-indicator').classList.add('hidden');
                 renderGrid(filteredUsers);
+
             } catch (error) {
                 console.error("Fetch users error:", error);
                 document.getElementById('loading-indicator').innerHTML = '<p class="text-red-500">読み込みに失敗しました</p>';
@@ -463,11 +495,16 @@
             const content = document.getElementById('filter-content');
             if (panel.classList.contains('hidden')) {
                 panel.classList.remove('hidden');
-                setTimeout(() => { panel.classList.remove('opacity-0'); content.classList.remove('translate-x-full'); }, 10);
+                setTimeout(() => {
+                    panel.classList.remove('opacity-0');
+                    content.classList.remove('translate-x-full');
+                }, 10);
             } else {
                 panel.classList.add('opacity-0');
                 content.classList.add('translate-x-full');
-                setTimeout(() => panel.classList.add('hidden'), 300);
+                setTimeout(() => {
+                    panel.classList.add('hidden');
+                }, 300);
             }
         };
 
@@ -539,6 +576,12 @@
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
+
+        window.handleLogout = () => {
+            if (isAdminMock) localStorage.removeItem('isAdminMock');
+            signOut(auth);
+            window.location.href = 'login.html';
+        };
     </script>
 </body>
 </html>
