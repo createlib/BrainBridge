@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRAIN BRIDGE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>ホーム | BRAIN BRIDGE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -19,7 +19,7 @@
     </script>
     <style>body { background-color: #f8fafc; }</style>
 </head>
-<body class="text-slate-800 antialiased pb-20">
+<body class="text-slate-800 antialiased pb-safe-bottom lg:pb-0">
 
     <!-- Header / Nav -->
     <nav class="bg-white/90 backdrop-blur-md border-b border-slate-200 fixed w-full z-50 top-0 h-16">
@@ -33,7 +33,7 @@
 
             <!-- PC Navigation -->
             <div class="hidden lg:flex items-center gap-6">
-                <a href="index.html" class="text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-house"></i> ホーム</a>
+                <a href="home.html" class="text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-house"></i> ホーム</a>
                 <a href="events.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-map-location-dot"></i> イベント</a>
                 <a href="search.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-magnifying-glass"></i> さがす</a>
                 <a href="user.html" class="text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-user"></i> マイページ</a>
@@ -44,11 +44,11 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto pt-24 px-4 sm:px-6 lg:px-8">
+    <main class="max-w-7xl mx-auto pt-24 px-4 sm:px-6 lg:px-8 pb-24">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <!-- Left Column -->
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-2 space-y-8">
                 <!-- Welcome Card -->
                 <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-3xl p-8 shadow-xl relative overflow-hidden">
                     <div class="relative z-10">
@@ -68,19 +68,30 @@
                     </div>
                 </div>
 
-                <!-- Recent Events -->
-                <h2 class="font-bold text-lg text-slate-900 flex items-center gap-2">
-                    <span class="w-1 h-6 bg-brand-500 rounded-full"></span>
-                    直近のイベント
-                </h2>
-                <div id="recent-events-list" class="space-y-4">
-                    <!-- Loading -->
-                    <div class="animate-pulse flex space-x-4 p-4 bg-white rounded-xl shadow-sm">
-                        <div class="rounded-full bg-slate-200 h-12 w-12"></div>
-                        <div class="flex-1 space-y-2 py-1">
-                            <div class="h-4 bg-slate-200 rounded w-3/4"></div>
-                            <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+                <!-- Participating Events -->
+                <div class="space-y-4">
+                    <h2 class="font-bold text-lg text-slate-900 flex items-center gap-2 border-l-4 border-brand-500 pl-3">
+                        参加予定のイベント
+                    </h2>
+                    <div id="participating-events-list" class="space-y-3">
+                        <!-- Loading State -->
+                        <div class="animate-pulse flex space-x-4 p-4 bg-white rounded-xl border border-slate-100">
+                            <div class="rounded-lg bg-slate-200 h-16 w-16"></div>
+                            <div class="flex-1 space-y-2 py-1">
+                                <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+                                <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+                            </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Hosting Events -->
+                <div class="space-y-4">
+                    <h2 class="font-bold text-lg text-slate-900 flex items-center gap-2 border-l-4 border-yellow-500 pl-3">
+                        主催するイベント
+                    </h2>
+                    <div id="hosting-events-list" class="space-y-3">
+                        <div class="text-sm text-slate-400 italic p-6 bg-white rounded-xl border border-slate-100 text-center">読み込み中...</div>
                     </div>
                 </div>
             </div>
@@ -89,7 +100,7 @@
             <div class="space-y-6">
                 <!-- User Card Mini -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
-                    <div class="w-20 h-20 bg-slate-100 rounded-full mx-auto mb-3 overflow-hidden">
+                    <div class="w-20 h-20 bg-slate-100 rounded-full mx-auto mb-3 overflow-hidden border-2 border-white shadow-sm">
                         <img id="home-user-icon" src="" class="w-full h-full object-cover hidden">
                         <div id="home-user-placeholder" class="w-full h-full flex items-center justify-center text-slate-300"><i class="fa-solid fa-user text-3xl"></i></div>
                     </div>
@@ -120,7 +131,7 @@
     <!-- Bottom Navigation (Mobile Only) -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-40 pb-safe-bottom">
         <div class="flex justify-around items-center h-16">
-            <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
+            <a href="home.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-bold">ホーム</span>
             </a>
@@ -142,11 +153,15 @@
             </a>
         </div>
     </nav>
+    
+    <style>
+        .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+    </style>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
         // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
@@ -169,12 +184,13 @@
         onAuthStateChanged(auth, async (user) => {
             if (isAdminMock) {
                 updateUI({ name: 'テスト管理者', userId: 'admin' });
-                loadEvents();
+                // モックデータ表示（テスト用）
+                renderMockEvents();
                 return;
             }
 
             if (user && !user.isAnonymous) {
-                // Get User Info
+                // User Info
                 try {
                     const docSnap = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data'));
                     if (docSnap.exists()) {
@@ -184,7 +200,7 @@
                     }
                 } catch (e) { console.error(e); }
                 
-                loadEvents();
+                loadEvents(user.uid);
             } else {
                 window.location.href = 'login.html';
             }
@@ -202,43 +218,131 @@
             }
         }
 
-        async function loadEvents() {
+        async function loadEvents(uid) {
+            
+            // 1. Hosting Events (自分が主催)
             try {
                 const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
-                const q = query(eventsRef, orderBy('date', 'asc'), limit(3));
-                const snapshot = await getDocs(q);
-                
-                const container = document.getElementById('recent-events-list');
-                container.innerHTML = '';
-                
-                if (snapshot.empty) {
-                    container.innerHTML = '<div class="text-sm text-slate-400 italic p-4">予定されているイベントはありません</div>';
-                    return;
-                }
-
-                snapshot.forEach(doc => {
-                    const evt = doc.data();
-                    const thumb = evt.thumbnailUrl || 'https://via.placeholder.com/80';
-                    const el = document.createElement('a');
-                    el.href = 'events.html'; // 詳細はマップで見る
-                    el.className = 'flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-100 hover:border-brand-200 transition-colors shadow-sm';
-                    el.innerHTML = `
-                        <img src="${thumb}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-bold text-slate-900 truncate">${evt.title}</h4>
-                            <p class="text-xs text-slate-500 mt-1 flex items-center gap-2">
-                                <span><i class="fa-regular fa-calendar mr-1"></i>${evt.date}</span>
-                                <span><i class="fa-solid fa-location-dot mr-1"></i>${evt.locationName}</span>
-                            </p>
-                        </div>
-                        <i class="fa-solid fa-chevron-right text-slate-300"></i>
-                    `;
-                    container.appendChild(el);
-                });
-
-            } catch (e) {
-                console.error("Events load err", e);
+                const qHost = query(eventsRef, where('organizerId', '==', uid), orderBy('createdAt', 'desc')); 
+                const snapHost = await getDocs(qHost);
+                renderEventList('hosting-events-list', snapHost.docs.map(d => ({...d.data(), id: d.id})), '主催するイベントはありません');
+            } catch (e) { 
+                console.error("Host load err", e);
+                // インデックスエラー回避のためクライアントフィルタを試す
+                // （whereとorderByの複合クエリはインデックスが必要だが、作成前はエラーになるため）
+                // 実際はコンソールのリンクからインデックスを作成すべきですが、簡易対応として全件取得フィルタ
+                loadHostingEventsClientSide(uid);
             }
+
+            // 2. Participating Events (自分が参加)
+            try {
+                // ユーザーの参加イベントリストを取得
+                const myJoinColl = collection(db, 'artifacts', appId, 'users', uid, 'participating_events');
+                const snapJoin = await getDocs(myJoinColl);
+                
+                const listEl = document.getElementById('participating-events-list');
+                listEl.innerHTML = '';
+
+                if (snapJoin.empty) {
+                    listEl.innerHTML = `
+                        <div class="text-sm text-slate-400 italic p-6 bg-white rounded-xl border border-slate-100 text-center">
+                            参加予定のイベントはありません<br>
+                            <a href="events.html" class="text-brand-600 underline mt-2 inline-block">イベントを探す</a>
+                        </div>`;
+                } else {
+                    // IDリストから詳細を取得
+                    const eventPromises = snapJoin.docs.map(async (joinDoc) => {
+                        const eventId = joinDoc.id; // ドキュメントIDがイベントID
+                        try {
+                            const evtRef = doc(db, 'artifacts', appId, 'public', 'data', 'events', eventId);
+                            const evtSnap = await getDoc(evtRef);
+                            if (evtSnap.exists()) {
+                                const data = evtSnap.data();
+                                data.id = evtSnap.id;
+                                return data;
+                            }
+                        } catch (e) { console.error(e); }
+                        return null; // 取得失敗や削除済み
+                    });
+
+                    const events = (await Promise.all(eventPromises)).filter(e => e !== null);
+                    
+                    // 日付順にソート (近い順)
+                    events.sort((a, b) => {
+                        const dateA = new Date(a.startDate).getTime();
+                        const dateB = new Date(b.startDate).getTime();
+                        return dateA - dateB;
+                    });
+
+                    if (events.length === 0) {
+                         listEl.innerHTML = '<div class="text-sm text-slate-400 italic p-6 bg-white rounded-xl border border-slate-100 text-center">イベントが見つかりません（削除された可能性があります）</div>';
+                    } else {
+                        events.forEach(evt => renderEventItem(listEl, evt));
+                    }
+                }
+            } catch (e) { 
+                console.error("Join load err", e); 
+                document.getElementById('participating-events-list').innerHTML = '<div class="text-sm text-red-400 p-4">読み込みエラー</div>';
+            }
+        }
+
+        // Firestoreインデックス未作成時のフォールバック
+        async function loadHostingEventsClientSide(uid) {
+            try {
+                const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
+                const q = query(eventsRef, orderBy('createdAt', 'desc')); // 単純ソートのみ
+                const snap = await getDocs(q);
+                const myEvents = snap.docs
+                    .map(d => ({...d.data(), id: d.id}))
+                    .filter(e => e.organizerId === uid);
+                
+                renderEventList('hosting-events-list', myEvents, '主催するイベントはありません');
+            } catch(e) {
+                console.error("Client side load err", e);
+            }
+        }
+
+        function renderEventList(containerId, events, emptyMsg) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            if (events.length === 0) {
+                container.innerHTML = `<div class="text-sm text-slate-400 italic p-6 bg-white rounded-xl border border-slate-100 text-center">${emptyMsg}</div>`;
+                return;
+            }
+            events.forEach(evt => renderEventItem(container, evt));
+        }
+
+        function renderEventItem(container, evt) {
+            const thumb = evt.thumbnailUrl || 'https://via.placeholder.com/80?text=No+Image';
+            // 詳細を見るためにevents.htmlへ（理想はクエリパラメータ付きだが、まずはマップへ誘導）
+            const el = document.createElement('a');
+            el.href = 'events.html'; 
+            el.className = 'flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-100 hover:border-brand-200 transition-colors shadow-sm';
+            el.innerHTML = `
+                <img src="${thumb}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0 bg-slate-100">
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-slate-900 truncate text-sm mb-1">${evt.title}</h4>
+                    <p class="text-xs text-slate-500 flex items-center gap-2">
+                        <span><i class="fa-regular fa-calendar mr-1"></i>${evt.startDate}</span>
+                        <span class="truncate max-w-[120px]"><i class="fa-solid fa-location-dot mr-1"></i>${evt.locationName}</span>
+                    </p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-300 text-sm"></i>
+            `;
+            container.appendChild(el);
+        }
+
+        function renderMockEvents() {
+            document.getElementById('participating-events-list').innerHTML = `
+                <div class="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-100 shadow-sm">
+                    <div class="w-16 h-16 bg-slate-200 rounded-lg flex items-center justify-center text-xs">Mock</div>
+                    <div class="flex-1"><h4 class="font-bold text-sm">テストイベント (参加)</h4><p class="text-xs text-slate-500">2023-12-01 / 東京</p></div>
+                </div>`;
+            document.getElementById('hosting-events-list').innerHTML = `
+                <div class="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-100 shadow-sm">
+                    <div class="w-16 h-16 bg-slate-200 rounded-lg flex items-center justify-center text-xs">Mock</div>
+                    <div class="flex-1"><h4 class="font-bold text-sm">テストイベント (主催)</h4><p class="text-xs text-slate-500">2023-12-10 / 大阪</p></div>
+                </div>`;
         }
 
         window.handleLogout = () => {
