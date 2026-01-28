@@ -24,6 +24,10 @@
         .calendar-day.selected { background-color: #4f46e5; color: white; font-weight: bold; }
         .calendar-day.has-event::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background-color: #ef4444; border-radius: 50%; }
         .calendar-day.selected.has-event::after { background-color: white; }
+        
+        /* スマホ用ボトムナビの高さ調整 */
+        .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); } /* Body用: ナビに隠れないようにする */
+        .safe-area-pb { padding-bottom: env(safe-area-inset-bottom); } /* Nav用: iPhoneのホームバー回避 */
     </style>
 </head>
 <body class="text-slate-800 antialiased pb-safe-bottom lg:pb-0">
@@ -224,7 +228,7 @@
     </div>
 
     <!-- Bottom Navigation (Mobile Only) -->
-    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-40 pb-safe-bottom">
+    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-40 safe-area-pb">
         <div class="flex justify-around items-center h-16">
             <a href="home.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
@@ -249,16 +253,11 @@
         </div>
     </nav>
     
-    <style>
-        .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
-    </style>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
-        // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
             authDomain: "brainbridge-4b8ac.firebaseapp.com",
@@ -267,7 +266,6 @@
             messagingSenderId: "803209683213",
             appId: "1:803209683213:web:b62d13784fa2bbbb9f5044"
         };
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -316,8 +314,7 @@
         }
 
         async function loadEvents(uid) {
-            console.log("Loading events for user:", uid);
-
+            
             // 1. Hosting Events (自分が主催)
             try {
                 const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
