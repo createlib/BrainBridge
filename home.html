@@ -17,7 +17,14 @@
             }
         }
     </script>
-    <style>body { background-color: #f8fafc; }</style>
+    <style>
+        body { background-color: #f8fafc; }
+        .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; border-radius: 9999px; transition: all 0.2s; }
+        .calendar-day:hover { background-color: #f1f5f9; }
+        .calendar-day.selected { background-color: #4f46e5; color: white; font-weight: bold; }
+        .calendar-day.has-event::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background-color: #ef4444; border-radius: 50%; }
+        .calendar-day.selected.has-event::after { background-color: white; }
+    </style>
 </head>
 <body class="text-slate-800 antialiased pb-safe-bottom lg:pb-0">
 
@@ -70,17 +77,53 @@
 
                 <!-- Participating Events -->
                 <div class="space-y-4">
-                    <h2 class="font-bold text-lg text-slate-900 flex items-center gap-2 border-l-4 border-brand-500 pl-3">
-                        参加予定のイベント
-                    </h2>
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-bold text-lg text-slate-900 flex items-center gap-2 border-l-4 border-brand-500 pl-3">
+                            参加予定のイベント
+                        </h2>
+                        <!-- Toggle Switch -->
+                        <div class="flex bg-slate-100 p-1 rounded-lg">
+                            <button onclick="switchView('list')" id="btn-view-list" class="px-3 py-1.5 rounded-md text-xs font-bold transition-all bg-white shadow text-brand-600">
+                                <i class="fa-solid fa-list mr-1"></i>リスト
+                            </button>
+                            <button onclick="switchView('calendar')" id="btn-view-calendar" class="px-3 py-1.5 rounded-md text-xs font-bold transition-all text-slate-500 hover:text-slate-700">
+                                <i class="fa-regular fa-calendar mr-1"></i>カレンダー
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- List View -->
                     <div id="participating-events-list" class="space-y-3">
-                        <!-- Loading State -->
+                        <!-- Loading -->
                         <div class="animate-pulse flex space-x-4 p-4 bg-white rounded-xl border border-slate-100">
                             <div class="rounded-lg bg-slate-200 h-16 w-16"></div>
                             <div class="flex-1 space-y-2 py-1">
                                 <div class="h-4 bg-slate-200 rounded w-3/4"></div>
                                 <div class="h-4 bg-slate-200 rounded w-1/2"></div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar View (Hidden by default) -->
+                    <div id="participating-events-calendar" class="hidden bg-white rounded-2xl border border-slate-100 p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg" id="calendar-month-year">2023年 12月</h3>
+                            <div class="flex gap-2">
+                                <button onclick="changeMonth(-1)" class="p-2 hover:bg-slate-50 rounded-full"><i class="fa-solid fa-chevron-left"></i></button>
+                                <button onclick="changeMonth(1)" class="p-2 hover:bg-slate-50 rounded-full"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-xs text-slate-400 mb-2">
+                            <div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div>
+                        </div>
+                        <div id="calendar-days" class="grid grid-cols-7 gap-1 text-sm text-slate-700">
+                            <!-- JS injected -->
+                        </div>
+                        
+                        <!-- Selected Date Events -->
+                        <div id="calendar-selected-events" class="mt-6 pt-4 border-t border-slate-100 hidden">
+                            <h4 class="text-xs font-bold text-slate-500 mb-2" id="selected-date-label">選択した日のイベント</h4>
+                            <div id="calendar-events-list" class="space-y-2"></div>
                         </div>
                     </div>
                 </div>
@@ -128,6 +171,58 @@
         </div>
     </main>
 
+    <!-- Event Detail Modal -->
+    <div id="event-detail-modal" class="hidden fixed inset-0 z-[2000] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <div class="relative h-40 bg-slate-200">
+                <img id="modal-event-img" class="w-full h-full object-cover" src="">
+                <button onclick="closeDetailModal()" class="absolute top-3 right-3 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto">
+                <h3 id="modal-event-title" class="text-xl font-bold text-slate-900 mb-2"></h3>
+                
+                <div class="flex flex-wrap gap-2 mb-4" id="modal-event-tags"></div>
+
+                <div class="space-y-3 mb-6 text-sm text-slate-600">
+                    <div class="flex gap-3">
+                        <i class="fa-regular fa-calendar mt-0.5 text-slate-400 w-5 text-center"></i>
+                        <span id="modal-event-date" class="font-bold"></span>
+                    </div>
+                    <div class="flex gap-3">
+                        <i class="fa-regular fa-clock mt-0.5 text-slate-400 w-5 text-center"></i>
+                        <span id="modal-event-time"></span>
+                    </div>
+                    <div class="flex gap-3">
+                        <i class="fa-solid fa-location-dot mt-0.5 text-slate-400 w-5 text-center"></i>
+                        <span id="modal-event-location"></span>
+                    </div>
+                    <div class="flex gap-3">
+                        <i class="fa-solid fa-user mt-0.5 text-slate-400 w-5 text-center"></i>
+                        <span>主催: <span id="modal-event-organizer"></span></span>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">詳細</h4>
+                    <p id="modal-event-desc" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap"></p>
+                </div>
+
+                <!-- Google Calendar Button -->
+                <a id="modal-gcal-btn" href="#" target="_blank" class="block w-full py-3 bg-brand-600 text-white text-center font-bold rounded-xl hover:bg-brand-700 transition-colors shadow-md">
+                    <i class="fa-brands fa-google mr-2"></i> Googleカレンダーに追加
+                </a>
+                
+                <a href="events.html" class="block w-full text-center text-xs text-slate-400 mt-4 hover:underline">
+                    イベントマップで位置を確認する
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Bottom Navigation (Mobile Only) -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-40 pb-safe-bottom">
         <div class="flex justify-around items-center h-16">
@@ -163,7 +258,6 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
-        // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
             authDomain: "brainbridge-4b8ac.firebaseapp.com",
@@ -172,7 +266,6 @@
             messagingSenderId: "803209683213",
             appId: "1:803209683213:web:b62d13784fa2bbbb9f5044"
         };
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -181,16 +274,18 @@
 
         const isAdminMock = localStorage.getItem('isAdminMock') === 'true';
 
+        let myEvents = []; // 参加予定イベントのキャッシュ
+        let currentCalendarDate = new Date();
+
         onAuthStateChanged(auth, async (user) => {
             if (isAdminMock) {
                 updateUI({ name: 'テスト管理者', userId: 'admin' });
-                // モックデータ表示（テスト用）
-                renderMockEvents();
+                document.getElementById('participating-events-list').innerHTML = '<div class="text-sm text-slate-400 italic p-6 bg-white rounded-xl border border-slate-100 text-center">管理者モード: 参加イベントなし</div>';
+                document.getElementById('hosting-events-list').innerHTML = '<div class="text-sm text-slate-400 italic p-6 bg-white rounded-xl border border-slate-100 text-center">管理者モード: 主催イベントなし</div>';
                 return;
             }
 
             if (user && !user.isAnonymous) {
-                // User Info
                 try {
                     const docSnap = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data'));
                     if (docSnap.exists()) {
@@ -219,8 +314,7 @@
         }
 
         async function loadEvents(uid) {
-            
-            // 1. Hosting Events (自分が主催)
+            // 1. Hosting Events
             try {
                 const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
                 const qHost = query(eventsRef, where('organizerId', '==', uid), orderBy('createdAt', 'desc')); 
@@ -228,15 +322,16 @@
                 renderEventList('hosting-events-list', snapHost.docs.map(d => ({...d.data(), id: d.id})), '主催するイベントはありません');
             } catch (e) { 
                 console.error("Host load err", e);
-                // インデックスエラー回避のためクライアントフィルタを試す
-                // （whereとorderByの複合クエリはインデックスが必要だが、作成前はエラーになるため）
-                // 実際はコンソールのリンクからインデックスを作成すべきですが、簡易対応として全件取得フィルタ
-                loadHostingEventsClientSide(uid);
+                // Fallback client-side filter
+                const qAll = query(eventsRef, orderBy('createdAt', 'desc'));
+                getDocs(qAll).then(snap => {
+                    const hostEvents = snap.docs.map(d => ({...d.data(), id: d.id})).filter(e => e.organizerId === uid);
+                    renderEventList('hosting-events-list', hostEvents, '主催するイベントはありません');
+                });
             }
 
-            // 2. Participating Events (自分が参加)
+            // 2. Participating Events
             try {
-                // ユーザーの参加イベントリストを取得
                 const myJoinColl = collection(db, 'artifacts', appId, 'users', uid, 'participating_events');
                 const snapJoin = await getDocs(myJoinColl);
                 
@@ -250,9 +345,8 @@
                             <a href="events.html" class="text-brand-600 underline mt-2 inline-block">イベントを探す</a>
                         </div>`;
                 } else {
-                    // IDリストから詳細を取得
                     const eventPromises = snapJoin.docs.map(async (joinDoc) => {
-                        const eventId = joinDoc.id; // ドキュメントIDがイベントID
+                        const eventId = joinDoc.id; 
                         try {
                             const evtRef = doc(db, 'artifacts', appId, 'public', 'data', 'events', eventId);
                             const evtSnap = await getDoc(evtRef);
@@ -262,43 +356,27 @@
                                 return data;
                             }
                         } catch (e) { console.error(e); }
-                        return null; // 取得失敗や削除済み
+                        return null; 
                     });
 
-                    const events = (await Promise.all(eventPromises)).filter(e => e !== null);
+                    myEvents = (await Promise.all(eventPromises)).filter(e => e !== null);
                     
-                    // 日付順にソート (近い順)
-                    events.sort((a, b) => {
+                    myEvents.sort((a, b) => {
                         const dateA = new Date(a.startDate).getTime();
                         const dateB = new Date(b.startDate).getTime();
                         return dateA - dateB;
                     });
 
-                    if (events.length === 0) {
+                    if (myEvents.length === 0) {
                          listEl.innerHTML = '<div class="text-sm text-slate-400 italic p-6 bg-white rounded-xl border border-slate-100 text-center">イベントが見つかりません（削除された可能性があります）</div>';
                     } else {
-                        events.forEach(evt => renderEventItem(listEl, evt));
+                        myEvents.forEach(evt => renderEventItem(listEl, evt));
+                        renderCalendar(); // Init calendar
                     }
                 }
             } catch (e) { 
                 console.error("Join load err", e); 
                 document.getElementById('participating-events-list').innerHTML = '<div class="text-sm text-red-400 p-4">読み込みエラー</div>';
-            }
-        }
-
-        // Firestoreインデックス未作成時のフォールバック
-        async function loadHostingEventsClientSide(uid) {
-            try {
-                const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
-                const q = query(eventsRef, orderBy('createdAt', 'desc')); // 単純ソートのみ
-                const snap = await getDocs(q);
-                const myEvents = snap.docs
-                    .map(d => ({...d.data(), id: d.id}))
-                    .filter(e => e.organizerId === uid);
-                
-                renderEventList('hosting-events-list', myEvents, '主催するイベントはありません');
-            } catch(e) {
-                console.error("Client side load err", e);
             }
         }
 
@@ -309,15 +387,16 @@
                 container.innerHTML = `<div class="text-sm text-slate-400 italic p-6 bg-white rounded-xl border border-slate-100 text-center">${emptyMsg}</div>`;
                 return;
             }
+            // Date sort
+            events.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
             events.forEach(evt => renderEventItem(container, evt));
         }
 
         function renderEventItem(container, evt) {
             const thumb = evt.thumbnailUrl || 'https://via.placeholder.com/80?text=No+Image';
-            // 詳細を見るためにevents.htmlへ（理想はクエリパラメータ付きだが、まずはマップへ誘導）
-            const el = document.createElement('a');
-            el.href = 'events.html'; 
-            el.className = 'flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-100 hover:border-brand-200 transition-colors shadow-sm';
+            const el = document.createElement('div');
+            el.className = 'flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-100 hover:border-brand-200 transition-colors shadow-sm cursor-pointer';
+            el.onclick = () => openEventDetail(evt);
             el.innerHTML = `
                 <img src="${thumb}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0 bg-slate-100">
                 <div class="flex-1 min-w-0">
@@ -332,18 +411,126 @@
             container.appendChild(el);
         }
 
-        function renderMockEvents() {
-            document.getElementById('participating-events-list').innerHTML = `
-                <div class="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-100 shadow-sm">
-                    <div class="w-16 h-16 bg-slate-200 rounded-lg flex items-center justify-center text-xs">Mock</div>
-                    <div class="flex-1"><h4 class="font-bold text-sm">テストイベント (参加)</h4><p class="text-xs text-slate-500">2023-12-01 / 東京</p></div>
-                </div>`;
-            document.getElementById('hosting-events-list').innerHTML = `
-                <div class="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-100 shadow-sm">
-                    <div class="w-16 h-16 bg-slate-200 rounded-lg flex items-center justify-center text-xs">Mock</div>
-                    <div class="flex-1"><h4 class="font-bold text-sm">テストイベント (主催)</h4><p class="text-xs text-slate-500">2023-12-10 / 大阪</p></div>
-                </div>`;
+        // --- View Switcher ---
+        window.switchView = (view) => {
+            const listEl = document.getElementById('participating-events-list');
+            const calEl = document.getElementById('participating-events-calendar');
+            const btnList = document.getElementById('btn-view-list');
+            const btnCal = document.getElementById('btn-view-calendar');
+
+            if (view === 'list') {
+                listEl.classList.remove('hidden');
+                calEl.classList.add('hidden');
+                btnList.classList.add('bg-white', 'shadow', 'text-brand-600');
+                btnList.classList.remove('text-slate-500');
+                btnCal.classList.remove('bg-white', 'shadow', 'text-brand-600');
+                btnCal.classList.add('text-slate-500');
+            } else {
+                listEl.classList.add('hidden');
+                calEl.classList.remove('hidden');
+                btnCal.classList.add('bg-white', 'shadow', 'text-brand-600');
+                btnCal.classList.remove('text-slate-500');
+                btnList.classList.remove('bg-white', 'shadow', 'text-brand-600');
+                btnList.classList.add('text-slate-500');
+                renderCalendar();
+            }
+        };
+
+        // --- Calendar Logic ---
+        window.changeMonth = (diff) => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + diff);
+            renderCalendar();
+        };
+
+        function renderCalendar() {
+            const container = document.getElementById('calendar-days');
+            container.innerHTML = '';
+            
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            document.getElementById('calendar-month-year').textContent = `${year}年 ${month + 1}月`;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDay = firstDay.getDay(); // 0:Sun
+
+            // Empty slots
+            for (let i = 0; i < startingDay; i++) {
+                container.appendChild(document.createElement('div'));
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const hasEvent = myEvents.some(e => e.startDate === dateStr);
+                
+                const dayEl = document.createElement('div');
+                dayEl.className = `calendar-day text-sm ${hasEvent ? 'has-event' : ''}`;
+                dayEl.textContent = d;
+                dayEl.onclick = () => selectDate(dateStr, dayEl);
+                
+                container.appendChild(dayEl);
+            }
+            
+            // Clear selection
+            document.getElementById('calendar-selected-events').classList.add('hidden');
         }
+
+        function selectDate(dateStr, el) {
+            // Remove previous selected class
+            document.querySelectorAll('.calendar-day').forEach(e => e.classList.remove('selected'));
+            el.classList.add('selected');
+
+            const eventsOnDate = myEvents.filter(e => e.startDate === dateStr);
+            const list = document.getElementById('calendar-events-list');
+            list.innerHTML = '';
+
+            document.getElementById('selected-date-label').textContent = `${dateStr} のイベント`;
+            document.getElementById('calendar-selected-events').classList.remove('hidden');
+
+            if (eventsOnDate.length === 0) {
+                list.innerHTML = '<p class="text-xs text-slate-400 italic">予定はありません</p>';
+            } else {
+                eventsOnDate.forEach(evt => renderEventItem(list, evt));
+            }
+        }
+
+        // --- Detail Modal & GCal Link ---
+        window.openEventDetail = (evt) => {
+            const modal = document.getElementById('event-detail-modal');
+            
+            document.getElementById('modal-event-title').textContent = evt.title;
+            document.getElementById('modal-event-img').src = evt.thumbnailUrl || 'https://via.placeholder.com/400x200';
+            document.getElementById('modal-event-date').textContent = `${evt.startDate} ${evt.startTime} ~ ${evt.endTime}`;
+            document.getElementById('modal-event-time').textContent = evt.startTime;
+            document.getElementById('modal-event-location').textContent = evt.locationName;
+            document.getElementById('modal-event-organizer').textContent = evt.organizerName;
+            document.getElementById('modal-event-desc').textContent = evt.description || '';
+            
+            const tagsEl = document.getElementById('modal-event-tags');
+            tagsEl.innerHTML = '';
+            if (evt.tags) {
+                evt.tags.forEach(tag => {
+                    tagsEl.innerHTML += `<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">#${tag}</span>`;
+                });
+            }
+
+            // Generate Google Calendar Link
+            // Format: YYYYMMDDTHHmmss
+            const startStr = evt.startDate.replace(/-/g, '') + 'T' + (evt.startTime ? evt.startTime.replace(/:/g, '') + '00' : '000000');
+            const endStr = (evt.endDate ? evt.endDate.replace(/-/g, '') : startStr.substring(0,8)) + 'T' + (evt.endTime ? evt.endTime.replace(/:/g, '') + '00' : '235900');
+            
+            const gcalUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(evt.title)}&dates=${startStr}/${endStr}&details=${encodeURIComponent(evt.description || '')}&location=${encodeURIComponent(evt.locationName || '')}`;
+            
+            document.getElementById('modal-gcal-btn').href = gcalUrl;
+
+            modal.classList.remove('hidden');
+        };
+
+        window.closeDetailModal = () => {
+            document.getElementById('event-detail-modal').classList.add('hidden');
+        };
 
         window.handleLogout = () => {
             if (isAdminMock) localStorage.removeItem('isAdminMock');
