@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ホーム | BRAIN BRIDGE</title>
+    <title>ホーム</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -39,7 +39,8 @@
                 <div class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm">
                     <i class="fa-solid fa-layer-group"></i>
                 </div>
-                <span class="text-xl font-black text-slate-900 tracking-tight">BRAIN BRIDGE</span>
+                <!-- サービス名を「ホーム」に変更 -->
+                <span class="text-xl font-black text-slate-900 tracking-tight">ホーム</span>
             </div>
 
             <!-- PC Navigation -->
@@ -63,7 +64,7 @@
                 <!-- Welcome Card -->
                 <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-3xl p-8 shadow-xl relative overflow-hidden">
                     <div class="relative z-10">
-                        <h1 class="text-2xl font-bold mb-2">Welcome to BRAIN BRIDGE</h1>
+                        <h1 class="text-2xl font-bold mb-2">Welcome</h1>
                         <p class="text-slate-300 text-sm mb-6">つながり、学び、創り出すためのコミュニティプラットフォーム。</p>
                         <div class="flex gap-3">
                             <a href="search.html" class="bg-white text-slate-900 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-100 transition-colors">
@@ -228,7 +229,7 @@
     </div>
 
     <!-- Bottom Navigation (Mobile Only) -->
-    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-40 safe-area-pb">
+    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-40 pb-safe-bottom">
         <div class="flex justify-around items-center h-16">
             <a href="home.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
@@ -253,11 +254,16 @@
         </div>
     </nav>
     
+    <style>
+        .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+    </style>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
+        // ▼▼▼▼ Firebase Config ▼▼▼▼
         const firebaseConfig = {
             apiKey: "AIzaSyBVDZJhL9sMzVknD5tNomLWF-0z0jPU3i0",
             authDomain: "brainbridge-4b8ac.firebaseapp.com",
@@ -266,6 +272,7 @@
             messagingSenderId: "803209683213",
             appId: "1:803209683213:web:b62d13784fa2bbbb9f5044"
         };
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -286,6 +293,7 @@
             }
 
             if (user && !user.isAnonymous) {
+                // User Info
                 try {
                     const docSnap = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data'));
                     if (docSnap.exists()) {
