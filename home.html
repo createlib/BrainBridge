@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ホーム</title>
+    <title>ホーム | BRAIN BRIDGE</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -25,9 +25,8 @@
         .calendar-day.has-event::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background-color: #ef4444; border-radius: 50%; }
         .calendar-day.selected.has-event::after { background-color: white; }
         
-        /* スマホ用ボトムナビの高さ調整 */
-        .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); } /* Body用: ナビに隠れないようにする */
-        .safe-area-pb { padding-bottom: env(safe-area-inset-bottom); } /* Nav用: iPhoneのホームバー回避 */
+        /* ボトムナビの高さ調整修正 */
+        .pb-safe-bottom { padding-bottom: 5rem; } /* コンテンツの下部余白 */
     </style>
 </head>
 <body class="text-slate-800 antialiased pb-safe-bottom lg:pb-0">
@@ -39,7 +38,6 @@
                 <div class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm">
                     <i class="fa-solid fa-layer-group"></i>
                 </div>
-                <!-- サービス名を「ホーム」に変更 -->
                 <span class="text-xl font-black text-slate-900 tracking-tight">ホーム</span>
             </div>
 
@@ -99,7 +97,7 @@
 
                     <!-- List View -->
                     <div id="participating-events-list" class="space-y-3">
-                        <!-- Loading -->
+                        <!-- Loading State -->
                         <div class="animate-pulse flex space-x-4 p-4 bg-white rounded-xl border border-slate-100">
                             <div class="rounded-lg bg-slate-200 h-16 w-16"></div>
                             <div class="flex-1 space-y-2 py-1">
@@ -229,7 +227,7 @@
     </div>
 
     <!-- Bottom Navigation (Mobile Only) -->
-    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-40 pb-safe-bottom">
+    <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 lg:hidden z-40">
         <div class="flex justify-around items-center h-16">
             <a href="home.html" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
@@ -254,10 +252,6 @@
         </div>
     </nav>
     
-    <style>
-        .pb-safe-bottom { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
-    </style>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
@@ -331,7 +325,7 @@
                 renderEventList('hosting-events-list', snapHost.docs.map(d => ({...d.data(), id: d.id})), '主催するイベントはありません');
             } catch (e) { 
                 console.error("Host load err", e);
-                // Fallback for index error
+                // Fallback client-side filter
                 try {
                      const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'events');
                      const qAll = query(eventsRef, orderBy('createdAt', 'desc'));
@@ -349,8 +343,6 @@
                 const myJoinColl = collection(db, 'artifacts', appId, 'users', uid, 'participating_events');
                 const snapJoin = await getDocs(myJoinColl);
                 
-                console.log("Participating count:", snapJoin.size);
-
                 const listEl = document.getElementById('participating-events-list');
                 listEl.innerHTML = '';
 
@@ -393,9 +385,7 @@
                 }
             } catch (e) { 
                 console.error("Join load err", e); 
-                let msg = '読み込みエラー';
-                if(e.code === 'permission-denied') msg = '読み込み権限がありません(Firestoreルールを確認)';
-                document.getElementById('participating-events-list').innerHTML = `<div class="text-sm text-red-400 p-4">${msg}</div>`;
+                document.getElementById('participating-events-list').innerHTML = '<div class="text-sm text-red-400 p-4">読み込みエラー</div>';
             }
         }
 
@@ -482,8 +472,6 @@
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 // イベントがあるかチェック
                 const hasEvent = myEvents.some(e => {
-                    // 単日の場合、startDateと一致するか
-                    // 複数日の場合、期間内か (簡易的に開始日のみでチェック)
                     return e.startDate === dateStr;
                 });
                 
