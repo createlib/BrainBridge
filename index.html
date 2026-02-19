@@ -352,11 +352,12 @@
 
         <div class="container mx-auto px-6 relative z-10">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">6つのエンジン</h2>
-                <p class="text-gray-400">あなたの人生とビジネスを加速させる、6つの強力な機能</p>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">4つのエンジン</h2>
+                <p class="text-gray-400">あなたの人生とビジネスを加速させる、4つの強力な機能</p>
             </div>
 
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- レイアウトを4項目に合わせて2列（2x2）に変更し、中央寄せ -->
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                 <!-- Engine 1 -->
                 <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-xl hover:bg-white/10 transition-colors">
                     <div class="text-brand-accent mb-4">
@@ -371,54 +372,31 @@
                 <!-- Engine 2 -->
                 <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-xl hover:bg-white/10 transition-colors">
                     <div class="text-brand-accent mb-4">
-                        <i data-lucide="camera" class="w-8 h-8"></i>
+                        <i data-lucide="users" class="w-8 h-8"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">2. プロによる<br>撮影・編集・制作</h3>
+                    <h3 class="text-xl font-bold mb-3">2. 各種<br>オフラインイベント</h3>
                     <p class="text-sm text-gray-300 leading-relaxed">
-                        メディア掲載や活動に必要な写真・動画は、プロのクオリティで撮影・編集・制作までサポート。「魅せ方」にこだわることで、あなたの信頼性を高めます。
+                        交流会、勉強会、体験型ワークショップなど、実際に顔を合わせる場を定期開催。メディアで知ったあの人と、リアルで深く繋がる「答え合わせ」の瞬間を。
                     </p>
                 </div>
 
                 <!-- Engine 3 -->
                 <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-xl hover:bg-white/10 transition-colors">
                     <div class="text-brand-accent mb-4">
-                        <i data-lucide="users" class="w-8 h-8"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">3. 各種<br>オフラインイベント</h3>
-                    <p class="text-sm text-gray-300 leading-relaxed">
-                        交流会、勉強会、体験型ワークショップなど、実際に顔を合わせる場を定期開催。メディアで知ったあの人と、リアルで深く繋がる「答え合わせ」の瞬間を。
-                    </p>
-                </div>
-
-                <!-- Engine 4 -->
-                <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-xl hover:bg-white/10 transition-colors relative">
-                    <div class="absolute top-4 right-4 bg-brand-accent text-xs font-bold px-2 py-1 rounded text-white">Coming Soon</div>
-                    <div class="text-brand-accent mb-4">
-                        <i data-lucide="bot" class="w-8 h-8"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">4. AI自動<br>ニーズマッチング</h3>
-                    <p class="text-sm text-gray-300 leading-relaxed">
-                        膨大なメンバーデータから、あなたの事業課題や価値観に合う「運命の相手」をAIが分析。人間では気づけなかった意外な繋がりを提案します。
-                    </p>
-                </div>
-
-                <!-- Engine 5 -->
-                <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-xl hover:bg-white/10 transition-colors">
-                    <div class="text-brand-accent mb-4">
                         <i data-lucide="briefcase" class="w-8 h-8"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">5. 事業共創<br>手数料完全無料</h3>
+                    <h3 class="text-xl font-bold mb-3">3. 事業共創<br>手数料完全無料</h3>
                     <p class="text-sm text-gray-300 leading-relaxed">
                         コミュニティ内で生まれた収益に対して、BRAIN BRIDGEは紹介料や手数料を一切いただきません。「繋がり放題」の環境を使い倒してください。
                     </p>
                 </div>
 
-                <!-- Engine 6 -->
+                <!-- Engine 4 -->
                 <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-xl hover:bg-white/10 transition-colors">
                     <div class="text-brand-accent mb-4">
                         <i data-lucide="map-pin" class="w-8 h-8"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">6. 地域のサービス・<br>他コミュニティとの連携</h3>
+                    <h3 class="text-xl font-bold mb-3">4. 地域のサービス・<br>他コミュニティとの連携</h3>
                     <p class="text-sm text-gray-300 leading-relaxed">
                         地域の飲食店やサービス、他のコミュニティ団体とも積極的に提携。「ここに入っていれば、地域のあの店で優待が受けられる」ハブとしての機能を果たします。
                     </p>
@@ -507,7 +485,7 @@
                         </div>
 
                         <!-- リンク変更: #contact -> login.html -->
-                        <a href=/*"login.html"*/ class="block w-full bg-white text-brand-dark text-center font-bold py-4 rounded-lg hover:bg-gray-100 transition-all transform hover:-translate-y-1 shadow-lg shadow-white/5">
+                        <a href="login.html" class="block w-full bg-white text-brand-dark text-center font-bold py-4 rounded-lg hover:bg-gray-100 transition-all transform hover:-translate-y-1 shadow-lg shadow-white/5">
                             今すぐ参加する
                         </a>
                         <p class="text-center text-xs text-gray-400 mt-4 leading-relaxed">
